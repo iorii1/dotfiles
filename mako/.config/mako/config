@@ -1,23 +1,45 @@
-max-history=50
+max-history=100
 sort=-time
+group-by=app-name
 
-font=JetBrains Mono 10
-width=320
-height=110
-margin=10
-padding=12
+font=JetBrainsMono Nerd Font 10
+width=340
+height=130
+outer-margin=10
+margin=8
+padding=14
 border-size=2
-border-radius=8
+border-radius=12
 
-background-color=#1e1e2e
-text-color=#cdd6f4
-border-color=#cba6f7
-progress-color=over #89b4fa
+# Blue-hour base (matches rofi) with a sunrise-orange accent
+background-color=#0a0f1eeb
+text-color=#cbd5e1
+border-color=#fab38799
+progress-color=over #fab387
+
+icons=1
+max-icon-size=48
+icon-border-radius=10
+icon-location=left
+
+markup=1
+text-alignment=left
+format=<b>%s</b>\n%b
 
 anchor=top-center
-default-timeout=5000
+default-timeout=6000
 ignore-timeout=1
+max-visible=5
+
+[urgency=low]
+border-color=#64748b99
+text-color=#94a3b8
+default-timeout=3000
 
 [urgency=critical]
 border-color=#f38ba8
-default-timeout=0
+progress-color=over #f38ba8
+default-timeout=10000
+
+[grouped]
+format=(%g) <b>%s</b>\n%b
