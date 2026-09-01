@@ -9,10 +9,10 @@ PopupWindow {
     property bool open: false
     property alias hovered: hoverHandler.hovered
     readonly property int today: Time.date.getDate()
-    readonly property real cellSize: (implicitWidth - 28) / 7
+    readonly property real cellSize: 32
 
-    implicitWidth: 300
-    implicitHeight: 355
+    implicitWidth: 514
+    implicitHeight: 320
     color: "transparent"
     visible: open || closeHold.running
 
@@ -31,21 +31,40 @@ PopupWindow {
         color: "#e61e1e2e"
         border.width: 1
         border.color: "#33cdd6f4"
+        clip: true
 
         opacity: root.open ? 1 : 0
         scale: root.open ? 1 : 0.92
         transformOrigin: Item.Top
 
         Behavior on opacity {
-            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
         }
         Behavior on scale {
-            NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.1 }
+            NumberAnimation { duration: 260; easing.type: Easing.OutBack; easing.overshoot: 1.1 }
         }
 
-        ColumnLayout {
+        RowLayout {
             anchors.fill: parent
             anchors.margins: 14
+            spacing: 18
+
+            AnalogClock {
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredWidth: 220
+                Layout.preferredHeight: 220
+            }
+
+            Rectangle {
+                Layout.fillHeight: true
+                Layout.preferredWidth: 2
+                Layout.topMargin: 8
+                Layout.bottomMargin: 8
+                radius: 1
+                color: "#40fab387"
+            }
+
+            ColumnLayout {
             spacing: 10
 
             Text {
@@ -119,6 +138,7 @@ PopupWindow {
                         }
                     }
                 }
+            }
             }
         }
     }
