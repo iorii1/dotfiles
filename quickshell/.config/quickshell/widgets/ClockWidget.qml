@@ -5,23 +5,36 @@ Item {
     id: root
     property var barWindow
 
-    implicitWidth: label.implicitWidth
-    implicitHeight: label.implicitHeight
+    implicitWidth: label.implicitWidth + 12
+    implicitHeight: label.implicitHeight + 6
+
+    Rectangle {
+        anchors.fill: parent
+        radius: 6
+        color: hover.hovered ? "#26fab387" : "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: 220 }
+        }
+    }
 
     Text {
         id: label
+        anchors.centerIn: parent
         text: Time.time
-        color: hover.hovered ? "#f9e2af" : "#ffffff"
+        color: hover.hovered ? "#fab387" : "#ffffff"
         font.pixelSize: 14
         font.family: "JetBrainsMono Nerd Font"
         renderType: Text.NativeRendering
 
         Behavior on color {
-            ColorAnimation { duration: 150 }
+            ColorAnimation { duration: 220 }
         }
     }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
 
     CalendarWidget {
         id: calendar

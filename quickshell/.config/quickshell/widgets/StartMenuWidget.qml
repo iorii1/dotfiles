@@ -10,32 +10,34 @@ Item {
   Rectangle{
     id: button
     anchors.fill: parent
-    radius: 4
-    color: hoverHandler.hovered ? "#cba6f7" : "transparent"
+    radius: 6
+    color: hoverHandler.hovered ? "#26fab387" : "transparent"
 
     Behavior on color {
-      ColorAnimation { duration: 150}
+      ColorAnimation { duration: 220}
     }
-    
-    Text { 
+
+    Text {
       anchors.centerIn: parent
       text: "󰣇"
-      color: hoverHandler.hovered ? "#11111b" : "#cdd6f4"
+      color: hoverHandler.hovered ? "#fab387" : "#cdd6f4"
       font.pixelSize: 14
       font.family: "JetBrainsMono Nerd Font"
       renderType: Text.NativeRendering
 
       Behavior on color {
-        ColorAnimation { duration: 150 }
+        ColorAnimation { duration: 220 }
       }
     }
   }
 
-  HoverHandler { id: hoverHandler}
+  HoverHandler {
+    id: hoverHandler
+  }
 
   MouseArea {
     anchors.fill: parent
     cursorShape: Qt.PointingHandCursor
-    onClicked: Quickshell.execDetached(["rofi", "-show", "drun", "-location", "1", "-xoffset", "14", "-yoffset", "38"])
+    onClicked: Quickshell.execDetached(["rofi", "-show", "drun", "-location", "2", "-xoffset", "0", "-yoffset", "38"])
   }
 }

@@ -18,7 +18,7 @@ Item {
     implicitHeight: 24
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: 140; easing.type: Easing.OutQuad }
+        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
     }
 
     HoverHandler {
@@ -45,44 +45,92 @@ Item {
         }
     }
 
-    RowLayout {
+    Item {
         id: expandedRow
         visible: root.expanded
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 8
+        implicitWidth: dotsRow.implicitWidth
+        implicitHeight: 24
 
-        Repeater {
-            model: root.windowSize
+        // Sliding highlight pill (inspired by serpantinum's WorkspacesWidget) that
+        // glides between dots instead of each dot flipping color instantly.
+        Rectangle {
+            id: highlight
+            radius: 4
+            color: "#cba6f7"
+            width: 24
+            height: 24
+            y: 0
+            x: (Workspaces.activeWorkspace - root.windowStart) * (24 + dotsRow.spacing)
+            visible: Workspaces.activeWorkspace >= root.windowStart
+                     && Workspaces.activeWorkspace < root.windowStart + root.windowSize
 
-            Rectangle {
-                id: tagDot
+            Behavior on x {
+                NumberAnimation { duration: 460; easing.type: Easing.OutExpo }
+            }
+        }
 
-                property int wsIndex: root.windowStart + index
-                property bool isActive: Workspaces.activeWorkspace === wsIndex
+        RowLayout {
+            id: dotsRow
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 8
 
-                implicitWidth: 24
-                implicitHeight: 24
-                radius: 4
-                color: isActive ? "#cba6f7" : "transparent"
+            Repeater {
+                model: root.windowSize
 
-                Text {
-                    anchors.centerIn: parent
-                    text: parent.wsIndex
-                    color: parent.isActive ? "#11111b" : "#a6adc8"
-                    font.pixelSize: 13
-                    font.weight: parent.isActive ? Font.Bold : Font.Normal
-                    font.family: "JetBrainsMono Nerd Font"
-                    renderType: Text.NativeRendering
-                }
+                Item {
+                    id: tagDot
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: Workspaces.setWorkspace(parent.wsIndex)
-                }
+                    property int wsIndex: root.windowStart + index
+                    property bool isActive: Workspaces.activeWorkspace === wsIndex
 
-                Behavior on color {
-                    ColorAnimation { duration: 150 }
+                    implicitWidth: 24
+                    implicitHeight: 24
+                    scale: isActive ? 1.0 : (hoverHandler2.hovered ? 1.05 : 0.88)
+
+                    Behavior on scale {
+                        NumberAnimation { duration: 230; easing.type: Easing.OutBack; easing.overshoot: 1.6 }
+                    }
+
+                    Component.onCompleted: {
+                        opacity = 0
+                        staggerTimer.start()
+                    }
+                    Timer {
+                        id: staggerTimer
+                        interval: index * 35
+                        onTriggered: appearAnim.start()
+                    }
+                    NumberAnimation {
+                        id: appearAnim
+                        target: tagDot
+                        property: "opacity"
+                        to: 1
+                        duration: 260
+                        easing.type: Easing.OutQuad
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: parent.wsIndex
+                        color: parent.isActive ? "#11111b" : "#a6adc8"
+                        font.pixelSize: 13
+                        font.weight: parent.isActive ? Font.Bold : Font.Normal
+                        font.family: "JetBrainsMono Nerd Font"
+                        renderType: Text.NativeRendering
+
+                        Behavior on color {
+                            ColorAnimation { duration: 220 }
+                        }
+                    }
+
+                    HoverHandler { id: hoverHandler2 }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Workspaces.setWorkspace(parent.wsIndex)
+                    }
                 }
             }
         }
