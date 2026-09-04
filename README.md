@@ -1,6 +1,6 @@
 #  Iori's Dotfiles
 
-> Personal Wayland desktop configurations on Arch Linux running **MangoWM**, **Quickshell**, **Rofi**, and **kitty**. Managed cleanly with GNU `stow`.
+> Personal Wayland desktop configurations on Arch Linux running **Hyprland**, **Quickshell**, **Rofi**, and **kitty**. Managed cleanly with GNU `stow`.
   WORK IN PROGRESS!!
 ---
 
@@ -14,7 +14,7 @@
 
 | Component | Tool |
 | :--- | :--- |
-| **Window Manager** | [MangoWM](https://github.com/mangowm/mango) |
+| **Window Manager** | [Hyprland](https://hyprland.org) |
 | **Status Bar** | [Quickshell](https://git.outfoxxed.me/quickshell/quickshell) |
 | **Notifications** | [mako](https://mako-project.org) |
 | **Application Launcher** | [Rofi](https://davatorium.github.io/rofi) |
@@ -31,8 +31,8 @@
 | `ALT` + `SPACE` | Launch Rofi (`drun`) |
 | `ALT` + `RETURN` | Open kitty Terminal |
 | `ALT` + `Q` | Close Active Window |
-| `SUPER` + `R` | Reload MangoWM Config |
-| `SUPER` + `SHIFT` + `E` | Quit MangoWM |
+| `SUPER` + `R` | Reload Hyprland Config |
+| `SUPER` + `SHIFT` + `E` | Quit Hyprland |
 | `SUPER` + `1-9` | Switch Workspaces |
 | `SUPER` + `SHIFT` + `1-9` | Move Window to Workspace |
 | `Print` | Screenshot: full screen (saved + copied) |
@@ -54,7 +54,7 @@ cd ~/.dotfiles
 sudo pacman -S stow
 
 # 3. Stow desired configurations
-stow mango
+stow hypr
 stow quickshell
 stow mako
 stow rofi
