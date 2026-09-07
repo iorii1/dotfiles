@@ -207,19 +207,17 @@ PanelWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 32
 
-                        property real entranceScale: 0.4
-                        property real entranceOpacity: 0.0
-                        scale: entranceScale
-                        opacity: entranceOpacity
+                        scale: 0.4
+                        opacity: 0.0
 
                         Component.onCompleted: cellEntranceAnim.start()
-                        SequentialAnimation {
+                        PopIn {
                             id: cellEntranceAnim
-                            PauseAnimation { duration: Math.min((dayCell.index % 7 + Math.floor(dayCell.index / 7)) * 18, 260) }
-                            ParallelAnimation {
-                                NumberAnimation { target: dayCell; property: "entranceScale"; to: 1.0; duration: 260; easing.type: Easing.OutBack; easing.overshoot: 1.7 }
-                                NumberAnimation { target: dayCell; property: "entranceOpacity"; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
-                            }
+                            target: dayCell
+                            delay: Math.min((dayCell.index % 7 + Math.floor(dayCell.index / 7)) * 18, 260)
+                            fromScale: 0.4
+                            scaleDuration: 260
+                            overshoot: 1.7
                         }
 
                         Rectangle {

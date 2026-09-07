@@ -22,28 +22,19 @@ Item {
 
     property bool active: false
     property int entranceDelay: 0
-    property real entranceScale: 0.6
-    property real entranceOpacity: 0.0
-    scale: root.entranceScale
-    opacity: root.entranceOpacity
+    scale: 0.6
+    opacity: 0.0
 
     onActiveChanged: {
         if (root.active) {
             entranceAnim.restart()
         } else {
-            root.entranceScale = 0.6
-            root.entranceOpacity = 0.0
+            root.scale = 0.6
+            root.opacity = 0.0
         }
     }
 
-    SequentialAnimation {
-        id: entranceAnim
-        PauseAnimation { duration: root.entranceDelay }
-        ParallelAnimation {
-            NumberAnimation { target: root; property: "entranceScale"; to: 1.0; duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.5 }
-            NumberAnimation { target: root; property: "entranceOpacity"; to: 1.0; duration: 240; easing.type: Easing.OutQuad }
-        }
-    }
+    PopIn { id: entranceAnim; target: root; delay: root.entranceDelay; fromScale: 0.6; scaleDuration: 320; opacityDuration: 240; overshoot: 1.5 }
 
     function reset() {
         resetTimer.stop()

@@ -80,21 +80,12 @@ PanelWindow {
                     color: itemFx.containsMouse ? Colors.surfaceContainer : "transparent"
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                    property real entranceScale: 0.85
-                    property real entranceOpacity: 0
-                    scale: entranceScale
-                    opacity: entranceOpacity
+                    scale: 0.85
+                    opacity: 0
                     transformOrigin: Item.Left
 
                     Component.onCompleted: entranceAnim.start()
-                    SequentialAnimation {
-                        id: entranceAnim
-                        PauseAnimation { duration: Math.min(row.index * 18, 220) }
-                        ParallelAnimation {
-                            NumberAnimation { target: row; property: "entranceScale"; to: 1.0; duration: 240; easing.type: Easing.OutBack; easing.overshoot: 1.4 }
-                            NumberAnimation { target: row; property: "entranceOpacity"; to: 1.0; duration: 200; easing.type: Easing.OutQuad }
-                        }
-                    }
+                    PopIn { id: entranceAnim; target: row; delay: Math.min(row.index * 18, 220) }
 
                     RowLayout {
                         anchors.fill: parent

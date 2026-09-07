@@ -153,21 +153,12 @@ PanelWindow {
                             color: netFx.containsMouse ? Colors.surfaceContainerHigh : "transparent"
                             Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                            property real entranceScale: 0.85
-                            property real entranceOpacity: 0.0
-                            scale: entranceScale
-                            opacity: entranceOpacity
+                            scale: 0.85
+                            opacity: 0.0
                             transformOrigin: Item.Left
 
                             Component.onCompleted: netEntranceAnim.start()
-                            SequentialAnimation {
-                                id: netEntranceAnim
-                                PauseAnimation { duration: Math.min(netRow.index * 25, 200) }
-                                ParallelAnimation {
-                                    NumberAnimation { target: netRow; property: "entranceScale"; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.4 }
-                                    NumberAnimation { target: netRow; property: "entranceOpacity"; to: 1.0; duration: 180; easing.type: Easing.OutQuad }
-                                }
-                            }
+                            PopIn { id: netEntranceAnim; target: netRow; delay: Math.min(netRow.index * 25, 200); scaleDuration: 220; opacityDuration: 180 }
 
                             RowLayout {
                                 anchors.fill: parent
@@ -241,21 +232,12 @@ PanelWindow {
                             color: btFx.containsMouse ? Colors.surfaceContainerHigh : "transparent"
                             Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                            property real entranceScale: 0.85
-                            property real entranceOpacity: 0.0
-                            scale: entranceScale
-                            opacity: entranceOpacity
+                            scale: 0.85
+                            opacity: 0.0
                             transformOrigin: Item.Left
 
                             Component.onCompleted: btEntranceAnim.start()
-                            SequentialAnimation {
-                                id: btEntranceAnim
-                                PauseAnimation { duration: Math.min(btRow.index * 25, 200) }
-                                ParallelAnimation {
-                                    NumberAnimation { target: btRow; property: "entranceScale"; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.4 }
-                                    NumberAnimation { target: btRow; property: "entranceOpacity"; to: 1.0; duration: 180; easing.type: Easing.OutQuad }
-                                }
-                            }
+                            PopIn { id: btEntranceAnim; target: btRow; delay: Math.min(btRow.index * 25, 200); scaleDuration: 220; opacityDuration: 180 }
 
                             RowLayout {
                                 anchors.fill: parent

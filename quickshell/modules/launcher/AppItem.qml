@@ -13,21 +13,11 @@ Item {
     property bool active: false
     signal activated()
 
-    property real entranceScale: 0.9
-    property real entranceOpacity: 0.0
-    scale: root.entranceScale
-    opacity: root.entranceOpacity
+    scale: 0.9
+    opacity: 0.0
 
     Component.onCompleted: entranceAnim.start()
-
-    SequentialAnimation {
-        id: entranceAnim
-        PauseAnimation { duration: Math.min(index * 15, 150) }
-        ParallelAnimation {
-            NumberAnimation { target: root; property: "entranceScale"; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
-            NumberAnimation { target: root; property: "entranceOpacity"; to: 1.0; duration: 180; easing.type: Easing.OutQuad }
-        }
-    }
+    PopIn { id: entranceAnim; target: root; delay: Math.min(index * 15, 150); fromScale: 0.9; scaleDuration: 220; opacityDuration: 180; overshoot: 1.3 }
 
     Rectangle {
         id: row
