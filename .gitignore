@@ -1,5 +1,6 @@
 quickshell/generated/
 hypr/.config/hypr/colors.lua
+hypr/.config/hypr/hyprlock-colors.conf
 
 *.swp
 *.swo

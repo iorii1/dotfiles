@@ -28,13 +28,18 @@
 
 | Keybinding | Action |
 | :--- | :--- |
-| `ALT` + `SPACE` | Launch Rofi (`drun`) |
+| `ALT` + `SPACE` | Open the Quickshell launcher |
+| `SUPER` + `V` | Open clipboard history |
+| `SUPER` + `W` | Open the wallpaper picker |
+| `SUPER` + `L` | Lock screen |
 | `ALT` + `RETURN` | Open kitty Terminal |
 | `ALT` + `Q` | Close Active Window |
 | `SUPER` + `R` | Reload Hyprland Config |
 | `SUPER` + `SHIFT` + `E` | Quit Hyprland |
 | `SUPER` + `1-9` | Switch Workspaces |
 | `SUPER` + `SHIFT` + `1-9` | Move Window to Workspace |
+| `SUPER` + `h/j/k/l` (or arrows) | Move focus |
+| `SUPER` + `SHIFT` + `h/j/k/l` (or arrows) | Swap window |
 | `Print` | Screenshot: full screen (saved + copied) |
 | `SHIFT` + `Print` | Screenshot: region (copied only) |
 | `SUPER` + `SHIFT` + `S` | Screenshot: region (saved only) |

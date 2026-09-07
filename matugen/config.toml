@@ -8,3 +8,7 @@ output_path = "~/dotfiless/quickshell/generated/colors.json"
 [templates.hyprland]
 input_path = "templates/hyprland-colors.lua.template"
 output_path = "~/dotfiless/hypr/.config/hypr/colors.lua"
+
+[templates.hyprlock]
+input_path = "templates/hyprlock-colors.conf.template"
+output_path = "~/dotfiless/hypr/.config/hypr/hyprlock-colors.conf"

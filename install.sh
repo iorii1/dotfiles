@@ -21,7 +21,7 @@ fi
 # --- 1. packages ------------------------------------------------------
 
 OFFICIAL_PKGS=(
-    hyprland quickshell matugen
+    hyprland quickshell matugen hyprlock hypridle
     kitty mako rofi fish fastfetch
     cava playerctl imagemagick ffmpeg qt6-multimedia qt6-multimedia-ffmpeg awww
     wl-clipboard cliphist brightnessctl grim slurp libnotify
@@ -79,7 +79,7 @@ link_path "$HOME/.config/quickshell" "$REPO_DIR/quickshell"
 
 link_path "$HOME/.config/kitty/kitty.conf" "$REPO_DIR/kitty/.config/kitty/kitty.conf"
 
-for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf keybinds.lua hyprland.conf autostart.lua; do
+for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf keybinds.lua hyprland.conf autostart.lua hyprlock.conf hypridle.conf; do
     link_path "$HOME/.config/hypr/$f" "$REPO_DIR/hypr/.config/hypr/$f"
 done
 

@@ -9,6 +9,7 @@ hl.bind("SUPER + SHIFT + E", hl.dsp.exit())
 hl.bind("ALT + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("SUPER + W", hl.dsp.exec_cmd("QS_WALLPAPER_DIR=$HOME/Pictures/Wallpapers ~/.local/share/qs-wallpaper-picker/scripts/open_picker.sh"))
+hl.bind("SUPER + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"))
 
 hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
 hl.bind("SUPER + SHIFT + space", hl.dsp.window.float({ action = "toggle" }))
