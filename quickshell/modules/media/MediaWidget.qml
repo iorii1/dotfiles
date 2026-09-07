@@ -79,7 +79,7 @@ Item {
                             fillMode: Image.PreserveAspectCrop
                             source: {
                                 if (!root.active) return ""
-                                const u = root.player.artUrl || ""
+                                const u = root.player.trackArtUrl || ""
                                 if (!u) return ""
                                 return (u.startsWith("file://") || u.startsWith("http")) ? u : "file://" + u
                             }

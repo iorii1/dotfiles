@@ -145,7 +145,7 @@ PanelWindow {
                                 anchors.fill: parent
                                 source: {
                                     if (!popupWindow.active) return ""
-                                    const u = popupWindow.player.artUrl || ""
+                                    const u = popupWindow.player.trackArtUrl || ""
                                     if (!u) return ""
                                     return (u.startsWith("file://") || u.startsWith("http")) ? u : "file://" + u
                                 }
