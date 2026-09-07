@@ -4,6 +4,9 @@ require("monitors")
 require("autostart")
 require("keybinds")
 
+package.loaded["colors"] = nil
+local colors = require("colors")
+
 hl.config({
     general = {
         layout = "dwindle",
@@ -13,7 +16,8 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border = "rgba(38bdf8ff)",
+            active_border = "rgba(" .. colors.primary .. "ff)",
+            inactive_border = "rgba(" .. colors.outline .. "ff)",
         },
     },
 

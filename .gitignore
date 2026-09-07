@@ -1,4 +1,5 @@
 quickshell/generated/
+hypr/.config/hypr/colors.lua
 
 *.swp
 *.swo
