@@ -6,6 +6,9 @@
 
 ##  Screenshots
 
+| Bar | Calendar + weather | Quick Settings |
+| :---: | :---: | :---: |
+| ![Bar](docs/screenshots/bar.png) | ![Calendar](docs/screenshots/calendar.png) | ![Quick Settings](docs/screenshots/quicksettings.png) |
 
 
 ---
