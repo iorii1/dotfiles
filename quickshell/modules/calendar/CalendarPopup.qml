@@ -178,6 +178,37 @@ PanelWindow {
                 }
             }
 
+            RowLayout {
+                Layout.fillWidth: true
+                visible: Weather.ready
+                spacing: Appearance.spacingSmall
+
+                Text {
+                    text: Weather.icon(Weather.weatherCode)
+                    color: Colors.primary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeNormal
+                }
+
+                Text {
+                    text: Math.round(Weather.temperature) + "°C"
+                    color: Colors.textPrimary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: Weather.cityName
+                    color: Colors.textSecondary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    elide: Text.ElideRight
+                }
+            }
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: Colors.outline; opacity: 0.4; visible: Weather.ready }
+
             GridLayout {
                 Layout.fillWidth: true
                 columns: 7

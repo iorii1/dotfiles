@@ -1,0 +1,75 @@
+pragma Singleton
+import QtQuick
+import Quickshell
+import Quickshell.Io
+
+Singleton {
+    id: root
+
+    property real temperature: 0
+    property int weatherCode: 0
+    property string cityName: ""
+    property bool ready: false
+
+    // Nerd Font (Font Awesome) icon for a WMO weather code.
+    // https://open-meteo.com/en/docs#weathervariables
+    function icon(code) {
+        if (code === 0 || code === 1) return ""        // sun
+        if (code === 2 || code === 3 || code === 45 || code === 48) return "" // cloud/fog
+        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return "" // rain/drizzle
+        if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "" // snow
+        if (code >= 95) return "" // thunderstorm
+        return ""
+    }
+
+    function refresh() {
+        if (!root.cityName) {
+            geoProc.running = true
+        } else {
+            weatherProc.running = true
+        }
+    }
+
+    Process {
+        id: geoProc
+        command: ["curl", "-s", "--max-time", "5", "http://ip-api.com/json/"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const d = JSON.parse(text)
+                    if (d.status === "success") {
+                        root.cityName = d.city || ""
+                        weatherProc.command = ["curl", "-s", "--max-time", "5",
+                            "https://api.open-meteo.com/v1/forecast?latitude=" + d.lat +
+                            "&longitude=" + d.lon + "&current=temperature_2m,weather_code"]
+                        weatherProc.running = true
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+
+    Process {
+        id: weatherProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const d = JSON.parse(text)
+                    if (d.current) {
+                        root.temperature = d.current.temperature_2m
+                        root.weatherCode = d.current.weather_code
+                        root.ready = true
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+
+    Timer {
+        interval: 900000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.refresh()
+    }
+}
