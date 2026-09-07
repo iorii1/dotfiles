@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+mkdir -p ~/Pictures
+
+notify() {
+    local icon="$1" title="$2" body="$3"
+    if [ -n "$icon" ]; then
+        notify-send -a "Screenshot" -i "$icon" "$title" "$body"
+    else
+        notify-send -a "Screenshot" "$title" "$body"
+    fi
+}
+
+case "$1" in
+    full)
+        FILE="$HOME/Pictures/$(date +%Y-%m-%d_%H-%M-%S).png"
+        grim "$FILE" && wl-copy < "$FILE"
+        notify "$FILE" "Screenshot saved" "Copied to clipboard"
+        ;;
+    region-clip)
+        geometry=$(slurp) || exit 0
+        grim -g "$geometry" - | wl-copy
+        notify "" "Screenshot copied" "Region copied to clipboard"
+        ;;
+    region-save)
+        geometry=$(slurp) || exit 0
+        FILE="$HOME/Pictures/$(date +%Y-%m-%d_%H-%M-%S).png"
+        grim -g "$geometry" "$FILE"
+        notify "$FILE" "Screenshot saved" "$FILE"
+        ;;
+    *)
+        echo "Usage: take-screenshot {full|region-clip|region-save}" >&2
+        exit 1
+        ;;
+esac

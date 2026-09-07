@@ -1,0 +1,6 @@
+[config]
+reload_apps = false
+
+[templates.quickshell]
+input_path = "templates/colors.json.template"
+output_path = "~/dotfiless/quickshell/generated/colors.json"

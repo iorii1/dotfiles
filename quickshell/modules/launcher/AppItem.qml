@@ -1,0 +1,97 @@
+import QtQuick
+import QtQuick.Layouts
+import "../../config"
+import "../common"
+
+Item {
+    id: root
+    implicitHeight: 48
+
+    property string appName: ""
+    property string appComment: ""
+    property string appIcon: ""
+    property bool active: false
+    signal activated()
+
+    property real entranceScale: 0.9
+    property real entranceOpacity: 0.0
+    scale: root.entranceScale
+    opacity: root.entranceOpacity
+
+    Component.onCompleted: entranceAnim.start()
+
+    SequentialAnimation {
+        id: entranceAnim
+        PauseAnimation { duration: Math.min(index * 15, 150) }
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "entranceScale"; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
+            NumberAnimation { target: root; property: "entranceOpacity"; to: 1.0; duration: 180; easing.type: Easing.OutQuad }
+        }
+    }
+
+    Rectangle {
+        id: row
+        anchors.fill: parent
+        anchors.margins: 2
+        radius: Appearance.radiusSmall
+        clip: true
+        color: root.active ? Colors.surfaceContainerHigh : (fx.containsMouse ? Colors.surfaceContainer : "transparent")
+        Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+
+        scale: fx.popScale * (fx.pressed ? 0.97 : 1.0)
+        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: row.radius
+            color: "#ffffff"
+            opacity: fx.flashOpacity
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Appearance.spacingNormal
+            anchors.rightMargin: Appearance.spacingNormal
+            spacing: Appearance.spacingNormal
+
+            Image {
+                Layout.preferredWidth: 28
+                Layout.preferredHeight: 28
+                source: root.appIcon ? "image://icon/" + root.appIcon : ""
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                Text {
+                    Layout.fillWidth: true
+                    text: root.appName
+                    color: Colors.textPrimary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeNormal
+                    font.bold: true
+                    elide: Text.ElideRight
+                }
+
+                Text {
+                    visible: root.appComment !== ""
+                    Layout.fillWidth: true
+                    text: root.appComment
+                    color: Colors.textSecondary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    elide: Text.ElideRight
+                }
+            }
+        }
+
+        PressFx {
+            id: fx
+            anchors.fill: parent
+            onActivated: root.activated()
+        }
+    }
+}

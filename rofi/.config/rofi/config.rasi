@@ -1,0 +1,98 @@
+configuration {
+    modi: "drun,run";
+    icon-theme: "Papirus-Dark";
+    show-icons: true;
+    drun-display-format: "{icon} {name}";
+    font: "Inter 11";
+    click-to-exit: true;
+}
+
+* {
+    bg-color:         #0a0f1ee6;
+    bg-alt:           #1e293b66;
+    bg-selected:      #38bdf833;
+    text-color:       #cbd5e1;
+    text-selected:    #38bdf8;
+    border-color:     #38bdf844;
+    placeholder-color:#64748b;
+}
+
+window {
+    transparency: "real";
+    background-color: @bg-color;
+    border: 1px;
+    border-color: @border-color;
+    border-radius: 14px;
+    width: 520px;
+    padding: 16px;
+}
+
+mainbox {
+    background-color: transparent;
+    children: [inputbar, listview];
+    spacing: 14px;
+}
+
+inputbar {
+    background-color: @bg-alt;
+    border-radius: 8px;
+    padding: 12px;
+    children: [prompt, entry];
+    spacing: 8px;
+}
+
+prompt {
+    background-color: transparent;
+    text-color: @text-selected;
+    font: "Inter Bold 11";
+}
+
+entry {
+    background-color: transparent;
+    text-color: @text-color;
+    placeholder: "Search applications...";
+    placeholder-color: @placeholder-color;
+}
+
+listview {
+    background-color: transparent;
+    columns: 1;
+    lines: 6;
+    spacing: 6px;
+    scrollbar: false;
+}
+
+element {
+    background-color: @bg-alt;
+    padding: 10px 14px;
+    border-radius: 8px;
+    spacing: 12px;
+}
+
+element normal.normal {
+    background-color: @bg-alt;
+    text-color: @text-color;
+}
+
+element alternate.normal {
+    background-color: @bg-alt;
+    text-color: @text-color;
+}
+
+element selected.normal {
+    background-color: @bg-selected;
+    text-color: @text-selected;
+    border: 1px solid;
+    border-color: @text-selected;
+}
+
+element-icon {
+    background-color: transparent;
+    size: 24px;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    vertical-align: 0.5;
+}
