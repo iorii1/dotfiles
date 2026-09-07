@@ -61,6 +61,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Appearance.spacingNormal
 
+                    TrayWidget {}
                     BatteryWidget {}
                     WifiWidget {}
                     BluetoothWidget {}
