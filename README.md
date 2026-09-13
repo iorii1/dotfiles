@@ -57,9 +57,10 @@ and `xfce-polkit` from the AUR via `yay`/`paru` if one is installed), enables
 `NetworkManager`/`bluetooth`/`power-profiles-daemon`, symlinks every app
 config into place, sets up the [qs-wallpaper-picker](https://github.com/magetsu002/qs-wallpaper-picker)
 integration (with matugen dynamic theming wired to Quickshell, Hyprland's border
-colors, and kitty's 16-color terminal palette -- which fastfetch and any
-other TUI program then inherits), and creates the runtime directories the
-shell expects.
+colors, kitty's 16-color terminal palette -- which fastfetch and any other
+TUI program then inherits -- cava's bar gradient, and the GTK3/GTK4 palette
+that Qt apps also pick up via `QT_QPA_PLATFORMTHEME=gtk3`), and creates the
+runtime directories the shell expects.
 
 ```bash
 git clone https://github.com/iorii1/dotfiless.git ~/dotfiless

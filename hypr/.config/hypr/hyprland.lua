@@ -12,6 +12,10 @@ if not ok then
     colors = { primary = "38bdf8", outline = "8087a2" }
 end
 
+-- Makes Qt apps render with the GTK3 theme (and thus matugen's colors,
+-- via the generated ~/.config/gtk-3.0/gtk.css) instead of plain Qt defaults.
+hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
+
 hl.config({
     general = {
         layout = "dwindle",
