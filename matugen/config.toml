@@ -1,6 +1,34 @@
 [config]
 reload_apps = false
 
+# Anchor hues for the 16 ANSI terminal colors. blend = true harmonizes each
+# anchor's hue toward the generated theme's primary color while keeping it
+# recognizable as "red"/"green"/etc, so kitty (and anything else reading its
+# palette, e.g. fastfetch/TUIs) stays in sync with the wallpaper-derived theme.
+[config.custom_colors.red]
+color = "#f38ba8"
+blend = true
+
+[config.custom_colors.green]
+color = "#a6e3a1"
+blend = true
+
+[config.custom_colors.yellow]
+color = "#f9e2af"
+blend = true
+
+[config.custom_colors.blue]
+color = "#89b4fa"
+blend = true
+
+[config.custom_colors.magenta]
+color = "#cba6f7"
+blend = true
+
+[config.custom_colors.cyan]
+color = "#94e2d5"
+blend = true
+
 [templates.quickshell]
 input_path = "templates/colors.json.template"
 output_path = "~/dotfiless/quickshell/generated/colors.json"
@@ -12,3 +40,15 @@ output_path = "~/dotfiless/hypr/.config/hypr/colors.lua"
 [templates.hyprlock]
 input_path = "templates/hyprlock-colors.conf.template"
 output_path = "~/dotfiless/hypr/.config/hypr/hyprlock-colors.conf"
+
+[templates.kitty]
+input_path = "templates/kitty-colors.conf.template"
+output_path = "~/dotfiless/kitty/.config/kitty/colors.conf"
+
+[templates.fastfetch]
+input_path = "templates/fastfetch-config.jsonc.template"
+output_path = "~/dotfiless/fastfetch/.config/fastfetch/config.jsonc"
+
+[templates.cava]
+input_path = "templates/cava-config.template"
+output_path = "~/dotfiless/cava/.config/cava/config"

@@ -1,6 +1,9 @@
 quickshell/generated/
 hypr/.config/hypr/colors.lua
 hypr/.config/hypr/hyprlock-colors.conf
+kitty/.config/kitty/colors.conf
+fastfetch/.config/fastfetch/config.jsonc
+cava/.config/cava/config
 
 *.swp
 *.swo

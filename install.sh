@@ -70,7 +70,7 @@ link_path() {
 }
 
 info "Symlinking configs..."
-for app in fastfetch fish mako rofi; do
+for app in fastfetch fish mako rofi cava; do
     link_path "$HOME/.config/$app" "$REPO_DIR/$app/.config/$app"
 done
 # quickshell is not GNU-stow-shaped like the others -- its repo dir *is*
@@ -78,6 +78,11 @@ done
 link_path "$HOME/.config/quickshell" "$REPO_DIR/quickshell"
 
 link_path "$HOME/.config/kitty/kitty.conf" "$REPO_DIR/kitty/.config/kitty/kitty.conf"
+# kitty resolves kitty.conf's `include colors.conf` relative to kitty.conf's
+# own path (not the symlink target's real directory), so this needs its own
+# symlink too. Dangling until dotfiless_matugen.sh generates the file is
+# fine -- kitty.conf's `include` just ignores a missing target.
+link_path "$HOME/.config/kitty/colors.conf" "$REPO_DIR/kitty/.config/kitty/colors.conf"
 
 for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf keybinds.lua hyprland.conf autostart.lua hyprlock.conf hypridle.conf; do
     link_path "$HOME/.config/hypr/$f" "$REPO_DIR/hypr/.config/hypr/$f"

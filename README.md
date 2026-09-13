@@ -56,9 +56,10 @@ package this setup depends on (official repo via `pacman`, plus `mpvpaper`
 and `xfce-polkit` from the AUR via `yay`/`paru` if one is installed), enables
 `NetworkManager`/`bluetooth`/`power-profiles-daemon`, symlinks every app
 config into place, sets up the [qs-wallpaper-picker](https://github.com/magetsu002/qs-wallpaper-picker)
-integration (with matugen dynamic theming wired to both Quickshell and
-Hyprland's border colors), and creates the runtime directories the shell
-expects.
+integration (with matugen dynamic theming wired to Quickshell, Hyprland's border
+colors, and kitty's 16-color terminal palette -- which fastfetch and any
+other TUI program then inherits), and creates the runtime directories the
+shell expects.
 
 ```bash
 git clone https://github.com/iorii1/dotfiless.git ~/dotfiless

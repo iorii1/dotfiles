@@ -27,4 +27,8 @@ fi
     matugen image "$wallpaper" -c "$HOME/dotfiless/matugen/config.toml" -m dark --prefer saturation
     qs ipc call theme reloadColors
     hyprctl reload
+    # SIGUSR1 makes kitty re-read kitty.conf (and its `include colors.conf`)
+    # in every running window, so open terminals -- and anything reading
+    # their ANSI palette, e.g. fastfetch -- pick up the new theme live.
+    killall -SIGUSR1 kitty 2>/dev/null || true
 } >>"$LOG" 2>&1

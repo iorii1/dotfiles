@@ -1,0 +1,42 @@
+background              {{colors.background.default.hex}}
+foreground              {{colors.on_background.default.hex}}
+selection_foreground    {{colors.on_primary.default.hex}}
+selection_background    {{colors.primary.default.hex}}
+
+cursor                  {{colors.primary.default.hex}}
+cursor_text_color       {{colors.on_primary.default.hex}}
+
+url_color               {{colors.primary.default.hex}}
+
+active_border_color     {{colors.primary.default.hex}}
+inactive_border_color   {{colors.outline.default.hex}}
+bell_border_color       {{colors.red.default.hex | set_lightness: 70}}
+
+active_tab_foreground   {{colors.on_primary.default.hex}}
+active_tab_background   {{colors.primary.default.hex}}
+inactive_tab_foreground {{colors.on_surface_variant.default.hex}}
+inactive_tab_background {{colors.surface_container.default.hex}}
+
+color0  {{colors.surface_container_high.default.hex}}
+color8  {{colors.outline.default.hex}}
+
+color1  {{colors.red.default.hex | set_lightness: 70}}
+color9  {{colors.red.default.hex | set_lightness: 80}}
+
+color2  {{colors.green.default.hex | set_lightness: 70}}
+color10 {{colors.green.default.hex | set_lightness: 80}}
+
+color3  {{colors.yellow.default.hex | set_lightness: 70}}
+color11 {{colors.yellow.default.hex | set_lightness: 80}}
+
+color4  {{colors.blue.default.hex | set_lightness: 70}}
+color12 {{colors.blue.default.hex | set_lightness: 80}}
+
+color5  {{colors.magenta.default.hex | set_lightness: 70}}
+color13 {{colors.magenta.default.hex | set_lightness: 80}}
+
+color6  {{colors.cyan.default.hex | set_lightness: 70}}
+color14 {{colors.cyan.default.hex | set_lightness: 80}}
+
+color7  {{colors.on_surface_variant.default.hex}}
+color15 {{colors.on_surface.default.hex}}
