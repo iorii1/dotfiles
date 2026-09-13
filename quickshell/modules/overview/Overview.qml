@@ -64,13 +64,21 @@ PanelWindow {
                     id: tile
                     required property var modelData
                     required property int index
-                    width: 260
-                    height: 170
+                    width: 320
+                    height: 220
 
                     scale: 0.9
                     opacity: 0
                     Component.onCompleted: entranceAnim.start()
                     PopIn { id: entranceAnim; target: tile; delay: Math.min(index * 40, 200) }
+
+                    // "Screen" inset, like a monitor bezel around the windows.
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        radius: Appearance.radiusNormal
+                        color: Colors.background
+                    }
 
                     Rectangle {
                         anchors.fill: parent
@@ -80,90 +88,119 @@ PanelWindow {
                         border.color: Colors.primary
                     }
 
-                    ColumnLayout {
+                    Item {
+                        visible: tile.modelData.toplevels.values.length === 0
                         anchors.fill: parent
-                        anchors.margins: Appearance.spacingNormal
-                        spacing: Appearance.spacingSmall
+                        anchors.margins: 8
 
-                        RowLayout {
-                            Layout.fillWidth: true
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            spacing: 2
+
                             Text {
-                                Layout.fillWidth: true
-                                text: tile.modelData.name || ("Workspace " + tile.modelData.id)
-                                color: tile.modelData.focused ? Colors.primary : Colors.textPrimary
+                                Layout.alignment: Qt.AlignHCenter
+                                text: ""
+                                color: Colors.textSecondary
+                                opacity: 0.35
                                 font.family: Appearance.fontFamily
-                                font.bold: true
-                                font.pixelSize: Appearance.fontSizeNormal
-                                elide: Text.ElideRight
+                                font.pixelSize: 30
+                            }
+
+                            Text {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: "Empty"
+                                color: Colors.textSecondary
+                                opacity: 0.6
+                                font.family: Appearance.fontFamily
+                                font.pixelSize: Appearance.fontSizeSmall
                             }
                         }
+                    }
 
-                        Text {
-                            visible: tile.modelData.toplevels.values.length === 0
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            text: "Empty"
-                            color: Colors.textSecondary
-                            font.family: Appearance.fontFamily
-                            font.pixelSize: Appearance.fontSizeSmall
-                        }
+                    Flow {
+                        visible: tile.modelData.toplevels.values.length > 0
+                        anchors.fill: parent
+                        anchors.margins: Appearance.spacingNormal + 8
+                        spacing: Appearance.spacingNormal
 
-                        Flow {
-                            visible: tile.modelData.toplevels.values.length > 0
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            spacing: Appearance.spacingSmall
+                        Repeater {
+                            model: tile.modelData.toplevels
 
-                            Repeater {
-                                model: tile.modelData.toplevels
+                            ColumnLayout {
+                                id: winTile
+                                required property var modelData
+                                width: 60
+                                spacing: 4
 
                                 Rectangle {
-                                    id: chip
-                                    required property var modelData
-                                    width: Math.min(220, chipLabel.implicitWidth + 36)
-                                    height: 26
-                                    radius: Appearance.radiusSmall
-                                    color: chipFx.containsMouse ? Colors.surfaceContainerHigh : Colors.surfaceContainer
+                                    id: iconBg
+                                    Layout.alignment: Qt.AlignHCenter
+                                    width: 48
+                                    height: 48
+                                    radius: Appearance.radiusNormal
+                                    color: winFx.containsMouse ? Colors.surfaceContainerHigh : Colors.surfaceContainer
                                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                                    scale: chipFx.popScale * (chipFx.pressed ? 0.92 : 1.0)
+                                    scale: winFx.popScale * (winFx.pressed ? 0.9 : 1.0)
                                     Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
 
-                                    RowLayout {
+                                    Rectangle {
                                         anchors.fill: parent
-                                        anchors.leftMargin: Appearance.spacingSmall
-                                        anchors.rightMargin: Appearance.spacingSmall
-                                        spacing: 4
+                                        radius: parent.radius
+                                        color: "#ffffff"
+                                        opacity: winFx.flashOpacity
+                                    }
 
-                                        Image {
-                                            Layout.preferredWidth: 14
-                                            Layout.preferredHeight: 14
-                                            source: chip.modelData.wayland && chip.modelData.wayland.appId
-                                                ? "image://icon/" + chip.modelData.wayland.appId : ""
-                                            fillMode: Image.PreserveAspectFit
-                                            asynchronous: true
-                                        }
-
-                                        Text {
-                                            id: chipLabel
-                                            Layout.fillWidth: true
-                                            text: chip.modelData.title || "Window"
-                                            color: Colors.textPrimary
-                                            font.family: Appearance.fontFamily
-                                            font.pixelSize: Appearance.fontSizeSmall
-                                            elide: Text.ElideRight
-                                        }
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 26
+                                        height: 26
+                                        source: winTile.modelData.wayland && winTile.modelData.wayland.appId
+                                            ? "image://icon/" + winTile.modelData.wayland.appId : ""
+                                        fillMode: Image.PreserveAspectFit
+                                        asynchronous: true
                                     }
 
                                     PressFx {
-                                        id: chipFx
+                                        id: winFx
                                         anchors.fill: parent
-                                        onActivated: overviewWindow.focusWindow(chip.modelData.address)
+                                        onActivated: overviewWindow.focusWindow(winTile.modelData.address)
                                     }
                                 }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignHCenter
+                                    horizontalAlignment: Text.AlignHCenter
+                                    text: winTile.modelData.title || "Window"
+                                    color: Colors.textSecondary
+                                    font.family: Appearance.fontFamily
+                                    font.pixelSize: 10
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
                             }
+                        }
+                    }
+
+                    // Corner badge with the workspace number/name.
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.margins: 10
+                        implicitWidth: badgeLabel.implicitWidth + 14
+                        implicitHeight: 22
+                        radius: implicitHeight / 2
+                        color: tile.modelData.focused ? Colors.primary : Colors.surfaceContainerHigh
+
+                        Text {
+                            id: badgeLabel
+                            anchors.centerIn: parent
+                            text: tile.modelData.name || ("" + tile.modelData.id)
+                            color: tile.modelData.focused ? Colors.primaryText : Colors.textPrimary
+                            font.family: Appearance.fontFamily
+                            font.bold: true
+                            font.pixelSize: Appearance.fontSizeSmall
                         }
                     }
 
