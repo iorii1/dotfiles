@@ -9,4 +9,6 @@ Singleton {
     property bool calendarOpen: false
     property bool clipboardOpen: false
     property bool mediaPopupOpen: false
+    property bool notificationCenterOpen: false
+    property bool overviewOpen: false
 }

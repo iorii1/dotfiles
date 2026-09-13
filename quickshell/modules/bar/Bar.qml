@@ -47,6 +47,7 @@ Scope {
                     }
                     spacing: Appearance.spacingNormal
                     Workspaces {}
+                    Taskbar {}
                     CavaVisualizer {}
                     MediaWidget {}
                 }

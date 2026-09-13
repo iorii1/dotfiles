@@ -58,6 +58,6 @@ Item {
         id: fx
         anchors.fill: parent
         anchors.margins: -4
-        onActivated: Notifications.dnd = !Notifications.dnd
+        onActivated: UiState.notificationCenterOpen = !UiState.notificationCenterOpen
     }
 }
