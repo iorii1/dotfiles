@@ -54,9 +54,9 @@ input_path = "templates/cava-config.template"
 output_path = "~/dotfiless/cava/.config/cava/config"
 
 [templates.gtk3]
-input_path = "templates/gtk-colors.css.template"
+input_path = "templates/gtk3-colors.css.template"
 output_path = "~/dotfiless/gtk-3.0/.config/gtk-3.0/gtk.css"
 
 [templates.gtk4]
-input_path = "templates/gtk-colors.css.template"
+input_path = "templates/gtk4-colors.css.template"
 output_path = "~/dotfiless/gtk-4.0/.config/gtk-4.0/gtk.css"
