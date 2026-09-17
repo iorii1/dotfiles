@@ -89,6 +89,12 @@ for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf ke
     link_path "$HOME/.config/hypr/$f" "$REPO_DIR/hypr/.config/hypr/$f"
 done
 
+# Pins ScreenCast/Screenshot to xdg-desktop-portal-hyprland. Without this,
+# having xdg-desktop-portal-wlr installed alongside it (both declare
+# UseIn=Hyprland) can leave the wrong portal answering ScreenCast requests,
+# which shows up as Discord/apps screen-sharing a solid black frame.
+link_path "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" "$REPO_DIR/hypr/.config/xdg-desktop-portal/hyprland-portals.conf"
+
 link_path "$HOME/.local/bin/take-screenshot" "$REPO_DIR/scripts/.local/bin/take-screenshot"
 
 # --- 4. GTK/Qt theme defaults ---------------------------------------------
