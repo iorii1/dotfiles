@@ -37,7 +37,7 @@ PanelWindow {
         id: card
         anchors.right: parent.right
         anchors.rightMargin: Appearance.spacingLarge
-        readonly property int restY: Appearance.barHeight + Appearance.barMargin + Appearance.spacingSmall
+        readonly property int restY: BarConfig.barHeight + BarConfig.barMargin + Appearance.spacingSmall
         width: 260
         height: content.implicitHeight + Appearance.spacingNormal * 2
 

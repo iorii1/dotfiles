@@ -11,6 +11,7 @@ import "./modules/calendar"
 import "./modules/clipboard"
 import "./modules/media"
 import "./modules/overview"
+import "./modules/settings"
 
 Scope {
     Bar {}
@@ -26,4 +27,5 @@ Scope {
     ClipboardPopup {}
     MediaPopup {}
     Overview {}
+    SettingsWindow {}
 }

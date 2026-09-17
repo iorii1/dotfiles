@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../../config"
+import "../../services"
 import "../media"
 
 Scope {
@@ -19,25 +20,28 @@ Scope {
                 right: true
             }
 
-            implicitHeight: Appearance.barHeight
-            exclusiveZone: Appearance.barHeight
+            implicitHeight: BarConfig.barHeight
+            exclusiveZone: BarConfig.barHeight
             color: "transparent"
 
             Rectangle {
+                property bool entered: false
+
                 anchors.fill: parent
-                anchors.margins: Appearance.barMargin
+                anchors.margins: BarConfig.barMargin
                 anchors.bottomMargin: 0
-                radius: Appearance.radiusLarge
+                radius: BarConfig.barRadius
                 color: Colors.background
                 border.width: 1
                 border.color: Qt.rgba(Colors.outline.r, Colors.outline.g, Colors.outline.b, 0.22)
-                opacity: 0
-                y: -6
+                opacity: entered ? BarConfig.barOpacity : 0
+                y: entered ? 0 : -6
 
                 Behavior on color { ColorAnimation { duration: Appearance.animSlow } }
                 Behavior on opacity { NumberAnimation { duration: Appearance.animSlow; easing.type: Easing.OutCubic } }
                 Behavior on y { NumberAnimation { duration: Appearance.animSlow; easing.type: Easing.OutCubic } }
-                Component.onCompleted: { opacity = 0.88; y = 0 }
+                Behavior on radius { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+                Component.onCompleted: entered = true
 
                 RowLayout {
                     anchors {
@@ -46,18 +50,18 @@ Scope {
                         verticalCenter: parent.verticalCenter
                     }
                     spacing: Appearance.spacingNormal
-                    Workspaces {}
-                    Taskbar {}
-                    CavaVisualizer {}
-                    MediaWidget {}
+                    Workspaces { visible: BarConfig.showWorkspaces }
+                    Taskbar { visible: BarConfig.showTaskbar }
+                    CavaVisualizer { visible: BarConfig.showCava }
+                    MediaWidget { visible: BarConfig.showMedia }
                 }
 
                 RowLayout {
                     anchors.centerIn: parent
                     spacing: Appearance.spacingNormal
 
-                    NotificationIndicator {}
-                    Clock {}
+                    NotificationIndicator { visible: BarConfig.showNotifications }
+                    Clock { visible: BarConfig.showClock }
                 }
 
                 RowLayout {
@@ -66,11 +70,11 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Appearance.spacingNormal
 
-                    TrayWidget {}
-                    BatteryWidget {}
-                    WifiWidget {}
-                    BluetoothWidget {}
-                    PowerButton {}
+                    TrayWidget { visible: BarConfig.showTray }
+                    BatteryWidget { visible: BarConfig.showBattery }
+                    WifiWidget { visible: BarConfig.showWifi }
+                    BluetoothWidget { visible: BarConfig.showBluetooth }
+                    PowerButton { visible: BarConfig.showPower }
                 }
             }
         }

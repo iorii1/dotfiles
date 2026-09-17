@@ -10,6 +10,7 @@ hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("SUPER + N", hl.dsp.exec_cmd("qs ipc call notifications toggle"))
 hl.bind("SUPER + TAB", hl.dsp.exec_cmd("qs ipc call overview toggle"))
+hl.bind("SUPER + comma", hl.dsp.exec_cmd("qs ipc call settings toggle"))
 hl.bind(
 	"SUPER + W",
 	hl.dsp.exec_cmd(

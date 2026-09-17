@@ -14,7 +14,7 @@ PanelWindow {
     color: "transparent"
 
     anchors { top: true; right: true; bottom: true }
-    margins { top: Appearance.barHeight + Appearance.barMargin + Appearance.spacingNormal; right: Appearance.spacingNormal }
+    margins { top: BarConfig.barHeight + BarConfig.barMargin + Appearance.spacingNormal; right: Appearance.spacingNormal }
 
     implicitWidth: 360
 

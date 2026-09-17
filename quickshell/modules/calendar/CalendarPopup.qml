@@ -71,7 +71,7 @@ PanelWindow {
     PopupCard {
         id: card
         anchors.horizontalCenter: parent.horizontalCenter
-        readonly property int restY: Appearance.barHeight + Appearance.barMargin + Appearance.spacingSmall
+        readonly property int restY: BarConfig.barHeight + BarConfig.barMargin + Appearance.spacingSmall
         width: 320
         height: layout.implicitHeight + Appearance.spacingNormal * 2
 
