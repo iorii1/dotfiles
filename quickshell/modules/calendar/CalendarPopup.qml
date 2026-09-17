@@ -20,10 +20,12 @@ PanelWindow {
     anchors { top: true; bottom: true; left: true; right: true }
 
     property var viewDate: new Date()
-    readonly property date today: new Date()
+    // Recomputed on open -- the shell outlives midnight, so a once-evaluated
+    // `today` would keep highlighting yesterday until quickshell restarted.
+    property date today: new Date()
     property var gridCells: buildGrid()
 
-    onVisibleChanged: if (visible) gridCells = buildGrid()
+    onVisibleChanged: if (visible) { today = new Date(); gridCells = buildGrid() }
 
     IpcHandler {
         target: "calendar"

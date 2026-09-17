@@ -36,11 +36,23 @@ Singleton {
         root.barLevels = empty
     }
 
-    onProcessEnabledChanged: if (!processEnabled) { resetBars(); active = false }
+    // `running` is driven imperatively from here rather than bound to
+    // processEnabled: restartTimer also assigns it, and a QML property
+    // animation/assignment tears down whatever binding was on the property --
+    // which used to leave cava running forever after its first restart.
+    onProcessEnabledChanged: {
+        if (processEnabled) {
+            cavaProcess.running = true
+        } else {
+            restartTimer.stop()
+            cavaProcess.running = false
+            resetBars()
+            active = false
+        }
+    }
 
     Process {
         id: cavaProcess
-        running: root.processEnabled
         onExited: if (root.processEnabled) restartTimer.start()
         command: [
             "bash", "-c",

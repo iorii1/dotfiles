@@ -31,12 +31,13 @@
 
 | Keybinding | Action |
 | :--- | :--- |
-| `ALT` + `SPACE` | Open the Quickshell launcher |
+| `SUPER` + `SPACE` | Open the Quickshell launcher |
 | `SUPER` + `V` | Open clipboard history |
 | `SUPER` + `W` | Open the wallpaper picker |
+| `SUPER` + `,` | Open bar settings |
 | `SUPER` + `Escape` | Lock screen |
-| `ALT` + `RETURN` | Open kitty Terminal |
-| `ALT` + `Q` | Close Active Window |
+| `SUPER` + `RETURN` | Open kitty Terminal |
+| `SUPER` + `Q` | Close Active Window |
 | `SUPER` + `R` | Reload Hyprland Config |
 | `SUPER` + `SHIFT` + `E` | Quit Hyprland |
 | `SUPER` + `1-9` | Switch Workspaces |

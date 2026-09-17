@@ -12,6 +12,8 @@ Singleton {
     property int signalStrength: 0
     property var networks: []
     property bool scanning: false
+    property string connectingTo: ""
+    property string lastError: ""
 
     function refreshStatus() {
         if (!statusProc.running) statusProc.running = true
@@ -28,8 +30,12 @@ Singleton {
         toggleProc.running = true
     }
 
+    // argv directly rather than `bash -c` -- an SSID is attacker-controlled
+    // (it is whatever a nearby AP broadcasts), so it must never reach a shell.
     function connectTo(ssid) {
-        connectProc.command = ["bash", "-c", "nmcli device wifi connect " + JSON.stringify(ssid)]
+        root.lastError = ""
+        root.connectingTo = ssid
+        connectProc.command = ["nmcli", "device", "wifi", "connect", ssid]
         connectProc.running = true
     }
 
@@ -84,7 +90,22 @@ Singleton {
     }
 
     Process { id: toggleProc; onExited: root.refreshStatus() }
-    Process { id: connectProc; onExited: { root.refreshStatus(); root.scan() } }
+
+    Process {
+        id: connectProc
+        stderr: StdioCollector { id: connectErr }
+        onExited: (exitCode) => {
+            if (exitCode !== 0) {
+                // nmcli cannot prompt for a passphrase from here, so an unsaved
+                // secured network lands in this branch rather than connecting.
+                const msg = connectErr.text.trim().replace(/^Error:\s*/, "")
+                root.lastError = msg.length > 0 ? msg : "Could not connect to " + root.connectingTo
+            }
+            root.connectingTo = ""
+            root.refreshStatus()
+            root.scan()
+        }
+    }
 
     Timer {
         interval: 8000

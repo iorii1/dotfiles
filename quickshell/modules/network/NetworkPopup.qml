@@ -121,6 +121,14 @@ PanelWindow {
                                 font.pixelSize: Appearance.fontSizeSmall
                                 elide: Text.ElideRight
                             }
+
+                            Text {
+                                visible: Network.connectingTo === netRow.modelData.ssid
+                                text: "connecting…"
+                                color: Colors.textSecondary
+                                font.family: Appearance.fontFamily
+                                font.pixelSize: Appearance.fontSizeSmall
+                            }
                         }
 
                         MouseArea {
@@ -139,6 +147,16 @@ PanelWindow {
                     color: Colors.textSecondary
                     font.family: Appearance.fontFamily
                     font.pixelSize: Appearance.fontSizeSmall
+                }
+
+                Text {
+                    width: parent.width
+                    visible: Network.lastError !== ""
+                    text: Network.lastError
+                    color: Colors.error
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    wrapMode: Text.WordWrap
                 }
             }
         }

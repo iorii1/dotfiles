@@ -85,7 +85,11 @@ link_path "$HOME/.config/kitty/kitty.conf" "$REPO_DIR/kitty/.config/kitty/kitty.
 # fine -- kitty.conf's `include` just ignores a missing target.
 link_path "$HOME/.config/kitty/colors.conf" "$REPO_DIR/kitty/.config/kitty/colors.conf"
 
-for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf keybinds.lua hyprland.conf autostart.lua hyprlock.conf hypridle.conf; do
+# hyprlock-colors.conf and colors.lua are matugen-generated (see
+# matugen/config.toml) and so are gitignored -- they still need symlinking
+# because hyprlock.conf `source=`s the former by absolute path under
+# ~/.config/hypr/. Dangling until matugen first runs is fine.
+for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf keybinds.lua hyprland.conf autostart.lua hyprlock.conf hypridle.conf hyprlock-colors.conf colors.lua; do
     link_path "$HOME/.config/hypr/$f" "$REPO_DIR/hypr/.config/hypr/$f"
 done
 
