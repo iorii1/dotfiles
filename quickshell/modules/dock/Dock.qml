@@ -10,35 +10,16 @@ Scope {
     Variants {
         model: Quickshell.screens
 
-        PanelWindow {
-            id: dockWindow
+        Scope {
+            id: perScreen
             required property var modelData
-            screen: modelData
-
-            // Deliberately always visible. A layer-shell surface with
-            // visible: false is destroyed, and a destroyed surface cannot
-            // receive the hover that is supposed to bring the dock back. The
-            // window therefore stays mapped and the *mask* is what changes:
-            // just the trigger strip while hidden, the whole dock once shown.
-            visible: BarConfig.showTaskbar
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.namespace: "quickshell-dock"
-            exclusionMode: ExclusionMode.Ignore
-            focusable: false
-            color: "transparent"
-
-            anchors { bottom: true; left: true; right: true }
-            implicitHeight: dockHeight + bottomMargin + revealTravel
 
             readonly property int dockHeight: 60
             readonly property int bottomMargin: Appearance.spacingSmall
-            readonly property int revealTravel: 16
-            readonly property int triggerWidth: 400
+            readonly property int zoneWidth: 400
             readonly property bool hasWindows: Hyprland.toplevels.values.length > 0
 
             property bool revealed: false
-
-            mask: Region { item: dockWindow.revealed ? hoverArea : trigger }
 
             function show() {
                 if (!hasWindows) return
@@ -46,75 +27,83 @@ Scope {
                 revealed = true
             }
 
-            // Hiding waits out a short grace period so crossing a gap or
-            // clipping a corner on the way to an icon does not dismiss it.
+            // A grace period, so clipping a corner on the way to an icon does
+            // not dismiss the dock.
             Timer {
                 id: hideTimer
                 interval: 350
-                onTriggered: dockWindow.revealed = false
+                onTriggered: perScreen.revealed = false
             }
 
             onHasWindowsChanged: if (!hasWindows) revealed = false
 
-            // The hidden-state hit target: a thin strip at the bottom centre.
-            Item {
-                id: trigger
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: dockWindow.triggerWidth
-                height: 4
+            // Two windows rather than one whose mask changes. Swapping a
+            // surface's input region while the pointer is inside it makes the
+            // compositor re-deliver enter/leave, which flipped `revealed` back
+            // and forth and left the dock oscillating. Each window here keeps
+            // one fixed input region for its whole life.
+
+            // Always mapped: a thin strip at the bottom centre, the only thing
+            // listening while the dock is hidden.
+            PanelWindow {
+                screen: perScreen.modelData
+                visible: BarConfig.showTaskbar
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell-dock"
+                exclusionMode: ExclusionMode.Ignore
+                focusable: false
+                color: "transparent"
+
+                anchors { bottom: true }
+                implicitWidth: perScreen.zoneWidth
+                implicitHeight: 4
 
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: dockWindow.show()
+                    onEntered: perScreen.show()
                 }
             }
 
-            // The revealed-state hit target. It deliberately extends past the
-            // card down to the screen edge and out to the trigger's width, so
-            // the pointer never falls into a gap between the two regions --
-            // which would hide and immediately re-show the dock in a loop.
-            Item {
-                id: hoverArea
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: Math.max(card.width, dockWindow.triggerWidth)
-                height: dockWindow.dockHeight + dockWindow.bottomMargin
+            // The dock proper. It reaches down to the screen edge and is at
+            // least as wide as the trigger strip, so the pointer arriving from
+            // the strip lands inside it rather than in a gap -- and leaving it
+            // sideways also leaves the strip, instead of dropping straight back
+            // onto the trigger.
+            PanelWindow {
+                screen: perScreen.modelData
+                visible: BarConfig.showTaskbar && perScreen.revealed
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.namespace: "quickshell-dock"
+                exclusionMode: ExclusionMode.Ignore
+                focusable: false
+                color: "transparent"
+
+                anchors { bottom: true }
+                implicitWidth: Math.max(card.width, perScreen.zoneWidth)
+                implicitHeight: perScreen.dockHeight + perScreen.bottomMargin
 
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: dockWindow.show()
+                    onEntered: perScreen.show()
                     onExited: hideTimer.restart()
                 }
-            }
 
-            PopupCard {
-                id: card
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: items.implicitWidth + Appearance.spacingNormal * 2
-                height: dockWindow.dockHeight
+                PopupCard {
+                    id: card
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    width: items.implicitWidth + Appearance.spacingNormal * 2
+                    height: perScreen.dockHeight
 
-                y: dockWindow.revealed
-                   ? parent.height - dockWindow.dockHeight - dockWindow.bottomMargin
-                   : parent.height
-                opacity: dockWindow.revealed ? 1 : 0
+                    Behavior on width { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
 
-                Behavior on y {
-                    NumberAnimation {
-                        duration: Appearance.animNormal
-                        easing.type: Easing.OutBack
-                        easing.overshoot: Appearance.overshootCard
+                    DockItems {
+                        id: items
+                        anchors.centerIn: parent
+                        shown: perScreen.revealed
                     }
-                }
-                Behavior on opacity { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutCubic } }
-                Behavior on width { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-
-                DockItems {
-                    id: items
-                    anchors.centerIn: parent
-                    shown: dockWindow.revealed
                 }
             }
         }

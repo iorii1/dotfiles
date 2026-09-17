@@ -45,6 +45,14 @@ hl.config({
     animations = {
         enabled = true,
     },
+
+    -- Focusing a window by address (what the dock and the overview do when you
+    -- click an entry) otherwise teleports the pointer into the middle of that
+    -- window, which is jarring when you clicked a dock icon at the bottom of
+    -- the screen. Set this back to false to get Hyprland's warping behaviour.
+    cursor = {
+        no_warps = true,
+    },
 })
 
 hl.config({
