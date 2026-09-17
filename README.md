@@ -34,7 +34,7 @@
 | `ALT` + `SPACE` | Open the Quickshell launcher |
 | `SUPER` + `V` | Open clipboard history |
 | `SUPER` + `W` | Open the wallpaper picker |
-| `SUPER` + `L` | Lock screen |
+| `SUPER` + `Escape` | Lock screen |
 | `ALT` + `RETURN` | Open kitty Terminal |
 | `ALT` + `Q` | Close Active Window |
 | `SUPER` + `R` | Reload Hyprland Config |

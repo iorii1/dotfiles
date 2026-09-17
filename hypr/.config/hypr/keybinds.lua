@@ -11,7 +11,10 @@ hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("SUPER + N", hl.dsp.exec_cmd("qs ipc call notifications toggle"))
 hl.bind("SUPER + TAB", hl.dsp.exec_cmd("qs ipc call overview toggle"))
 hl.bind("SUPER + W", hl.dsp.exec_cmd("QS_WALLPAPER_DIR=$HOME/Pictures/Wallpapers ~/.local/share/qs-wallpaper-picker/scripts/open_picker.sh"))
-hl.bind("SUPER + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"))
+
+-- SUPER+L (and SUPER+SHIFT+L) are taken by the vim-style movefocus/
+-- swapwindow binds below, so lock lives on SUPER+Escape instead
+hl.bind("SUPER + Escape", hl.dsp.exec_cmd("loginctl lock-session"))
 
 hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
 hl.bind("SUPER + SHIFT + space", hl.dsp.window.float({ action = "toggle" }))
