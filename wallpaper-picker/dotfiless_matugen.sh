@@ -66,7 +66,7 @@ trap 'rm -f "$work_png"' EXIT
         scheme_args=(-t scheme-monochrome)
     fi
 
-    matugen image "$work_png" -c "$HOME/dotfiless/matugen/config.toml" -m dark \
+    matugen image "$work_png" -c "$HOME/.config/matugen/config.toml" -m dark \
         --prefer saturation "${scheme_args[@]}"
     qs ipc call theme reloadColors
     hyprctl reload

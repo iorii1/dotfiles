@@ -68,10 +68,9 @@ hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 hl.bind("SUPER + CTRL + mouse:273", hl.dsp.window.close())
 
--- Touchpad gestures — syntax not yet verified live, check once Hyprland
--- is actually running and adjust (see PR notes). "workspace" is a built-in
--- gesture action; there's no built-in "focus" action, so the 2-finger
--- swipes dispatch through a Lua closure instead.
+-- Touchpad gestures. "workspace" is a built-in gesture action; there is no
+-- built-in "focus" action, so the 2-finger swipes dispatch through a Lua
+-- closure instead.
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
 hl.gesture({

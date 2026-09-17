@@ -1,0 +1,62 @@
+[config]
+reload_apps = false
+
+# Anchor hues for the 16 ANSI terminal colors. blend = true harmonizes each
+# anchor's hue toward the generated theme's primary color while keeping it
+# recognizable as "red"/"green"/etc, so kitty (and anything else reading its
+# palette, e.g. fastfetch/TUIs) stays in sync with the wallpaper-derived theme.
+[config.custom_colors.red]
+color = "#f38ba8"
+blend = true
+
+[config.custom_colors.green]
+color = "#a6e3a1"
+blend = true
+
+[config.custom_colors.yellow]
+color = "#f9e2af"
+blend = true
+
+[config.custom_colors.blue]
+color = "#89b4fa"
+blend = true
+
+[config.custom_colors.magenta]
+color = "#cba6f7"
+blend = true
+
+[config.custom_colors.cyan]
+color = "#94e2d5"
+blend = true
+
+[templates.quickshell]
+input_path = "@REPO_DIR@/matugen/templates/colors.json.template"
+output_path = "@REPO_DIR@/quickshell/generated/colors.json"
+
+[templates.hyprland]
+input_path = "@REPO_DIR@/matugen/templates/hyprland-colors.lua.template"
+output_path = "@REPO_DIR@/hypr/.config/hypr/colors.lua"
+
+[templates.hyprlock]
+input_path = "@REPO_DIR@/matugen/templates/hyprlock-colors.conf.template"
+output_path = "@REPO_DIR@/hypr/.config/hypr/hyprlock-colors.conf"
+
+[templates.kitty]
+input_path = "@REPO_DIR@/matugen/templates/kitty-colors.conf.template"
+output_path = "@REPO_DIR@/kitty/.config/kitty/colors.conf"
+
+[templates.fastfetch]
+input_path = "@REPO_DIR@/matugen/templates/fastfetch-config.jsonc.template"
+output_path = "@REPO_DIR@/fastfetch/.config/fastfetch/config.jsonc"
+
+[templates.cava]
+input_path = "@REPO_DIR@/matugen/templates/cava-config.template"
+output_path = "@REPO_DIR@/cava/.config/cava/config"
+
+[templates.gtk3]
+input_path = "@REPO_DIR@/matugen/templates/gtk3-colors.css.template"
+output_path = "@REPO_DIR@/gtk-3.0/.config/gtk-3.0/gtk.css"
+
+[templates.gtk4]
+input_path = "@REPO_DIR@/matugen/templates/gtk4-colors.css.template"
+output_path = "@REPO_DIR@/gtk-4.0/.config/gtk-4.0/gtk.css"

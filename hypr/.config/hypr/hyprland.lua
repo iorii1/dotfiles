@@ -66,6 +66,12 @@ hl.animation({ leaf = "fadeOut",    enabled = true, speed = 2.0, bezier = "mango
 hl.animation({ leaf = "workspaces", enabled = true, speed = 2.3, bezier = "mangoOpen",  style = "slide" })
 hl.animation({ leaf = "layers",     enabled = true, speed = 2.6, bezier = "mangoOpen",  style = "popin 80%" })
 
--- Rofi and mako slide down from the bar edge instead of the default fade
-hl.layer_rule({ name = "rofi-slide",          match = { namespace = "^rofi$" },          animation = "slide", blur = true })
-hl.layer_rule({ name = "notifications-slide", match = { namespace = "^notifications$" }, animation = "slide", blur = true })
+-- Quickshell bar + notification toasts: slide in from their anchored edge
+-- instead of the default "popin", which pops from the centre of the screen
+-- and looks wrong for an edge-anchored panel.
+hl.layer_rule({ name = "quickshell-slide", match = { namespace = "^quickshell$" }, animation = "slide" })
+
+-- Popup cards (launcher, quick settings, calendar, media...) already animate
+-- themselves in QML, and a directional slide clips round content against the
+-- screen edge mid-transition, so the surface just fades.
+hl.layer_rule({ name = "quickshell-popup-fade", match = { namespace = "^quickshell-popup$" }, animation = "fade" })

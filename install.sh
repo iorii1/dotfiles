@@ -22,11 +22,11 @@ fi
 
 OFFICIAL_PKGS=(
     hyprland quickshell matugen hyprlock hypridle
-    kitty mako rofi fish fastfetch
-    cava playerctl imagemagick ffmpeg qt6-base qt6-multimedia qt6-multimedia-ffmpeg awww
-    wl-clipboard cliphist brightnessctl grim slurp libnotify
-    networkmanager bluez bluez-utils upower power-profiles-daemon
-    xdg-desktop-portal-hyprland xdg-desktop-portal-gtk ttf-jetbrains-mono-nerd
+    kitty fish fastfetch starship
+    cava playerctl imagemagick libheif ffmpeg qt6-base qt6-multimedia qt6-multimedia-ffmpeg awww
+    wl-clipboard cliphist brightnessctl grim slurp libnotify curl
+    networkmanager bluez bluez-utils upower power-profiles-daemon wireplumber
+    xdg-desktop-portal-hyprland xdg-desktop-portal-gtk ttf-jetbrains-mono-nerd inter-font
     papirus-icon-theme git
 )
 AUR_PKGS=(mpvpaper xfce-polkit)
@@ -71,7 +71,7 @@ link_path() {
 }
 
 info "Symlinking configs..."
-for app in fastfetch fish mako rofi cava gtk-3.0 gtk-4.0; do
+for app in fastfetch fish cava gtk-3.0 gtk-4.0; do
     link_path "$HOME/.config/$app" "$REPO_DIR/$app/.config/$app"
 done
 # quickshell is not GNU-stow-shaped like the others -- its repo dir *is*
@@ -89,7 +89,7 @@ link_path "$HOME/.config/kitty/colors.conf" "$REPO_DIR/kitty/.config/kitty/color
 # matugen/config.toml) and so are gitignored -- they still need symlinking
 # because hyprlock.conf `source=`s the former by absolute path under
 # ~/.config/hypr/. Dangling until matugen first runs is fine.
-for f in monitors.conf hyprland.lua monitors.lua keybinds.conf autostart.conf keybinds.lua hyprland.conf autostart.lua hyprlock.conf hypridle.conf hyprlock-colors.conf colors.lua; do
+for f in hyprland.lua monitors.lua keybinds.lua autostart.lua hyprlock.conf hypridle.conf hyprlock-colors.conf colors.lua; do
     link_path "$HOME/.config/hypr/$f" "$REPO_DIR/hypr/.config/hypr/$f"
 done
 
@@ -100,6 +100,18 @@ done
 link_path "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" "$REPO_DIR/hypr/.config/xdg-desktop-portal/hyprland-portals.conf"
 
 link_path "$HOME/.local/bin/take-screenshot" "$REPO_DIR/scripts/.local/bin/take-screenshot"
+
+# --- 3b. matugen config ----------------------------------------------------
+
+# matugen's output paths have to be absolute, so the config is rendered from a
+# template with this clone's real location baked in. Writing it to
+# ~/.config/matugen also means a bare `matugen` picks the same config up,
+# rather than silently running with no templates at all.
+info "Rendering matugen config for $REPO_DIR..."
+mkdir -p "$HOME/.config/matugen"
+sed "s|@REPO_DIR@|$REPO_DIR|g" \
+    "$REPO_DIR/matugen/config.toml.template" > "$HOME/.config/matugen/config.toml"
+echo "  $HOME/.config/matugen/config.toml"
 
 # --- 4. GTK/Qt theme defaults ---------------------------------------------
 
