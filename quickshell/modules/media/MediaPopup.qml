@@ -77,6 +77,7 @@ PanelWindow {
         opacity: UiState.mediaPopupOpen ? 1 : 0
         y: UiState.mediaPopupOpen ? restY : restY - 12
         scale: UiState.mediaPopupOpen ? 1 : 0.95
+        transformOrigin: Item.TopLeft
         Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }

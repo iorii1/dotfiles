@@ -78,6 +78,7 @@ PanelWindow {
         opacity: UiState.calendarOpen ? 1 : 0
         y: UiState.calendarOpen ? restY : restY - 12
         scale: UiState.calendarOpen ? 1 : 0.95
+        transformOrigin: Item.Top
         Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }

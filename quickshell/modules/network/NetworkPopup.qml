@@ -44,6 +44,7 @@ PanelWindow {
         opacity: UiState.networkOpen ? 1 : 0
         y: UiState.networkOpen ? restY : restY - 12
         scale: UiState.networkOpen ? 1 : 0.96
+        transformOrigin: Item.TopRight
         Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }

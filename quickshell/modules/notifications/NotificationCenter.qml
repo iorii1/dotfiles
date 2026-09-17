@@ -42,6 +42,7 @@ PanelWindow {
         opacity: UiState.notificationCenterOpen ? 1 : 0
         y: UiState.notificationCenterOpen ? restY : restY - 12
         scale: UiState.notificationCenterOpen ? 1 : 0.96
+        transformOrigin: Item.TopRight
         Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
         Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
