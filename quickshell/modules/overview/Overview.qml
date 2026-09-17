@@ -67,10 +67,20 @@ PanelWindow {
                     width: 320
                     height: 220
 
+                    readonly property bool hovered: tileHoverFx.containsMouse
+
                     scale: 0.9
                     opacity: 0
                     Component.onCompleted: entranceAnim.start()
                     PopIn { id: entranceAnim; target: tile; delay: Math.min(index * 40, 200) }
+
+                    MouseArea {
+                        id: tileHoverFx
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        z: -1
+                        onClicked: overviewWindow.goTo(tile.modelData.id)
+                    }
 
                     // "Screen" inset, like a monitor bezel around the windows.
                     Rectangle {
@@ -78,14 +88,27 @@ PanelWindow {
                         anchors.margins: 8
                         radius: Appearance.radiusNormal
                         color: Colors.background
+                        opacity: tile.hovered ? 1.0 : 0.92
+                        Behavior on opacity { NumberAnimation { duration: Appearance.animFast } }
                     }
 
                     Rectangle {
+                        id: focusBorder
                         anchors.fill: parent
                         radius: Appearance.radiusLarge
                         color: "transparent"
-                        border.width: tile.modelData.focused ? 2 : 0
+                        border.width: tile.modelData.focused ? 2 : (tile.hovered ? 1 : 0)
                         border.color: Colors.primary
+                        opacity: tile.modelData.focused ? glowOpacity : 1.0
+                        Behavior on border.width { NumberAnimation { duration: Appearance.animFast } }
+
+                        property real glowOpacity: 1.0
+                        SequentialAnimation {
+                            running: tile.modelData.focused
+                            loops: Animation.Infinite
+                            NumberAnimation { target: focusBorder; property: "glowOpacity"; to: 0.5; duration: 1100; easing.type: Easing.InOutSine }
+                            NumberAnimation { target: focusBorder; property: "glowOpacity"; to: 1.0; duration: 1100; easing.type: Easing.InOutSine }
+                        }
                     }
 
                     Item {
@@ -129,8 +152,14 @@ PanelWindow {
                             ColumnLayout {
                                 id: winTile
                                 required property var modelData
+                                required property int index
                                 width: 60
                                 spacing: 4
+
+                                scale: 0.7
+                                opacity: 0
+                                Component.onCompleted: winEntranceAnim.start()
+                                PopIn { id: winEntranceAnim; target: winTile; delay: Math.min(winTile.index * 35, 240); fromScale: 0.7; overshoot: 1.8 }
 
                                 Rectangle {
                                     id: iconBg
@@ -202,12 +231,6 @@ PanelWindow {
                             font.bold: true
                             font.pixelSize: Appearance.fontSizeSmall
                         }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        z: -1
-                        onClicked: overviewWindow.goTo(tile.modelData.id)
                     }
                 }
             }

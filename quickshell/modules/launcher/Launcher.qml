@@ -102,11 +102,37 @@ PanelWindow {
 
             Rectangle { Layout.fillWidth: true; height: 1; color: Colors.outline; opacity: 0.4 }
 
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: Appearance.spacingLarge
+                spacing: 2
+                visible: launcherWindow.results.length === 0
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: ""
+                    color: Colors.textSecondary
+                    opacity: 0.35
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: 30
+                }
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "No apps found"
+                    color: Colors.textSecondary
+                    opacity: 0.6
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                }
+            }
+
             ListView {
                 id: resultsList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
+                visible: launcherWindow.results.length > 0
                 model: launcherWindow.results
                 spacing: 2
                 currentIndex: 0

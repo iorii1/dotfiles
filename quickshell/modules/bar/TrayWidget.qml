@@ -28,6 +28,9 @@ Item {
                 width: 18
                 height: 18
 
+                opacity: 0
+                NumberAnimation on opacity { to: 1.0; duration: 260; easing.type: Easing.OutQuad }
+
                 scale: fx.popScale * (fx.pressed ? 0.85 : (fx.containsMouse ? 1.1 : 1.0))
                 Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
 

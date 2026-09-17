@@ -75,9 +75,10 @@ PanelWindow {
                     required property var modelData
                     required property int index
                     width: list.width
-                    height: 40
+                    height: row.modelData.isImage ? 52 : 40
                     radius: Appearance.radiusSmall
                     color: itemFx.containsMouse ? Colors.surfaceContainer : "transparent"
+                    clip: true
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
                     scale: 0.85
@@ -93,8 +94,26 @@ PanelWindow {
                         anchors.rightMargin: Appearance.spacingNormal
                         spacing: Appearance.spacingSmall
 
+                        Image {
+                            visible: row.modelData.isImage
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            source: row.modelData.isImage ? "file://" + Clipboard.thumbDir + "/" + row.modelData.id : ""
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: "transparent"
+                                border.width: 1
+                                border.color: Colors.outline
+                                opacity: 0.35
+                            }
+                        }
+
                         Text {
-                            text: row.modelData.isImage ? "\uf03e" : "\uf0ea"
+                            visible: !row.modelData.isImage
+                            text: "\uf0ea"
                             color: Colors.textSecondary
                             font.family: Appearance.fontFamily
                             font.pixelSize: Appearance.fontSizeNormal
@@ -102,12 +121,35 @@ PanelWindow {
 
                         Text {
                             Layout.fillWidth: true
-                            text: row.modelData.preview
+                            text: row.modelData.isImage ? "Image" : row.modelData.preview
                             color: Colors.textPrimary
                             font.family: Appearance.fontFamily
                             font.pixelSize: Appearance.fontSizeSmall
                             elide: Text.ElideRight
                         }
+                    }
+
+                    Rectangle {
+                        id: copyFlash
+                        anchors.fill: parent
+                        radius: row.radius
+                        color: "#ffffff"
+                        opacity: 0
+                    }
+
+                    Timer {
+                        id: closeTimer
+                        interval: 180
+                        onTriggered: UiState.clipboardOpen = false
+                    }
+
+                    NumberAnimation {
+                        id: flashFade
+                        target: copyFlash
+                        property: "opacity"
+                        to: 0
+                        duration: 250
+                        easing.type: Easing.OutExpo
                     }
 
                     MouseArea {
@@ -117,7 +159,9 @@ PanelWindow {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             Clipboard.select(row.modelData.id)
-                            UiState.clipboardOpen = false
+                            copyFlash.opacity = 0.5
+                            flashFade.restart()
+                            closeTimer.restart()
                         }
                     }
                 }

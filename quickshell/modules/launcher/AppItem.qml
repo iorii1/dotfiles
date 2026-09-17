@@ -38,15 +38,30 @@ Item {
             opacity: fx.flashOpacity
         }
 
+        Rectangle {
+            width: 3
+            radius: 1.5
+            color: Colors.primary
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.margins: 6
+            scale: root.active ? 1 : 0
+            transformOrigin: Item.Center
+            Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutBack; easing.overshoot: 2.2 } }
+        }
+
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Appearance.spacingNormal
+            anchors.leftMargin: Appearance.spacingNormal + 6
             anchors.rightMargin: Appearance.spacingNormal
             spacing: Appearance.spacingNormal
 
             Image {
                 Layout.preferredWidth: 28
                 Layout.preferredHeight: 28
+                scale: root.active ? 1.12 : 1.0
+                Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: 2.0 } }
                 source: root.appIcon ? "image://icon/" + root.appIcon : ""
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
