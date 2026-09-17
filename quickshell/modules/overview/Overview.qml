@@ -29,12 +29,12 @@ PanelWindow {
 
     function goTo(workspaceId) {
         UiState.overviewOpen = false
-        Hyprland.dispatch("workspace " + workspaceId)
+        Compositor.focusWorkspace(workspaceId)
     }
 
     function focusWindow(address) {
         UiState.overviewOpen = false
-        Hyprland.dispatch("focuswindow address:" + address)
+        Compositor.focusWindow(address)
     }
 
     MouseArea {

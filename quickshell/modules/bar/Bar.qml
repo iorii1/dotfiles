@@ -51,7 +51,6 @@ Scope {
                     }
                     spacing: Appearance.spacingNormal
                     Workspaces { visible: BarConfig.showWorkspaces }
-                    Taskbar { visible: BarConfig.showTaskbar }
                     CavaVisualizer { visible: BarConfig.showCava }
                     MediaWidget { visible: BarConfig.showMedia }
                 }

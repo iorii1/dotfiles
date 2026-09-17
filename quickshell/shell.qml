@@ -12,6 +12,7 @@ import "./modules/clipboard"
 import "./modules/media"
 import "./modules/overview"
 import "./modules/settings"
+import "./modules/dock"
 
 Scope {
     Bar {}
@@ -28,4 +29,5 @@ Scope {
     MediaPopup {}
     Overview {}
     SettingsWindow {}
+    Dock {}
 }

@@ -75,3 +75,7 @@ hl.layer_rule({ name = "quickshell-slide", match = { namespace = "^quickshell$" 
 -- themselves in QML, and a directional slide clips round content against the
 -- screen edge mid-transition, so the surface just fades.
 hl.layer_rule({ name = "quickshell-popup-fade", match = { namespace = "^quickshell-popup$" }, animation = "fade" })
+
+-- The dock's own surface stays mapped so it can keep receiving hover; it
+-- animates itself in QML, so the compositor must not also animate it.
+hl.layer_rule({ name = "quickshell-dock", match = { namespace = "^quickshell-dock$" }, animation = "none" })

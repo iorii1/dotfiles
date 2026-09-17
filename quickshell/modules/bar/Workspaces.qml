@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
 import "../../config"
+import "../../services"
 import "../common"
 
 RowLayout {
@@ -61,7 +62,7 @@ RowLayout {
                 anchors.fill: parent
                 anchors.margins: -4
                 popOvershoot: 2.2
-                onActivated: Hyprland.dispatch("workspace " + pill.modelData.id)
+                onActivated: Compositor.focusWorkspace(pill.modelData.id)
             }
         }
     }

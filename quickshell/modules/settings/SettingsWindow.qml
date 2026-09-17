@@ -28,7 +28,7 @@ PanelWindow {
 
     readonly property var widgets: [
         { key: "showWorkspaces", label: "Workspaces", icon: "" },
-        { key: "showTaskbar", label: "Taskbar", icon: "" },
+        { key: "showTaskbar", label: "Dock", icon: "" },
         { key: "showCava", label: "Audio visualizer", icon: "" },
         { key: "showMedia", label: "Media", icon: "" },
         { key: "showNotifications", label: "Notification bell", icon: "" },
