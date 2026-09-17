@@ -23,7 +23,7 @@ Item {
         anchors.centerIn: parent
         text: "\uf011"
         color: fx.containsMouse ? Colors.error : Colors.textPrimary
-        font.family: Appearance.fontFamily
+        font.family: Appearance.fontFamilyIcons
         font.pixelSize: Appearance.fontSizeLarge
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
     }

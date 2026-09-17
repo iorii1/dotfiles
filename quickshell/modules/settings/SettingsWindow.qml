@@ -233,7 +233,7 @@ PanelWindow {
                             Layout.preferredWidth: 22
                             text: widgetRow.modelData.icon
                             color: Colors.textSecondary
-                            font.family: Appearance.fontFamily
+                            font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeNormal
                         }
 

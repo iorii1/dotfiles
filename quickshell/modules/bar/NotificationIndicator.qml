@@ -27,7 +27,7 @@ Item {
         anchors.centerIn: parent
         text: Notifications.dnd ? "\uf1f6" : "\uf0f3"
         color: Notifications.dnd ? Colors.textSecondary : (root.count > 0 ? Colors.primary : Colors.textPrimary)
-        font.family: Appearance.fontFamily
+        font.family: Appearance.fontFamilyIcons
         font.pixelSize: Appearance.fontSizeLarge
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
     }

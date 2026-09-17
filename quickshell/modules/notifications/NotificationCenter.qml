@@ -79,7 +79,7 @@ PanelWindow {
                         transformOrigin: Item.Top
                         text: Notifications.dnd ? "" : ""
                         color: Notifications.dnd ? Colors.textSecondary : Colors.primaryText
-                        font.family: Appearance.fontFamily
+                        font.family: Appearance.fontFamilyIcons
                         font.pixelSize: Appearance.fontSizeNormal
                         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
                     }
@@ -263,7 +263,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignTop
                             text: ""
                             color: Colors.textSecondary
-                            font.family: Appearance.fontFamily
+                            font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeSmall
 
                             scale: dismissFx.popScale * (dismissFx.pressed ? 0.85 : (dismissFx.containsMouse ? 1.15 : 1.0))

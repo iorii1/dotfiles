@@ -108,7 +108,7 @@ PanelWindow {
                             Text {
                                 text: modelData.active ? "" : (modelData.secure ? "" : "")
                                 color: modelData.active ? Colors.primary : Colors.textSecondary
-                                font.family: Appearance.fontFamily
+                                font.family: Appearance.fontFamilyIcons
                                 font.pixelSize: Appearance.fontSizeSmall
                                 Layout.preferredWidth: 14
                             }

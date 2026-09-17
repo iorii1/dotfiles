@@ -113,7 +113,7 @@ PanelWindow {
                     return "\uf026"
                 }
                 color: Colors.primary
-                font.family: Appearance.fontFamily
+                font.family: Appearance.fontFamilyIcons
                 font.pixelSize: Appearance.fontSizeLarge
             }
 

@@ -96,7 +96,7 @@ Item {
                         anchors.centerIn: parent
                         text: root.icon
                         color: root.checked ? Colors.primaryText : Colors.textSecondary
-                        font.family: Appearance.fontFamily
+                        font.family: Appearance.fontFamilyIcons
                         font.pixelSize: Appearance.fontSizeNormal
                         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
                     }

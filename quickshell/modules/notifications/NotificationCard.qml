@@ -105,7 +105,7 @@ Item {
                     Text {
                         text: "\uf00d"
                         color: Colors.textSecondary
-                        font.family: Appearance.fontFamily
+                        font.family: Appearance.fontFamilyIcons
                         font.pixelSize: Appearance.fontSizeSmall
 
                         scale: closeFx.popScale * (closeFx.pressed ? 0.85 : (closeFx.containsMouse ? 1.15 : 1.0))

@@ -3,7 +3,7 @@ configuration {
     icon-theme: "Papirus-Dark";
     show-icons: true;
     drun-display-format: "{icon} {name}";
-    font: "Inter 11";
+    font: "SF Pro Display, Inter 11";
     click-to-exit: true;
 }
 
@@ -44,7 +44,7 @@ inputbar {
 prompt {
     background-color: transparent;
     text-color: @text-selected;
-    font: "Inter Bold 11";
+    font: "SF Pro Display, Inter Bold 11";
 }
 
 entry {

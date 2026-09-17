@@ -113,7 +113,7 @@ PanelWindow {
                     text: ""
                     color: Colors.textSecondary
                     opacity: 0.35
-                    font.family: Appearance.fontFamily
+                    font.family: Appearance.fontFamilyIcons
                     font.pixelSize: 30
                 }
 

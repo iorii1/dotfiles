@@ -31,7 +31,7 @@ Item {
         anchors.centerIn: parent
         text: root.icon
         color: !Network.wifiEnabled ? Colors.outline : (Network.connected ? Colors.primary : Colors.textSecondary)
-        font.family: Appearance.fontFamily
+        font.family: Appearance.fontFamilyIcons
         font.pixelSize: Appearance.fontSizeLarge
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
     }

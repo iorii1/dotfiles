@@ -108,7 +108,7 @@ PanelWindow {
                             Text {
                                 text: modelData.connected ? "" : ""
                                 color: Colors.primary
-                                font.family: Appearance.fontFamily
+                                font.family: Appearance.fontFamilyIcons
                                 font.pixelSize: Appearance.fontSizeSmall
                                 Layout.preferredWidth: 14
                             }

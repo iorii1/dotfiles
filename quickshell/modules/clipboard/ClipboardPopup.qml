@@ -115,7 +115,7 @@ PanelWindow {
                             visible: !row.modelData.isImage
                             text: "\uf0ea"
                             color: Colors.textSecondary
-                            font.family: Appearance.fontFamily
+                            font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeNormal
                         }
 

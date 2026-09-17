@@ -122,7 +122,7 @@ PanelWindow {
                             anchors.centerIn: parent
                             text: "\uf053"
                             color: Colors.textSecondary
-                            font.family: Appearance.fontFamily
+                            font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeLarge
                         }
                     }
@@ -168,7 +168,7 @@ PanelWindow {
                             anchors.centerIn: parent
                             text: "\uf054"
                             color: Colors.textSecondary
-                            font.family: Appearance.fontFamily
+                            font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeLarge
                         }
                     }
@@ -291,7 +291,7 @@ PanelWindow {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: ""
                         color: Colors.primary
-                        font.family: Appearance.fontFamily
+                        font.family: Appearance.fontFamilyIcons
                         font.pixelSize: 14
 
                         SequentialAnimation {

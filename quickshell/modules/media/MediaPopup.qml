@@ -182,7 +182,7 @@ PanelWindow {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "\uf001"
-                                    font.family: Appearance.fontFamily
+                                    font.family: Appearance.fontFamilyIcons
                                     font.pixelSize: parent.width * 0.26
                                     color: Colors.textSecondary
                                 }
@@ -323,7 +323,7 @@ PanelWindow {
                         anchors.centerIn: parent
                         text: "\uf048"
                         color: prevFx.containsMouse ? Colors.textPrimary : Colors.textSecondary
-                        font.family: Appearance.fontFamily
+                        font.family: Appearance.fontFamilyIcons
                         font.pixelSize: Appearance.fontSizeLarge
                     }
                     PressFx {
@@ -353,7 +353,7 @@ PanelWindow {
                             anchors.centerIn: parent
                             text: popupWindow.playing ? "\uf04c" : "\uf04b"
                             color: Colors.primaryText
-                            font.family: Appearance.fontFamily
+                            font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeLarge
                         }
                     }
@@ -370,7 +370,7 @@ PanelWindow {
                         anchors.centerIn: parent
                         text: "\uf051"
                         color: nextFx.containsMouse ? Colors.textPrimary : Colors.textSecondary
-                        font.family: Appearance.fontFamily
+                        font.family: Appearance.fontFamilyIcons
                         font.pixelSize: Appearance.fontSizeLarge
                     }
                     PressFx {

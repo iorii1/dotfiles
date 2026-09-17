@@ -23,7 +23,7 @@ Item {
         anchors.centerIn: parent
         text: ""
         color: !Bluetooth.powered ? Colors.outline : (Bluetooth.devices.some(d => d.connected) ? Colors.primary : Colors.textSecondary)
-        font.family: Appearance.fontFamily
+        font.family: Appearance.fontFamilyIcons
         font.pixelSize: Appearance.fontSizeLarge
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
     }

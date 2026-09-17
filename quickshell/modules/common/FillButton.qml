@@ -136,7 +136,7 @@ Item {
                 visible: root.icon !== ""
                 text: root.icon
                 color: root.fillLevel > 0.5 ? root.onAccentColor : Colors.textPrimary
-                font.family: Appearance.fontFamily
+                font.family: Appearance.fontFamilyIcons
                 font.pixelSize: Appearance.fontSizeLarge
                 Behavior on color { ColorAnimation { duration: Appearance.animFast } }
             }
