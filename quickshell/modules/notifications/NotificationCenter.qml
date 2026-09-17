@@ -58,6 +58,48 @@ PanelWindow {
                 Layout.fillWidth: true
                 spacing: Appearance.spacingSmall
 
+                Item {
+                    id: bellBadge
+                    implicitWidth: 26
+                    implicitHeight: 26
+
+                    property int lastCount: Notifications.history.count
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: Notifications.dnd ? Colors.surfaceContainerHigh : Colors.primary
+                        Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+                    }
+
+                    Text {
+                        id: bellIcon
+                        anchors.centerIn: parent
+                        transformOrigin: Item.Top
+                        text: Notifications.dnd ? "" : ""
+                        color: Notifications.dnd ? Colors.textSecondary : Colors.primaryText
+                        font.family: Appearance.fontFamily
+                        font.pixelSize: Appearance.fontSizeNormal
+                        Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+                    }
+
+                    SequentialAnimation {
+                        id: ringAnim
+                        loops: 2
+                        NumberAnimation { target: bellIcon; property: "rotation"; to: 22; duration: 80; easing.type: Easing.OutQuad }
+                        NumberAnimation { target: bellIcon; property: "rotation"; to: -22; duration: 140; easing.type: Easing.InOutQuad }
+                        NumberAnimation { target: bellIcon; property: "rotation"; to: 0; duration: 80; easing.type: Easing.InQuad }
+                    }
+
+                    Connections {
+                        target: Notifications.history
+                        function onCountChanged() {
+                            if (Notifications.history.count > bellBadge.lastCount && !Notifications.dnd) ringAnim.restart()
+                            bellBadge.lastCount = Notifications.history.count
+                        }
+                    }
+                }
+
                 Text {
                     Layout.fillWidth: true
                     text: "Notifications"
@@ -84,6 +126,13 @@ PanelWindow {
                         anchors.margins: -6
                         onActivated: Notifications.clearHistory()
                     }
+                }
+
+                Text {
+                    text: "DND"
+                    color: Colors.textSecondary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
                 }
 
                 Toggle {

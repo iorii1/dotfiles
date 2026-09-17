@@ -41,9 +41,8 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         onActivated: {
-            UiState.quickSettingsSection = "wifi"
-            UiState.quickSettingsOpen = true
-            Network.scan()
+            UiState.networkOpen = !UiState.networkOpen
+            if (UiState.networkOpen) Network.scan()
         }
     }
 }

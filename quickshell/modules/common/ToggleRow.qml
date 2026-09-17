@@ -14,6 +14,7 @@ Item {
     property bool expanded: false
     property bool expandable: true
     property Component expandedContent: null
+    property bool pulsing: false
 
     property bool active: false
     property int entranceDelay: 0
@@ -58,6 +59,31 @@ Item {
             Item {
                 Layout.preferredWidth: 32
                 Layout.preferredHeight: 32
+
+                Rectangle {
+                    id: pulseRing
+                    anchors.centerIn: parent
+                    width: 32
+                    height: 32
+                    radius: width / 2
+                    color: "transparent"
+                    border.width: 2
+                    border.color: Colors.primary
+                    scale: 1.0
+                    opacity: 0.0
+
+                    SequentialAnimation {
+                        running: root.pulsing
+                        loops: Animation.Infinite
+                        ParallelAnimation {
+                            NumberAnimation { target: pulseRing; property: "scale"; from: 1.0; to: 1.8; duration: 1100; easing.type: Easing.OutCubic }
+                            NumberAnimation { target: pulseRing; property: "opacity"; from: 0.6; to: 0.0; duration: 1100; easing.type: Easing.OutCubic }
+                        }
+                        PropertyAction { target: pulseRing; property: "scale"; value: 1.0 }
+                        PropertyAction { target: pulseRing; property: "opacity"; value: 0.0 }
+                        PauseAnimation { duration: 400 }
+                    }
+                }
 
                 Rectangle {
                     id: badgeBg

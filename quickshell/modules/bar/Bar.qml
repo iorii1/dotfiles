@@ -52,8 +52,12 @@ Scope {
                     MediaWidget {}
                 }
 
-                Clock {
+                RowLayout {
                     anchors.centerIn: parent
+                    spacing: Appearance.spacingNormal
+
+                    NotificationIndicator {}
+                    Clock {}
                 }
 
                 RowLayout {
@@ -67,7 +71,6 @@ Scope {
                     WifiWidget {}
                     BluetoothWidget {}
                     PowerButton {}
-                    NotificationIndicator {}
                 }
             }
         }

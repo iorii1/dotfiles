@@ -1,6 +1,7 @@
 import QtQuick
 import "../../config"
 import "../../services"
+import "../common"
 
 Item {
     id: root
@@ -11,6 +12,17 @@ Item {
     readonly property color fillColor: (Battery.percent <= 15 && !Battery.charging)
         ? Colors.error
         : (Battery.charging ? Colors.primary : Colors.textPrimary)
+
+    scale: fx.popScale * (fx.pressed ? 0.9 : (fx.containsMouse ? 1.06 : 1.0))
+    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: -6
+        radius: 8
+        color: "#ffffff"
+        opacity: fx.flashOpacity
+    }
 
     Row {
         id: rowLayout
@@ -75,5 +87,12 @@ Item {
             font.pixelSize: Appearance.fontSizeSmall
             anchors.verticalCenter: parent.verticalCenter
         }
+    }
+
+    PressFx {
+        id: fx
+        anchors.fill: parent
+        anchors.margins: -4
+        onActivated: UiState.batteryOpen = !UiState.batteryOpen
     }
 }

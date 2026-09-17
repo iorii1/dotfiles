@@ -4,8 +4,9 @@ import Quickshell
 
 Singleton {
     property bool powerMenuOpen: false
-    property bool quickSettingsOpen: false
-    property string quickSettingsSection: ""
+    property bool networkOpen: false
+    property bool bluetoothOpen: false
+    property bool batteryOpen: false
     property bool calendarOpen: false
     property bool clipboardOpen: false
     property bool mediaPopupOpen: false

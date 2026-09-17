@@ -22,6 +22,15 @@ Singleton {
         return ""
     }
 
+    // Broad category for driving a themed animated icon.
+    function category(code) {
+        if (code === 0 || code === 1) return "clear"
+        if (code >= 95) return "thunder"
+        if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "snow"
+        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return "rain"
+        return "cloud"
+    }
+
     function refresh() {
         if (!root.cityName) {
             geoProc.running = true

@@ -11,8 +11,15 @@ Item {
     property string icon: ""
     property color accentColor: Colors.primary
     property color baseColor: Colors.surfaceContainer
+    property color onAccentColor: Colors.primaryText
     property int fillDuration: 900
     property int autoResetTimeout: 1400
+
+    // When true, a completed hold doesn't fire immediately -- it switches
+    // the label to confirmLabel and arms a second hold as the real trigger.
+    property bool requireConfirm: false
+    property string confirmLabel: "Confirm?"
+    property bool awaitingConfirm: false
 
     signal triggered()
 
@@ -31,6 +38,7 @@ Item {
         } else {
             root.scale = 0.6
             root.opacity = 0.0
+            root.reset()
         }
     }
 
@@ -38,7 +46,9 @@ Item {
 
     function reset() {
         resetTimer.stop()
+        confirmTimer.stop()
         root.isTriggered = false
+        root.awaitingConfirm = false
         fillAnim.stop()
         drainAnim.restart()
     }
@@ -49,11 +59,13 @@ Item {
         radius: Appearance.radiusNormal
         color: root.baseColor
         clip: true
-        border.color: Colors.outline
-        border.width: 1
 
         scale: (ma.pressed && !root.isTriggered) ? 0.97 : (root.hovered ? 1.02 : 1.0)
         Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+
+        border.color: root.awaitingConfirm ? root.accentColor : Colors.outline
+        border.width: root.awaitingConfirm ? 2 : 1
+        Behavior on border.color { ColorAnimation { duration: Appearance.animFast } }
 
         Canvas {
             id: waveCanvas
@@ -123,17 +135,19 @@ Item {
             Text {
                 visible: root.icon !== ""
                 text: root.icon
-                color: Colors.textPrimary
+                color: root.fillLevel > 0.5 ? root.onAccentColor : Colors.textPrimary
                 font.family: Appearance.fontFamily
                 font.pixelSize: Appearance.fontSizeLarge
+                Behavior on color { ColorAnimation { duration: Appearance.animFast } }
             }
 
             Text {
-                text: root.label
-                color: Colors.textPrimary
+                text: root.awaitingConfirm ? root.confirmLabel : root.label
+                color: root.fillLevel > 0.5 ? root.onAccentColor : Colors.textPrimary
                 font.family: Appearance.fontFamily
                 font.bold: true
                 font.pixelSize: Appearance.fontSizeNormal
+                Behavior on color { ColorAnimation { duration: Appearance.animFast } }
             }
         }
 
@@ -158,9 +172,17 @@ Item {
             easing.type: Easing.InSine
             onFinished: {
                 if (root.fillLevel >= 0.999) {
-                    root.isTriggered = true
-                    root.triggered()
-                    resetTimer.restart()
+                    if (root.requireConfirm && !root.awaitingConfirm) {
+                        root.awaitingConfirm = true
+                        confirmTimer.restart()
+                        drainAnim.restart()
+                    } else {
+                        root.isTriggered = true
+                        root.awaitingConfirm = false
+                        confirmTimer.stop()
+                        root.triggered()
+                        resetTimer.restart()
+                    }
                 }
             }
         }
@@ -178,6 +200,12 @@ Item {
             id: resetTimer
             interval: root.autoResetTimeout
             onTriggered: root.reset()
+        }
+
+        Timer {
+            id: confirmTimer
+            interval: 3000
+            onTriggered: root.awaitingConfirm = false
         }
     }
 }

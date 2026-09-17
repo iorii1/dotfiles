@@ -33,9 +33,8 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         onActivated: {
-            UiState.quickSettingsSection = "bluetooth"
-            UiState.quickSettingsOpen = true
-            Bluetooth.refresh()
+            UiState.bluetoothOpen = !UiState.bluetoothOpen
+            if (UiState.bluetoothOpen) Bluetooth.refresh()
         }
     }
 }

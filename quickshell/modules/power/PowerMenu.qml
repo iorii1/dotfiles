@@ -66,11 +66,20 @@ PanelWindow {
             }
 
             FillButton {
+                label: "Suspend"
+                icon: "\uf186"
+                accentColor: Colors.primary
+                active: UiState.powerMenuOpen
+                entranceDelay: 60
+                onTriggered: powerWindow.run("systemctl suspend")
+            }
+
+            FillButton {
                 label: "Logout"
                 icon: "\uf08b"
                 accentColor: Colors.primary
                 active: UiState.powerMenuOpen
-                entranceDelay: 60
+                entranceDelay: 120
                 onTriggered: powerWindow.run("hyprctl dispatch exit")
             }
 
@@ -78,8 +87,10 @@ PanelWindow {
                 label: "Reboot"
                 icon: "\uf021"
                 accentColor: Colors.error
+                onAccentColor: Colors.errorText
+                requireConfirm: true
                 active: UiState.powerMenuOpen
-                entranceDelay: 120
+                entranceDelay: 180
                 onTriggered: powerWindow.run("systemctl reboot")
             }
 
@@ -87,8 +98,10 @@ PanelWindow {
                 label: "Shutdown"
                 icon: "\uf011"
                 accentColor: Colors.error
+                onAccentColor: Colors.errorText
+                requireConfirm: true
                 active: UiState.powerMenuOpen
-                entranceDelay: 180
+                entranceDelay: 240
                 onTriggered: powerWindow.run("systemctl poweroff")
             }
         }

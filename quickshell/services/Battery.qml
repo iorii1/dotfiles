@@ -9,6 +9,9 @@ Singleton {
     property bool present: false
     property int percent: 0
     property bool charging: false
+    property string state: ""
+    property string timeText: ""
+    property int chargeEndThreshold: 100
 
     function refresh() {
         if (!proc.running) proc.running = true
@@ -23,7 +26,17 @@ Singleton {
                 const pct = text.match(/percentage:\s*(\d+)%/)
                 const state = text.match(/state:\s*(\S+)/)
                 root.percent = pct ? parseInt(pct[1]) : 0
+                root.state = state ? state[1] : ""
                 root.charging = state ? ["charging", "fully-charged", "pending-charge"].indexOf(state[1]) !== -1 : false
+
+                const toEmpty = text.match(/time to empty:\s*(.+)/)
+                const toFull = text.match(/time to full:\s*(.+)/)
+                if (toEmpty) root.timeText = toEmpty[1].trim() + " remaining"
+                else if (toFull) root.timeText = toFull[1].trim() + " until full"
+                else root.timeText = ""
+
+                const end = text.match(/charge-end-threshold:\s*(\d+)%/)
+                root.chargeEndThreshold = end ? parseInt(end[1]) : 100
             }
         }
     }

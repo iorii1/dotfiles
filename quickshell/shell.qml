@@ -4,7 +4,9 @@ import "./modules/launcher"
 import "./modules/notifications"
 import "./modules/power"
 import "./modules/osd"
-import "./modules/quicksettings"
+import "./modules/network"
+import "./modules/bluetooth"
+import "./modules/battery"
 import "./modules/calendar"
 import "./modules/clipboard"
 import "./modules/media"
@@ -17,7 +19,9 @@ Scope {
     NotificationCenter {}
     PowerMenu {}
     Osd {}
-    QuickSettings {}
+    NetworkPopup {}
+    BluetoothPopup {}
+    BatteryPopup {}
     CalendarPopup {}
     ClipboardPopup {}
     MediaPopup {}

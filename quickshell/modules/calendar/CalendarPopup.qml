@@ -183,11 +183,124 @@ PanelWindow {
                 visible: Weather.ready
                 spacing: Appearance.spacingSmall
 
-                Text {
-                    text: Weather.icon(Weather.weatherCode)
-                    color: Colors.primary
-                    font.family: Appearance.fontFamily
-                    font.pixelSize: Appearance.fontSizeNormal
+                Item {
+                    id: weatherIcon
+                    implicitWidth: 30
+                    implicitHeight: 30
+
+                    readonly property string cat: Weather.category(Weather.weatherCode)
+
+                    Item {
+                        id: sunGroup
+                        visible: weatherIcon.cat === "clear"
+                        anchors.centerIn: parent
+                        width: 20; height: 20
+
+                        NumberAnimation on rotation {
+                            running: weatherIcon.cat === "clear"
+                            loops: Animation.Infinite
+                            from: 0; to: 360; duration: 9000
+                        }
+
+                        Repeater {
+                            model: 8
+                            Item {
+                                required property int index
+                                anchors.centerIn: parent
+                                rotation: index * 45
+
+                                Rectangle {
+                                    x: -1; y: -13
+                                    width: 2; height: 7
+                                    radius: 1
+                                    color: Colors.primary
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: 13; height: 13
+                            radius: 6.5
+                            color: Colors.primary
+                        }
+                    }
+
+                    Item {
+                        id: cloudGroup
+                        visible: weatherIcon.cat !== "clear"
+                        anchors.centerIn: parent
+                        anchors.verticalCenterOffset: bobOffset
+                        width: 26; height: 16
+
+                        property real bobOffset: 0
+                        SequentialAnimation on bobOffset {
+                            running: weatherIcon.cat !== "clear"
+                            loops: Animation.Infinite
+                            NumberAnimation { to: -2; duration: 1300; easing.type: Easing.InOutSine }
+                            NumberAnimation { to: 2; duration: 1300; easing.type: Easing.InOutSine }
+                        }
+
+                        Rectangle { x: 0; y: 6; width: 14; height: 10; radius: 5; color: Colors.textSecondary }
+                        Rectangle { x: 8; y: 0; width: 14; height: 14; radius: 7; color: Colors.textSecondary }
+                        Rectangle { x: 14; y: 6; width: 12; height: 10; radius: 5; color: Colors.textSecondary }
+                    }
+
+                    Item {
+                        id: particleArea
+                        visible: weatherIcon.cat === "rain" || weatherIcon.cat === "snow"
+                        anchors.top: cloudGroup.bottom
+                        anchors.topMargin: -2
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: 22
+                        height: 10
+                        clip: true
+
+                        Repeater {
+                            model: 3
+                            Rectangle {
+                                id: particle
+                                required property int index
+                                width: weatherIcon.cat === "snow" ? 3 : 2
+                                height: weatherIcon.cat === "snow" ? 3 : 6
+                                radius: weatherIcon.cat === "snow" ? 1.5 : 1
+                                color: weatherIcon.cat === "snow" ? "#ffffff" : Colors.primary
+                                x: 2 + particle.index * 7
+                                y: -height
+
+                                SequentialAnimation {
+                                    running: particleArea.visible
+                                    loops: Animation.Infinite
+                                    PauseAnimation { duration: particle.index * 280 }
+                                    NumberAnimation { target: particle; property: "y"; to: particleArea.height; duration: weatherIcon.cat === "snow" ? 1600 : 650; easing.type: Easing.Linear }
+                                    PropertyAction { target: particle; property: "y"; value: -particle.height }
+                                    PauseAnimation { duration: 150 }
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        id: boltIcon
+                        visible: weatherIcon.cat === "thunder"
+                        anchors.top: cloudGroup.bottom
+                        anchors.topMargin: -4
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: ""
+                        color: Colors.primary
+                        font.family: Appearance.fontFamily
+                        font.pixelSize: 14
+
+                        SequentialAnimation {
+                            running: weatherIcon.cat === "thunder"
+                            loops: Animation.Infinite
+                            NumberAnimation { target: boltIcon; property: "opacity"; to: 1.0; duration: 80 }
+                            NumberAnimation { target: boltIcon; property: "opacity"; to: 0.25; duration: 200 }
+                            NumberAnimation { target: boltIcon; property: "opacity"; to: 1.0; duration: 80 }
+                            NumberAnimation { target: boltIcon; property: "opacity"; to: 0.25; duration: 200 }
+                            PauseAnimation { duration: 1800 }
+                        }
+                    }
                 }
 
                 Text {
@@ -270,6 +383,19 @@ PanelWindow {
                         }
                     }
                 }
+            }
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: Colors.outline; opacity: 0.4 }
+
+            ToggleRow {
+                Layout.fillWidth: true
+                icon: ""
+                label: "Keep Awake"
+                checked: IdleInhibit.keepAwake
+                active: UiState.calendarOpen
+                entranceDelay: 0
+                expandable: false
+                onToggleRequested: IdleInhibit.toggle()
             }
         }
     }

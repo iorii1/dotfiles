@@ -8,6 +8,7 @@ Singleton {
 
     property bool powered: false
     property var devices: []
+    readonly property bool refreshing: refreshProc.running
 
     function refresh() {
         if (!refreshProc.running) refreshProc.running = true
