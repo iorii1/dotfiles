@@ -154,9 +154,14 @@ Plus `qs ipc call osd volume|brightness|mic` and
 misbehaves. `qs-lint` runs qmllint over `quickshell/` with this repo's
 structural noise filtered out; CI runs the same script.
 
-For how the shell is put together -- the shared panel type, the persistence
-layer, and the Wayland and QML traps found building it -- see
-[docs/shell-rebuild.md](docs/shell-rebuild.md).
+Two longer documents live in `docs/`:
+
+- [**architecture.md**](docs/architecture.md) -- how the whole thing fits
+  together: which processes exist, the symlink scheme, how a panel becomes a
+  layer surface, the theming pipeline, what happens when you press a key, and
+  recipes for adding a widget, a panel or a service.
+- [**shell-rebuild.md**](docs/shell-rebuild.md) -- why parts of the shell look
+  the way they do, and the Wayland and QML traps found building them.
 
 ---
 
