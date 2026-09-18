@@ -72,6 +72,7 @@ assembled from widgets:
 | `SUPER` + `1-9` | Switch workspace |
 | `SUPER` + `SHIFT` + `1-9` | Move window to workspace |
 | `SUPER` + `Page_Up/Down` | Previous / next workspace |
+| `SUPER` + `SHIFT` + `Page_Up/Down` | Move window to previous / next workspace |
 | `SUPER` + `h/j/k/l` (or arrows) | Move focus |
 | `SUPER` + `SHIFT` + `h/j/k/l` | Swap window |
 | `SUPER` + `CTRL` + `h/j/k/l` | Resize window |
@@ -83,7 +84,9 @@ assembled from widgets:
 | `SUPER` + `SHIFT` + `S` | Screenshot: region (saved) |
 
 Media, volume and brightness keys are bound to the `XF86*` keys and work while
-locked. Two- and three-finger touchpad swipes change focus and workspace.
+locked; `SHIFT` + mute toggles the *microphone*, and `SHIFT` + a brightness key
+jumps straight to full or minimum. Two- and three-finger touchpad swipes change
+focus and workspace.
 
 ### Controlling the shell from the CLI
 
@@ -184,9 +187,11 @@ If theming misbehaves, the script logs to `/tmp/dotfiless-matugen.log`.
 `install.sh` only creates symlinks, so removing them is enough:
 
 ```bash
-rm -f ~/.config/hypr/{hyprland,monitors,keybinds,autostart}.lua \
-      ~/.config/hypr/{hyprlock,hypridle}.conf \
-      ~/.config/kitty/kitty.conf ~/.local/bin/take-screenshot
+rm -f ~/.config/hypr/{hyprland,monitors,keybinds,autostart,colors}.lua \
+      ~/.config/hypr/{hyprlock,hypridle,hyprlock-colors}.conf \
+      ~/.config/kitty/{kitty,colors}.conf \
+      ~/.config/xdg-desktop-portal/hyprland-portals.conf \
+      ~/.local/bin/take-screenshot
 rm -f ~/.config/{quickshell,fastfetch,fish,cava,gtk-3.0,gtk-4.0}
 rm -rf ~/.config/matugen ~/.local/state/quickshell
 ```
