@@ -34,7 +34,6 @@ Item {
         anchors.margins: -4
         onActivated: {
             UiState.bluetoothOpen = !UiState.bluetoothOpen
-            if (UiState.bluetoothOpen) Bluetooth.refresh()
         }
     }
 }

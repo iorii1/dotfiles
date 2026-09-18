@@ -1,71 +1,40 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import Quickshell.Bluetooth as Bluez
 
+// BlueZ over DBus. Power state and per-device connection state are properties
+// that announce themselves, so the 10-second `bluetoothctl` poll -- and the
+// scraping of its human-readable output -- are gone.
 Singleton {
     id: root
 
-    property bool powered: false
-    property var devices: []
-    readonly property bool refreshing: refreshProc.running
+    readonly property var adapter: Bluez.Bluetooth.defaultAdapter
 
-    function refresh() {
-        if (!refreshProc.running) refreshProc.running = true
+    readonly property bool powered: !!adapter && adapter.enabled
+    readonly property bool refreshing: !!adapter && adapter.discovering
+
+    // Live BluetoothDevice objects: the popup lists what you have paired, and
+    // each row binds straight to its device, so a connection made from
+    // anywhere else shows up here without asking.
+    readonly property var devices: {
+        if (!adapter) return []
+        const all = Bluez.Bluetooth.devices.values
+        const paired = []
+        for (let i = 0; i < all.length; i++)
+            if (all[i].paired) paired.push(all[i])
+        return paired
     }
 
     function toggle() {
-        toggleProc.command = ["bash", "-c", "bluetoothctl power " + (root.powered ? "off" : "on")]
-        toggleProc.running = true
+        if (adapter) adapter.enabled = !adapter.enabled
     }
 
-    function connectDevice(mac) {
-        actionProc.command = ["bash", "-c", "bluetoothctl connect " + mac]
-        actionProc.running = true
+    function connectDevice(device) {
+        if (device) device.connect()
     }
 
-    function disconnectDevice(mac) {
-        actionProc.command = ["bash", "-c", "bluetoothctl disconnect " + mac]
-        actionProc.running = true
-    }
-
-    Process {
-        id: refreshProc
-        command: ["bash", "-c", "echo POWERED:$(bluetoothctl show | grep -m1 'Powered:' | awk '{print $2}'); bluetoothctl devices Paired; echo CONNECTED; bluetoothctl devices Connected"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const lines = text.trim().split("\n")
-                let section = "paired"
-                const connectedMacs = {}
-                const list = []
-                for (const line of lines) {
-                    if (line.startsWith("POWERED:")) {
-                        root.powered = line.split(":")[1] === "yes"
-                        continue
-                    }
-                    if (line === "CONNECTED") { section = "connected"; continue }
-                    const m = line.match(/^Device\s+(\S+)\s+(.*)$/)
-                    if (!m) continue
-                    if (section === "connected") {
-                        connectedMacs[m[1]] = true
-                    } else {
-                        list.push({ mac: m[1], name: m[2] })
-                    }
-                }
-                for (const d of list) d.connected = !!connectedMacs[d.mac]
-                root.devices = list
-            }
-        }
-    }
-
-    Process { id: toggleProc; onExited: root.refresh() }
-    Process { id: actionProc; onExited: root.refresh() }
-
-    Timer {
-        interval: 10000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refresh()
+    function disconnectDevice(device) {
+        if (device) device.disconnect()
     }
 }

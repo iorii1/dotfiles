@@ -1,117 +1,109 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import Quickshell.Networking as Net
 
+// NetworkManager over DBus. Status, the visible networks and their signal
+// strength all arrive as property changes, so nothing polls `nmcli` any more.
 Singleton {
     id: root
 
-    property bool wifiEnabled: true
-    property bool connected: false
-    property string ssid: ""
-    property int signalStrength: 0
-    property var networks: []
+    readonly property var device: {
+        const devices = Net.Networking.devices.values
+        for (let i = 0; i < devices.length; i++)
+            if (devices[i].type === Net.DeviceType.Wifi) return devices[i]
+        return null
+    }
+
+    readonly property bool wifiEnabled: Net.Networking.wifiEnabled
+
+    readonly property var active: {
+        if (!device) return null
+        const nets = device.networks.values
+        for (let i = 0; i < nets.length; i++)
+            if (nets[i].connected) return nets[i]
+        return null
+    }
+
+    readonly property bool connected: !!active
+    readonly property string ssid: active ? active.name : ""
+    // NM reports 0-1; the widget's icon thresholds are in percent.
+    readonly property int signalStrength: active ? Math.round(active.signalStrength * 100) : 0
+
+    // Live WifiNetwork objects, strongest first. NM only keeps the full list
+    // populated while its scanner is running, which is why scan()/stopScan()
+    // bracket the popup being open rather than running all the time.
+    readonly property var networks: {
+        if (!device) return []
+        const list = device.networks.values.slice()
+        list.sort((a, b) => b.signalStrength - a.signalStrength)
+        return list
+    }
+
+    function isSecure(network) {
+        return !!network && network.security !== Net.WifiSecurityType.Open
+    }
+
     property bool scanning: false
     property string connectingTo: ""
     property string lastError: ""
-
-    function refreshStatus() {
-        if (!statusProc.running) statusProc.running = true
-    }
+    property var pending: null
 
     function scan() {
-        if (scanProc.running) return
+        if (!device || device.scannerEnabled) return
+        device.scannerEnabled = true
         root.scanning = true
-        scanProc.running = true
+        scanTimer.restart()
+    }
+
+    function stopScan() {
+        if (device) device.scannerEnabled = false
+        root.scanning = false
+        scanTimer.stop()
     }
 
     function toggleWifi() {
-        toggleProc.command = ["bash", "-c", "nmcli radio wifi " + (root.wifiEnabled ? "off" : "on")]
-        toggleProc.running = true
+        Net.Networking.wifiEnabled = !Net.Networking.wifiEnabled
     }
 
-    // argv directly rather than `bash -c` -- an SSID is attacker-controlled
-    // (it is whatever a nearby AP broadcasts), so it must never reach a shell.
-    function connectTo(ssid) {
+    function connectTo(network) {
+        if (!network) return
         root.lastError = ""
-        root.connectingTo = ssid
-        connectProc.command = ["nmcli", "device", "wifi", "connect", ssid]
-        connectProc.running = true
+        root.connectingTo = network.name
+        root.pending = network
+        network.connect()
     }
 
-    Process {
-        id: statusProc
-        command: ["bash", "-c", "nmcli -t -f WIFI radio; nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi 2>/dev/null | grep '^yes'"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const lines = text.trim().split("\n")
-                root.wifiEnabled = lines[0] === "enabled"
-                if (lines.length > 1 && lines[1]) {
-                    const parts = lines[1].split(":")
-                    root.connected = true
-                    root.ssid = parts[1] || ""
-                    root.signalStrength = parseInt(parts[2]) || 0
-                } else {
-                    root.connected = false
-                    root.ssid = ""
-                    root.signalStrength = 0
-                }
-            }
-        }
-    }
-
-    Process {
-        id: scanProc
-        command: ["bash", "-c", "nmcli -t -f SSID,SECURITY,SIGNAL,ACTIVE dev wifi list --rescan yes 2>/dev/null"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const seen = {}
-                const list = []
-                const lines = text.trim().split("\n")
-                for (const line of lines) {
-                    if (!line) continue
-                    const parts = line.split(":")
-                    const ssid = parts[0]
-                    if (!ssid || seen[ssid]) continue
-                    seen[ssid] = true
-                    list.push({
-                        ssid: ssid,
-                        secure: (parts[1] || "") !== "",
-                        signal: parseInt(parts[2]) || 0,
-                        active: parts[3] === "yes"
-                    })
-                }
-                list.sort((a, b) => b.signal - a.signal)
-                root.networks = list
-                root.scanning = false
-                root.refreshStatus()
-            }
-        }
-    }
-
-    Process { id: toggleProc; onExited: root.refreshStatus() }
-
-    Process {
-        id: connectProc
-        stderr: StdioCollector { id: connectErr }
-        onExited: (exitCode) => {
-            if (exitCode !== 0) {
-                // nmcli cannot prompt for a passphrase from here, so an unsaved
-                // secured network lands in this branch rather than connecting.
-                const msg = connectErr.text.trim().replace(/^Error:\s*/, "")
-                root.lastError = msg.length > 0 ? msg : "Could not connect to " + root.connectingTo
-            }
-            root.connectingTo = ""
-            root.refreshStatus()
-            root.scan()
-        }
-    }
-
+    // The scan is a request, not a transaction: NM answers by filling the
+    // network list over the next second or two, so the indicator is given a
+    // deadline rather than a completion.
     Timer {
-        interval: 8000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refreshStatus()
+        id: scanTimer
+        interval: 4000
+        onTriggered: root.scanning = false
+    }
+
+    // NM says *why* a connection failed, which nmcli could only report as a
+    // line of stderr. NoSecrets is the common one here: a secured network the
+    // machine has no saved passphrase for, and this shell has nowhere to type
+    // one yet.
+    Connections {
+        target: root.pending
+
+        function onConnectionFailed(reason) {
+            root.lastError = reason === Net.ConnectionFailReason.NoSecrets
+                ? "\"" + root.connectingTo + "\" needs a password -- connect once with nmcli or nmtui"
+                : "Could not connect to \"" + root.connectingTo + "\" ("
+                    + Net.ConnectionFailReason.toString(reason) + ")"
+            root.connectingTo = ""
+            root.pending = null
+        }
+
+        function onConnectedChanged() {
+            if (root.pending && root.pending.connected) {
+                root.connectingTo = ""
+                root.pending = null
+            }
+        }
     }
 }

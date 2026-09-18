@@ -26,7 +26,6 @@ PanelWindow {
         function close(): void { UiState.bluetoothOpen = false }
     }
 
-    onVisibleChanged: if (visible) Bluetooth.refresh()
 
     MouseArea {
         anchors.fill: parent
@@ -106,7 +105,7 @@ PanelWindow {
                             spacing: Appearance.spacingSmall
 
                             Text {
-                                text: modelData.connected ? "" : ""
+                                text: modelData && modelData.connected ? "" : ""
                                 color: Colors.primary
                                 font.family: Appearance.fontFamilyIcons
                                 font.pixelSize: Appearance.fontSizeSmall
@@ -115,7 +114,7 @@ PanelWindow {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: modelData.name
+                                text: modelData && modelData.name ? modelData.name : ""
                                 color: Colors.textPrimary
                                 font.family: Appearance.fontFamily
                                 font.pixelSize: Appearance.fontSizeSmall
@@ -128,7 +127,7 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: modelData.connected ? Bluetooth.disconnectDevice(modelData.mac) : Bluetooth.connectDevice(modelData.mac)
+                            onClicked: modelData && modelData.connected ? Bluetooth.disconnectDevice(modelData) : Bluetooth.connectDevice(modelData)
                         }
                     }
                 }

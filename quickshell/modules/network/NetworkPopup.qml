@@ -26,7 +26,7 @@ PanelWindow {
         function close(): void { UiState.networkOpen = false }
     }
 
-    onVisibleChanged: if (visible) { Network.refreshStatus(); Network.scan() }
+    onVisibleChanged: visible ? Network.scan() : Network.stopScan()
 
     MouseArea {
         anchors.fill: parent
@@ -106,8 +106,8 @@ PanelWindow {
                             spacing: Appearance.spacingSmall
 
                             Text {
-                                text: modelData.active ? "" : (modelData.secure ? "" : "")
-                                color: modelData.active ? Colors.primary : Colors.textSecondary
+                                text: modelData && modelData.connected ? "" : (Network.isSecure(modelData) ? "" : "")
+                                color: modelData && modelData.connected ? Colors.primary : Colors.textSecondary
                                 font.family: Appearance.fontFamilyIcons
                                 font.pixelSize: Appearance.fontSizeSmall
                                 Layout.preferredWidth: 14
@@ -115,7 +115,7 @@ PanelWindow {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: modelData.ssid
+                                text: modelData && modelData.name ? modelData.name : ""
                                 color: Colors.textPrimary
                                 font.family: Appearance.fontFamily
                                 font.pixelSize: Appearance.fontSizeSmall
@@ -123,7 +123,7 @@ PanelWindow {
                             }
 
                             Text {
-                                visible: Network.connectingTo === netRow.modelData.ssid
+                                visible: Network.connectingTo === (netRow.modelData ? netRow.modelData.name : "")
                                 text: "connecting…"
                                 color: Colors.textSecondary
                                 font.family: Appearance.fontFamily
@@ -136,7 +136,7 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: Network.connectTo(modelData.ssid)
+                            onClicked: Network.connectTo(modelData)
                         }
                     }
                 }
