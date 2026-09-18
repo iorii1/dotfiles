@@ -12,8 +12,8 @@ Item {
     readonly property bool hovered: fx.containsMouse
     readonly property bool badgeVisible: root.count > 0 && !Notifications.dnd
 
-    scale: fx.popScale * (fx.pressed ? 0.88 : (hovered ? 1.08 : 1.0))
-    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+    scale: fx.gestureScale
+    Behavior on scale { Anim { duration: Appearance.animFast } }
 
     Rectangle {
         anchors.fill: parent
@@ -43,7 +43,7 @@ Item {
         anchors.rightMargin: -4
 
         scale: root.badgeVisible ? 1.0 : 0.0
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: 1.8 } }
+        Behavior on scale { PopAnim { easing.overshoot: Appearance.overshootPop } }
 
         Text {
             anchors.centerIn: parent

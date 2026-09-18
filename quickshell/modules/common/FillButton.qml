@@ -42,7 +42,7 @@ Item {
         }
     }
 
-    PopIn { id: entranceAnim; target: root; delay: root.entranceDelay; fromScale: 0.6; scaleDuration: 320; opacityDuration: 240; overshoot: 1.5 }
+    PopIn { id: entranceAnim; target: root; delay: root.entranceDelay; fromScale: 0.6 }
 
     function reset() {
         resetTimer.stop()
@@ -60,8 +60,8 @@ Item {
         color: root.baseColor
         clip: true
 
-        scale: (ma.pressed && !root.isTriggered) ? 0.97 : (root.hovered ? 1.02 : 1.0)
-        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+        scale: (ma.pressed && !root.isTriggered) ? Appearance.pressScaleSubtle : (root.hovered ? Appearance.hoverScaleSubtle : 1.0)
+        Behavior on scale { Anim { duration: Appearance.animFast } }
 
         border.color: root.awaitingConfirm ? root.accentColor : Colors.outline
         border.width: root.awaitingConfirm ? 2 : 1
@@ -75,7 +75,7 @@ Item {
             NumberAnimation on wavePhase {
                 running: root.fillLevel > 0.001 && root.fillLevel < 0.999
                 loops: Animation.Infinite
-                from: 0; to: Math.PI * 2; duration: 700
+                from: 0; to: Math.PI * 2; duration: Appearance.animAmbient
             }
 
             onWavePhaseChanged: requestPaint()
@@ -125,7 +125,7 @@ Item {
             anchors.fill: parent
             color: "#ffffff"
             opacity: root.isTriggered ? 0.45 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+            Behavior on opacity { Anim {} }
         }
 
         RowLayout {
@@ -193,7 +193,8 @@ Item {
             property: "fillLevel"
             to: 0.0
             duration: 500 * root.fillLevel
-            easing.type: Easing.OutQuad
+            easing.type: Easing.Bezier
+            easing.bezierCurve: Appearance.easeStandard
         }
 
         Timer {

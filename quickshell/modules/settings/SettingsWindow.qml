@@ -76,10 +76,10 @@ PanelWindow {
         y: parent.height * 0.12
 
         opacity: UiState.settingsOpen ? 1 : 0
-        scale: UiState.settingsOpen ? 1 : 0.94
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
-        Behavior on height { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+        scale: UiState.settingsOpen ? 1 : Appearance.popupFromScale
+        Behavior on opacity { Anim {} }
+        Behavior on scale { PopAnim {} }
+        Behavior on height { Anim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -112,10 +112,10 @@ PanelWindow {
                     radius: Appearance.radiusSmall
                     color: resetFx.containsMouse ? Colors.surfaceContainerHigh : "transparent"
                     border.width: 1
-                    border.color: Qt.rgba(Colors.outline.r, Colors.outline.g, Colors.outline.b, 0.3)
+                    border.color: Colors.alpha(Colors.outline, 0.3)
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                    scale: resetFx.popScale * (resetFx.pressed ? 0.94 : 1.0)
+                    scale: resetFx.gestureScale
 
                     Text {
                         id: resetLabel
@@ -128,6 +128,8 @@ PanelWindow {
 
                     PressFx {
                         id: resetFx
+                        hoverScale: 1.0
+                        pressScale: Appearance.pressScaleSubtle
                         anchors.fill: parent
                         onActivated: {
                             BarConfig.reset()

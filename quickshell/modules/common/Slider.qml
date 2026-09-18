@@ -17,7 +17,7 @@ Item {
         width: parent.width
         height: 10
         radius: 5
-        color: Colors.surfaceContainerHigh
+        color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
         clip: true
 
         Rectangle {
@@ -27,7 +27,7 @@ Item {
             width: parent.width * Math.max(0, Math.min(1, root.value))
             radius: parent.radius
             color: root.accentColor
-            Behavior on width { enabled: !root.dragging; NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            Behavior on width { enabled: !root.dragging; Anim { duration: Appearance.animFast } }
         }
     }
 
@@ -43,8 +43,8 @@ Item {
         x: Math.max(0, Math.min(root.width - width, root.value * root.width - width / 2))
 
         scale: ma.pressed ? 1.25 : (ma.containsMouse ? 1.1 : 1.0)
-        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutBack; easing.overshoot: 1.6 } }
-        Behavior on x { enabled: !root.dragging; NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+        Behavior on scale { PopAnim { duration: Appearance.animFast; easing.overshoot: Appearance.overshootPop } }
+        Behavior on x { enabled: !root.dragging; Anim { duration: Appearance.animFast } }
     }
 
     MouseArea {

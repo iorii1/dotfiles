@@ -23,7 +23,7 @@ Item {
     implicitHeight: 24
     clip: true
 
-    Behavior on implicitWidth { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+    Behavior on implicitWidth { Anim {} }
 
     Rectangle {
         anchors.fill: parent
@@ -65,10 +65,10 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: width / 2
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
                         border.width: 1
                         border.color: root.playing ? Colors.primary : Colors.outline
-                        Behavior on border.color { ColorAnimation { duration: 400 } }
+                        Behavior on border.color { ColorAnimation { duration: Appearance.animSlow } }
 
                         Image {
                             id: thumbArt
@@ -101,7 +101,7 @@ Item {
                             maskEnabled: true
                             maskSource: thumbMask
                             opacity: (root.active && thumbArt.status === Image.Ready && thumbArt.source !== "") ? 1.0 : 0.0
-                            Behavior on opacity { NumberAnimation { duration: 300 } }
+                            Behavior on opacity { NumberAnimation { duration: Appearance.animNormal } }
                         }
 
                         Rectangle {

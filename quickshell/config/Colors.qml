@@ -20,6 +20,13 @@ Singleton {
     property color error: "#ed8796"
     property color errorText: "#181926"
 
+    // A palette colour at a given alpha. The shell's surfaces sit on a
+    // compositor blur (see Appearance.surfaceOpacity), so most fills are
+    // translucent versions of one of the colours above.
+    function alpha(c, a) {
+        return Qt.rgba(c.r, c.g, c.b, a)
+    }
+
     function apply(json) {
         try {
             const c = JSON.parse(json)

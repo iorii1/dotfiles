@@ -23,7 +23,7 @@ Item {
     signal toggleRequested()
     signal expandRequested()
 
-    Behavior on implicitHeight { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+    Behavior on implicitHeight { Anim {} }
 
     onActiveChanged: {
         if (root.active) {
@@ -51,10 +51,10 @@ Item {
             spacing: Appearance.spacingSmall
 
             opacity: root.entered ? 1 : 0
-            scale: root.entered ? 1 : 0.85
+            scale: root.entered ? 1 : Appearance.popFromScale
             transformOrigin: Item.Left
-            Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
-            Behavior on scale { NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.6 } }
+            Behavior on opacity { Anim { duration: Appearance.animFast } }
+            Behavior on scale { PopAnim { duration: Appearance.animSlow; easing.overshoot: Appearance.overshootPop } }
 
             Item {
                 Layout.preferredWidth: 32
@@ -76,8 +76,8 @@ Item {
                         running: root.pulsing
                         loops: Animation.Infinite
                         ParallelAnimation {
-                            NumberAnimation { target: pulseRing; property: "scale"; from: 1.0; to: 1.8; duration: 1100; easing.type: Easing.OutCubic }
-                            NumberAnimation { target: pulseRing; property: "opacity"; from: 0.6; to: 0.0; duration: 1100; easing.type: Easing.OutCubic }
+                            NumberAnimation { target: pulseRing; property: "scale"; from: 1.0; to: 1.8; duration: Appearance.animPulse; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeDecelerate }
+                            NumberAnimation { target: pulseRing; property: "opacity"; from: 0.6; to: 0.0; duration: Appearance.animPulse; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeDecelerate }
                         }
                         PropertyAction { target: pulseRing; property: "scale"; value: 1.0 }
                         PropertyAction { target: pulseRing; property: "opacity"; value: 0.0 }

@@ -87,3 +87,14 @@ hl.layer_rule({ name = "quickshell-popup-fade", match = { namespace = "^quickshe
 -- The dock's own surface stays mapped so it can keep receiving hover; it
 -- animates itself in QML, so the compositor must not also animate it.
 hl.layer_rule({ name = "quickshell-dock", match = { namespace = "^quickshell-dock$" }, animation = "none" })
+
+-- The shell's surfaces are translucent (see PopupCard and BarConfig.barOpacity),
+-- which only reads as glass if the compositor blurs what is behind them. Blur
+-- is already on globally for windows; these opt the shell's own layers in.
+--
+-- ignore_alpha is not optional here: every one of these layers is a screen-sized
+-- transparent surface with a small card drawn somewhere inside it, so without a
+-- threshold the compositor blurs the entire desktop the moment a popup opens.
+hl.layer_rule({ name = "quickshell-blur",       match = { namespace = "^quickshell$" },       blur = true, ignore_alpha = 0.1 })
+hl.layer_rule({ name = "quickshell-popup-blur", match = { namespace = "^quickshell-popup$" }, blur = true, ignore_alpha = 0.1 })
+hl.layer_rule({ name = "quickshell-dock-blur",  match = { namespace = "^quickshell-dock$" },  blur = true, ignore_alpha = 0.1 })

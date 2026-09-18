@@ -13,8 +13,8 @@ Item {
         ? Colors.error
         : (Battery.charging ? Colors.primary : Colors.textPrimary)
 
-    scale: fx.popScale * (fx.pressed ? 0.9 : (fx.containsMouse ? 1.06 : 1.0))
-    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+    scale: fx.gestureScale
+    Behavior on scale { Anim { duration: Appearance.animFast } }
 
     Rectangle {
         anchors.fill: parent
@@ -57,15 +57,15 @@ Item {
                     color: root.fillColor
                     opacity: 1.0
 
-                    Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
-                    Behavior on color { ColorAnimation { duration: 400 } }
+                    Behavior on width { Anim { duration: Appearance.animSlow } }
+                    Behavior on color { ColorAnimation { duration: Appearance.animSlow } }
 
                     SequentialAnimation on opacity {
                         running: Battery.charging
                         loops: Animation.Infinite
                         onRunningChanged: if (!running) fillBar.opacity = 1.0
-                        NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutSine }
-                        NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutSine }
+                        NumberAnimation { to: 0.35; duration: Appearance.animAmbient; easing.type: Easing.InOutSine }
+                        NumberAnimation { to: 1.0; duration: Appearance.animAmbient; easing.type: Easing.InOutSine }
                     }
                 }
             }

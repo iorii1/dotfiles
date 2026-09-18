@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../config"
 import "../../services"
+import "../common"
 
 Item {
     id: root
@@ -12,7 +13,7 @@ Item {
     visible: opacity > 0
     clip: true
 
-    Behavior on implicitWidth { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+    Behavior on implicitWidth { Anim {} }
     Behavior on opacity { NumberAnimation { duration: Appearance.animNormal } }
 
     Component.onCompleted: Cava.registerConsumer()
@@ -41,8 +42,8 @@ Item {
                     color: Colors.primary
                     opacity: 0.55 + parent.level * 0.45
 
-                    Behavior on height { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
-                    Behavior on opacity { NumberAnimation { duration: 130 } }
+                    Behavior on height { Anim { duration: Appearance.animFast } }
+                    Behavior on opacity { NumberAnimation { duration: Appearance.animFast } }
                 }
             }
         }

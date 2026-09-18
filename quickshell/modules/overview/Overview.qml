@@ -48,9 +48,9 @@ PanelWindow {
         height: grid.implicitHeight
 
         opacity: UiState.overviewOpen ? 1 : 0
-        scale: UiState.overviewOpen ? 1 : 0.92
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
+        scale: UiState.overviewOpen ? 1 : Appearance.popupFromScale
+        Behavior on opacity { Anim {} }
+        Behavior on scale { PopAnim {} }
 
         Grid {
             id: grid
@@ -69,10 +69,10 @@ PanelWindow {
 
                     readonly property bool hovered: tileHoverFx.containsMouse
 
-                    scale: 0.9
+                    scale: Appearance.popFromScale
                     opacity: 0
                     Component.onCompleted: entranceAnim.start()
-                    PopIn { id: entranceAnim; target: tile; delay: Math.min(index * 40, 200) }
+                    PopIn { id: entranceAnim; target: tile; delay: Appearance.staggerDelay(index) }
 
                     MouseArea {
                         id: tileHoverFx
@@ -106,8 +106,8 @@ PanelWindow {
                         SequentialAnimation {
                             running: tile.modelData.focused
                             loops: Animation.Infinite
-                            NumberAnimation { target: focusBorder; property: "glowOpacity"; to: 0.5; duration: 1100; easing.type: Easing.InOutSine }
-                            NumberAnimation { target: focusBorder; property: "glowOpacity"; to: 1.0; duration: 1100; easing.type: Easing.InOutSine }
+                            NumberAnimation { target: focusBorder; property: "glowOpacity"; to: 0.5; duration: Appearance.animPulse; easing.type: Easing.InOutSine }
+                            NumberAnimation { target: focusBorder; property: "glowOpacity"; to: 1.0; duration: Appearance.animPulse; easing.type: Easing.InOutSine }
                         }
                     }
 
@@ -159,7 +159,7 @@ PanelWindow {
                                 scale: 0.7
                                 opacity: 0
                                 Component.onCompleted: winEntranceAnim.start()
-                                PopIn { id: winEntranceAnim; target: winTile; delay: Math.min(winTile.index * 35, 240); fromScale: 0.7; overshoot: 1.8 }
+                                PopIn { id: winEntranceAnim; target: winTile; delay: Appearance.staggerDelay(winTile.index); fromScale: 0.7 }
 
                                 Rectangle {
                                     id: iconBg
@@ -170,8 +170,8 @@ PanelWindow {
                                     color: winFx.containsMouse ? Colors.surfaceContainerHigh : Colors.surfaceContainer
                                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                                    scale: winFx.popScale * (winFx.pressed ? 0.9 : 1.0)
-                                    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                                    scale: winFx.gestureScale
+                                    Behavior on scale { Anim { duration: Appearance.animFast } }
 
                                     Rectangle {
                                         anchors.fill: parent
@@ -192,6 +192,8 @@ PanelWindow {
 
                                     PressFx {
                                         id: winFx
+                                        hoverScale: 1.0
+                                        pressScale: Appearance.pressScaleSubtle
                                         anchors.fill: parent
                                         onActivated: overviewWindow.focusWindow(winTile.modelData.address)
                                     }

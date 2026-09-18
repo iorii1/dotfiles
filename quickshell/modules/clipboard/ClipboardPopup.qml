@@ -41,9 +41,9 @@ PanelWindow {
         y: parent.height * 0.22
 
         opacity: UiState.clipboardOpen ? 1 : 0
-        scale: UiState.clipboardOpen ? 1 : 0.94
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
+        scale: UiState.clipboardOpen ? 1 : Appearance.popupFromScale
+        Behavior on opacity { Anim {} }
+        Behavior on scale { PopAnim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -81,12 +81,12 @@ PanelWindow {
                     clip: true
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                    scale: 0.85
+                    scale: Appearance.popFromScale
                     opacity: 0
                     transformOrigin: Item.Left
 
                     Component.onCompleted: entranceAnim.start()
-                    PopIn { id: entranceAnim; target: row; delay: Math.min(row.index * 18, 220) }
+                    PopIn { id: entranceAnim; target: row; delay: Appearance.staggerDelay(row.index) }
 
                     RowLayout {
                         anchors.fill: parent
@@ -148,8 +148,9 @@ PanelWindow {
                         target: copyFlash
                         property: "opacity"
                         to: 0
-                        duration: 250
-                        easing.type: Easing.OutExpo
+                        duration: Appearance.animNormal
+                        easing.type: Easing.Bezier
+                        easing.bezierCurve: Appearance.easeAccelerate
                     }
 
                     MouseArea {

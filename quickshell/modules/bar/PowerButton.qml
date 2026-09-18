@@ -8,8 +8,8 @@ Item {
     implicitWidth: 22
     implicitHeight: 20
 
-    scale: fx.popScale * (fx.pressed ? 0.85 : (fx.containsMouse ? 1.1 : 1.0))
-    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+    scale: fx.gestureScale
+    Behavior on scale { Anim { duration: Appearance.animFast } }
 
     Rectangle {
         anchors.fill: parent

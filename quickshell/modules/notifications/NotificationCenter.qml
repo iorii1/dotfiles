@@ -41,12 +41,12 @@ PanelWindow {
 
         opacity: UiState.notificationCenterOpen ? 1 : 0
         y: UiState.notificationCenterOpen ? restY : restY - 12
-        scale: UiState.notificationCenterOpen ? 1 : 0.96
+        scale: UiState.notificationCenterOpen ? 1 : Appearance.popupFromScale
         transformOrigin: Item.TopRight
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
-        Behavior on height { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Anim {} }
+        Behavior on y { Anim {} }
+        Behavior on scale { PopAnim {} }
+        Behavior on height { Anim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -87,9 +87,9 @@ PanelWindow {
                     SequentialAnimation {
                         id: ringAnim
                         loops: 2
-                        NumberAnimation { target: bellIcon; property: "rotation"; to: 22; duration: 80; easing.type: Easing.OutQuad }
-                        NumberAnimation { target: bellIcon; property: "rotation"; to: -22; duration: 140; easing.type: Easing.InOutQuad }
-                        NumberAnimation { target: bellIcon; property: "rotation"; to: 0; duration: 80; easing.type: Easing.InQuad }
+                        NumberAnimation { target: bellIcon; property: "rotation"; to: 22; duration: Appearance.animInstant; easing.type: Easing.OutQuad }
+                        NumberAnimation { target: bellIcon; property: "rotation"; to: -22; duration: Appearance.animFast; easing.type: Easing.InOutQuad }
+                        NumberAnimation { target: bellIcon; property: "rotation"; to: 0; duration: Appearance.animInstant; easing.type: Easing.InQuad }
                     }
 
                     Connections {
@@ -118,11 +118,13 @@ PanelWindow {
                     font.pixelSize: Appearance.fontSizeSmall
 
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
-                    scale: clearFx.popScale * (clearFx.pressed ? 0.9 : 1.0)
-                    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                    scale: clearFx.gestureScale
+                    Behavior on scale { Anim { duration: Appearance.animFast } }
 
                     PressFx {
                         id: clearFx
+                        hoverScale: 1.0
+                        pressScale: Appearance.pressScaleSubtle
                         anchors.fill: parent
                         anchors.margins: -6
                         onActivated: Notifications.clearHistory()
@@ -175,10 +177,10 @@ PanelWindow {
                     color: itemFx.containsMouse ? Colors.surfaceContainer : "transparent"
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                    scale: 0.94
+                    scale: Appearance.popFromScale
                     opacity: 0
                     Component.onCompleted: entranceAnim.start()
-                    PopIn { id: entranceAnim; target: row; delay: Math.min(row.index * 15, 180) }
+                    PopIn { id: entranceAnim; target: row; delay: Appearance.staggerDelay(row.index) }
 
                     readonly property color accent: row.modelData.urgency === 2 ? Colors.error : Colors.primary
 
@@ -266,8 +268,8 @@ PanelWindow {
                             font.family: Appearance.fontFamilyIcons
                             font.pixelSize: Appearance.fontSizeSmall
 
-                            scale: dismissFx.popScale * (dismissFx.pressed ? 0.85 : (dismissFx.containsMouse ? 1.15 : 1.0))
-                            Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                            scale: dismissFx.gestureScale
+                            Behavior on scale { Anim { duration: Appearance.animFast } }
 
                             PressFx {
                                 id: dismissFx

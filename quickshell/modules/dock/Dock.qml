@@ -97,7 +97,7 @@ Scope {
                     width: items.implicitWidth + Appearance.spacingNormal * 2
                     height: perScreen.dockHeight
 
-                    Behavior on width { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+                    Behavior on width { Anim {} }
 
                     DockItems {
                         id: items

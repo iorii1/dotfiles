@@ -60,9 +60,9 @@ PanelWindow {
         y: parent.height * 0.28
 
         opacity: launcherWindow.open ? 1 : 0
-        scale: launcherWindow.open ? 1 : 0.94
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
+        scale: launcherWindow.open ? 1 : Appearance.popupFromScale
+        Behavior on opacity { Anim {} }
+        Behavior on scale { PopAnim {} }
 
         MouseArea { anchors.fill: parent }
 

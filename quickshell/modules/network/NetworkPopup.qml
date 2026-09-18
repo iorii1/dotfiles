@@ -43,12 +43,12 @@ PanelWindow {
 
         opacity: UiState.networkOpen ? 1 : 0
         y: UiState.networkOpen ? restY : restY - 12
-        scale: UiState.networkOpen ? 1 : 0.96
+        scale: UiState.networkOpen ? 1 : Appearance.popupFromScale
         transformOrigin: Item.TopRight
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
-        Behavior on height { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Anim {} }
+        Behavior on y { Anim {} }
+        Behavior on scale { PopAnim {} }
+        Behavior on height { Anim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -92,12 +92,12 @@ PanelWindow {
                         color: netFx.containsMouse ? Colors.surfaceContainerHigh : "transparent"
                         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                        scale: 0.85
+                        scale: Appearance.popFromScale
                         opacity: 0.0
                         transformOrigin: Item.Left
 
                         Component.onCompleted: netEntranceAnim.start()
-                        PopIn { id: netEntranceAnim; target: netRow; delay: Math.min(netRow.index * 25, 200); scaleDuration: 220; opacityDuration: 180 }
+                        PopIn { id: netEntranceAnim; target: netRow; delay: Appearance.staggerDelay(netRow.index) }
 
                         RowLayout {
                             anchors.fill: parent

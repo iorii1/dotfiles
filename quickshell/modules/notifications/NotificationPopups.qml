@@ -33,20 +33,20 @@ PanelWindow {
 
         add: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Appearance.animNormal; easing.type: Easing.OutCubic }
-                NumberAnimation { property: "x"; from: width * 0.35; to: 0; duration: Appearance.animNormal; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Appearance.animNormal; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeDecelerate }
+                NumberAnimation { property: "x"; from: width * 0.35; to: 0; duration: Appearance.animNormal; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeDecelerate }
             }
         }
 
         remove: Transition {
             ParallelAnimation {
-                NumberAnimation { property: "opacity"; to: 0; duration: Appearance.animFast; easing.type: Easing.OutCubic }
-                NumberAnimation { property: "x"; to: width * 0.35; duration: Appearance.animFast; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "opacity"; to: 0; duration: Appearance.animFast; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeAccelerate }
+                NumberAnimation { property: "x"; to: width * 0.35; duration: Appearance.animFast; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeAccelerate }
             }
         }
 
         displaced: Transition {
-            NumberAnimation { property: "y"; duration: Appearance.animNormal; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "y"; duration: Appearance.animNormal; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeStandard }
         }
 
         delegate: Item {

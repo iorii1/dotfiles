@@ -34,15 +34,10 @@ RowLayout {
             // binding to fx.popScale, and a property animation on it would tear
             // that binding down permanently the first time it ran.
             opacity: root.shown ? 1 : 0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Appearance.animNormal
-                    easing.type: Easing.OutCubic
-                }
-            }
+            Behavior on opacity { Anim {} }
 
-            scale: fx.popScale * (fx.pressed ? 0.88 : (fx.containsMouse ? 1.08 : 1.0))
-            Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+            scale: fx.gestureScale
+            Behavior on scale { Anim { duration: Appearance.animFast } }
 
             Rectangle {
                 anchors.fill: parent

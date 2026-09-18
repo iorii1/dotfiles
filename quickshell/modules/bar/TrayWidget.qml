@@ -11,7 +11,7 @@ Item {
     implicitHeight: 20
     clip: true
 
-    Behavior on implicitWidth { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+    Behavior on implicitWidth { Anim {} }
 
     Row {
         id: row
@@ -29,10 +29,10 @@ Item {
                 height: 18
 
                 opacity: 0
-                NumberAnimation on opacity { to: 1.0; duration: 260; easing.type: Easing.OutQuad }
+                NumberAnimation on opacity { to: 1.0; duration: Appearance.animNormal; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeDecelerate }
 
-                scale: fx.popScale * (fx.pressed ? 0.85 : (fx.containsMouse ? 1.1 : 1.0))
-                Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                scale: fx.gestureScale
+                Behavior on scale { Anim { duration: Appearance.animFast } }
 
                 IconImage {
                     anchors.fill: parent

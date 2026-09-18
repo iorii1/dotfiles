@@ -17,8 +17,8 @@ Item {
         onTriggered: root.now = new Date()
     }
 
-    scale: fx.popScale * (fx.pressed ? 0.95 : (fx.containsMouse ? 1.05 : 1.0))
-    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+    scale: fx.gestureScale
+    Behavior on scale { Anim { duration: Appearance.animFast } }
 
     Rectangle {
         anchors.fill: parent
@@ -40,6 +40,8 @@ Item {
 
     PressFx {
         id: fx
+        hoverScale: Appearance.hoverScaleSubtle
+        pressScale: Appearance.pressScaleSubtle
         anchors.fill: parent
         anchors.margins: -6
         onActivated: UiState.calendarOpen = !UiState.calendarOpen

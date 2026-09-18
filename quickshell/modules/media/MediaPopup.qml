@@ -76,11 +76,11 @@ PanelWindow {
 
         opacity: UiState.mediaPopupOpen ? 1 : 0
         y: UiState.mediaPopupOpen ? restY : restY - 12
-        scale: UiState.mediaPopupOpen ? 1 : 0.95
+        scale: UiState.mediaPopupOpen ? 1 : Appearance.popupFromScale
         transformOrigin: Item.TopLeft
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
+        Behavior on opacity { Anim {} }
+        Behavior on y { Anim {} }
+        Behavior on scale { PopAnim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -116,10 +116,10 @@ PanelWindow {
                         id: vinylBase
                         anchors.fill: parent
                         radius: width / 2
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
                         border.width: 2
                         border.color: popupWindow.playing ? Colors.primary : Colors.outline
-                        Behavior on border.color { ColorAnimation { duration: 400 } }
+                        Behavior on border.color { ColorAnimation { duration: Appearance.animSlow } }
 
                         Repeater {
                             model: [0.92, 0.82, 0.72, 0.62, 0.52]
@@ -169,15 +169,15 @@ PanelWindow {
                                 maskEnabled: true
                                 maskSource: artMask
                                 opacity: (popupWindow.active && artImg.status === Image.Ready && artImg.source !== "") ? 1.0 : 0.0
-                                Behavior on opacity { NumberAnimation { duration: 400 } }
+                                Behavior on opacity { NumberAnimation { duration: Appearance.animSlow } }
                             }
 
                             Rectangle {
                                 anchors.fill: parent
                                 radius: width / 2
-                                color: Colors.surfaceContainer
+                                color: Colors.alpha(Colors.surfaceContainer, Appearance.layerOpacity)
                                 opacity: (popupWindow.active && artImg.status === Image.Ready && artImg.source !== "") ? 0.0 : 1.0
-                                Behavior on opacity { NumberAnimation { duration: 300 } }
+                                Behavior on opacity { NumberAnimation { duration: Appearance.animNormal } }
 
                                 Text {
                                     anchors.centerIn: parent
@@ -203,7 +203,7 @@ PanelWindow {
                                 width: parent.width * 0.32
                                 height: width
                                 radius: width / 2
-                                color: Colors.surfaceContainerHigh
+                                color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
                             }
                         }
                     }
@@ -339,8 +339,8 @@ PanelWindow {
                         anchors.fill: parent
                         radius: width / 2
                         color: Colors.primary
-                        scale: playFx.popScale * (playFx.pressed ? 0.9 : 1.0)
-                        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                        scale: playFx.gestureScale
+                        Behavior on scale { Anim { duration: Appearance.animFast } }
 
                         Rectangle {
                             anchors.fill: parent
@@ -359,6 +359,7 @@ PanelWindow {
                     }
                     PressFx {
                         id: playFx
+                        hoverScale: 1.0
                         anchors.fill: parent
                         onActivated: if (popupWindow.active && popupWindow.player.canTogglePlaying) popupWindow.player.togglePlaying()
                     }

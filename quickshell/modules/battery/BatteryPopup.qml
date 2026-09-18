@@ -43,12 +43,12 @@ PanelWindow {
 
         opacity: UiState.batteryOpen ? 1 : 0
         y: UiState.batteryOpen ? restY : restY - 12
-        scale: UiState.batteryOpen ? 1 : 0.96
+        scale: UiState.batteryOpen ? 1 : Appearance.popupFromScale
         transformOrigin: Item.TopRight
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
-        Behavior on height { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Anim {} }
+        Behavior on y { Anim {} }
+        Behavior on scale { PopAnim {} }
+        Behavior on height { Anim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -101,7 +101,7 @@ PanelWindow {
                 readonly property color liquidColor: (Battery.percent <= 15 && !Battery.charging) ? Colors.error : Colors.primary
                 property real displayLevel: 0
 
-                Behavior on displayLevel { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+                Behavior on displayLevel { Anim { duration: Appearance.animSlow } }
 
                 NumberAnimation {
                     id: fillInAnim
@@ -110,7 +110,8 @@ PanelWindow {
                     from: 0
                     to: gauge.targetLevel
                     duration: 1200
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.Bezier
+                    easing.bezierCurve: Appearance.easeDecelerate
                 }
 
                 Connections {
@@ -125,7 +126,7 @@ PanelWindow {
                     anchors.bottom: parent.bottom
                     width: parent.width - 10
                     radius: Appearance.radiusSmall
-                    color: Colors.surfaceContainerHigh
+                    color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
                     border.width: 2
                     border.color: Colors.outline
                     clip: true

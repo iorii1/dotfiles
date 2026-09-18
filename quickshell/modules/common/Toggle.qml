@@ -16,8 +16,8 @@ Item {
         color: root.checked ? Colors.primary : Colors.surfaceContainerHigh
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-        scale: fx.popScale * (fx.pressed ? 0.94 : (fx.containsMouse ? 1.05 : 1.0))
-        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+        scale: fx.gestureScale
+        Behavior on scale { Anim { duration: Appearance.animFast } }
 
         Rectangle {
             id: handle
@@ -28,7 +28,7 @@ Item {
             x: root.checked ? parent.width - width - 3 : 3
             color: Colors.background
 
-            Behavior on x { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: 1.3 } }
+            Behavior on x { PopAnim { easing.overshoot: Appearance.overshootPop } }
         }
 
         Rectangle {
@@ -40,6 +40,8 @@ Item {
 
         PressFx {
             id: fx
+            hoverScale: Appearance.hoverScaleSubtle
+            pressScale: Appearance.pressScaleSubtle
             anchors.fill: parent
             onActivated: {
                 root.checked = !root.checked

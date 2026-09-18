@@ -79,11 +79,11 @@ PanelWindow {
 
         opacity: UiState.calendarOpen ? 1 : 0
         y: UiState.calendarOpen ? restY : restY - 12
-        scale: UiState.calendarOpen ? 1 : 0.95
+        scale: UiState.calendarOpen ? 1 : Appearance.popupFromScale
         transformOrigin: Item.Top
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
+        Behavior on opacity { Anim {} }
+        Behavior on y { Anim {} }
+        Behavior on scale { PopAnim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -102,8 +102,8 @@ PanelWindow {
                     id: prevBtn
                     implicitWidth: 28; implicitHeight: 28
 
-                    scale: prevFx.popScale * (prevFx.pressed ? 0.85 : (prevFx.containsMouse ? 1.1 : 1.0))
-                    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                    scale: prevFx.gestureScale
+                    Behavior on scale { Anim { duration: Appearance.animFast } }
 
                     Rectangle {
                         anchors.fill: parent
@@ -148,8 +148,8 @@ PanelWindow {
                     id: nextBtn
                     implicitWidth: 28; implicitHeight: 28
 
-                    scale: nextFx.popScale * (nextFx.pressed ? 0.85 : (nextFx.containsMouse ? 1.1 : 1.0))
-                    Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                    scale: nextFx.gestureScale
+                    Behavior on scale { Anim { duration: Appearance.animFast } }
 
                     Rectangle {
                         anchors.fill: parent
@@ -361,10 +361,10 @@ PanelWindow {
                         PopIn {
                             id: cellEntranceAnim
                             target: dayCell
-                            delay: Math.min((dayCell.index % 7 + Math.floor(dayCell.index / 7)) * 18, 260)
+                            // Diagonal wave: a cell's distance from the top-left
+                            // corner of the grid, not its raw index.
+                            delay: Appearance.staggerDelay(dayCell.index % 7 + Math.floor(dayCell.index / 7))
                             fromScale: 0.4
-                            scaleDuration: 260
-                            overshoot: 1.7
                         }
 
                         Rectangle {

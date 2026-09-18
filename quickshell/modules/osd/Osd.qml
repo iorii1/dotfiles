@@ -85,8 +85,8 @@ PanelWindow {
 
     SequentialAnimation {
         id: popAnim
-        NumberAnimation { target: osdWindow; property: "popScale"; to: 1.05; duration: 140; easing.type: Easing.OutBack; easing.overshoot: 2.2 }
-        NumberAnimation { target: osdWindow; property: "popScale"; to: 1.0; duration: 160; easing.type: Easing.OutQuad }
+        NumberAnimation { target: osdWindow; property: "popScale"; to: 1.05; duration: Appearance.animFast; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootPop }
+        NumberAnimation { target: osdWindow; property: "popScale"; to: 1.0; duration: Appearance.animFast; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeStandard }
     }
 
     PopupCard {
@@ -97,7 +97,7 @@ PanelWindow {
 
         scale: osdWindow.popScale
         opacity: osdWindow.shown ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Anim {} }
 
         RowLayout {
             anchors.fill: parent
@@ -121,7 +121,7 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 10
                 radius: 5
-                color: Colors.surfaceContainerHigh
+                color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
 
                 Rectangle {
                     anchors.left: parent.left
@@ -130,7 +130,7 @@ PanelWindow {
                     radius: parent.radius
                     width: parent.width * (osdWindow.muted ? 0 : osdWindow.level)
                     color: Colors.primary
-                    Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                    Behavior on width { Anim {} }
                 }
             }
         }

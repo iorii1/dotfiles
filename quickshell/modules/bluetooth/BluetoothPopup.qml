@@ -43,12 +43,12 @@ PanelWindow {
 
         opacity: UiState.bluetoothOpen ? 1 : 0
         y: UiState.bluetoothOpen ? restY : restY - 12
-        scale: UiState.bluetoothOpen ? 1 : 0.96
+        scale: UiState.bluetoothOpen ? 1 : Appearance.popupFromScale
         transformOrigin: Item.TopRight
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on y { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
-        Behavior on height { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+        Behavior on opacity { Anim {} }
+        Behavior on y { Anim {} }
+        Behavior on scale { PopAnim {} }
+        Behavior on height { Anim {} }
 
         MouseArea { anchors.fill: parent }
 
@@ -92,12 +92,12 @@ PanelWindow {
                         color: btFx.containsMouse ? Colors.surfaceContainerHigh : "transparent"
                         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-                        scale: 0.85
+                        scale: Appearance.popFromScale
                         opacity: 0.0
                         transformOrigin: Item.Left
 
                         Component.onCompleted: btEntranceAnim.start()
-                        PopIn { id: btEntranceAnim; target: btRow; delay: Math.min(btRow.index * 25, 200); scaleDuration: 220; opacityDuration: 180 }
+                        PopIn { id: btEntranceAnim; target: btRow; delay: Appearance.staggerDelay(btRow.index) }
 
                         RowLayout {
                             anchors.fill: parent

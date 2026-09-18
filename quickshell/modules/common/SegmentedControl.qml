@@ -21,7 +21,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Appearance.radiusNormal
-        color: Colors.surfaceContainerHigh
+        color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
     }
 
     Rectangle {
@@ -33,7 +33,7 @@ Item {
         radius: Appearance.radiusSmall
         color: Colors.primary
 
-        Behavior on x { NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.35 } }
+        Behavior on x { PopAnim { duration: Appearance.animSlow; easing.overshoot: Appearance.overshootPop } }
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
         Rectangle {
@@ -48,8 +48,9 @@ Item {
                 target: flash
                 property: "opacity"
                 to: 0
-                duration: 350
-                easing.type: Easing.OutExpo
+                duration: Appearance.animSlow
+                easing.type: Easing.Bezier
+                easing.bezierCurve: Appearance.easeAccelerate
             }
         }
     }
@@ -74,8 +75,8 @@ Item {
 
                 readonly property bool isCurrent: seg.index === root.currentIndex
 
-                scale: fx.pressed ? 0.94 : 1.0
-                Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                scale: fx.pressed ? Appearance.pressScaleSubtle : 1.0
+                Behavior on scale { Anim { duration: Appearance.animFast } }
 
                 Text {
                     anchors.centerIn: parent

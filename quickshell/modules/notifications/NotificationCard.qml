@@ -25,8 +25,8 @@ Item {
     PopupCard {
         anchors.fill: parent
 
-        scale: root.hovered ? 1.02 : 1.0
-        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+        scale: root.hovered ? Appearance.hoverScaleSubtle : 1.0
+        Behavior on scale { Anim { duration: Appearance.animFast } }
 
         Rectangle {
             width: 4
@@ -47,7 +47,7 @@ Item {
             anchors.margins: 6
             height: 3
             radius: 1.5
-            color: Colors.surfaceContainerHigh
+            color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
             clip: true
 
             property real countdownProgress: 1.0
@@ -108,8 +108,8 @@ Item {
                         font.family: Appearance.fontFamilyIcons
                         font.pixelSize: Appearance.fontSizeSmall
 
-                        scale: closeFx.popScale * (closeFx.pressed ? 0.85 : (closeFx.containsMouse ? 1.15 : 1.0))
-                        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                        scale: closeFx.gestureScale
+                        Behavior on scale { Anim { duration: Appearance.animFast } }
 
                         PressFx {
                             id: closeFx
@@ -163,8 +163,8 @@ Item {
                             color: actionFx.pressed ? Colors.surfaceContainerHigh : (actionFx.containsMouse ? Colors.surfaceContainerHigh : Colors.background)
 
                             Behavior on color { ColorAnimation { duration: Appearance.animFast } }
-                            scale: actionFx.popScale * (actionFx.pressed ? 0.95 : 1.0)
-                            Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+                            scale: actionFx.gestureScale
+                            Behavior on scale { Anim { duration: Appearance.animFast } }
 
                             Rectangle {
                                 anchors.fill: parent
@@ -184,6 +184,8 @@ Item {
 
                             PressFx {
                                 id: actionFx
+                                hoverScale: 1.0
+                                pressScale: Appearance.pressScaleSubtle
                                 anchors.fill: parent
                                 onActivated: root.actionRequested(actionPill.modelData.id)
                             }

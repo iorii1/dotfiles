@@ -45,9 +45,9 @@ PanelWindow {
         height: layout.implicitHeight + Appearance.spacingLarge * 2
 
         opacity: UiState.powerMenuOpen ? 1 : 0
-        scale: UiState.powerMenuOpen ? 1 : 0.9
-        Behavior on opacity { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: Appearance.overshootCard } }
+        scale: UiState.powerMenuOpen ? 1 : Appearance.popupFromScale
+        Behavior on opacity { Anim {} }
+        Behavior on scale { PopAnim {} }
 
         MouseArea { anchors.fill: parent }
 

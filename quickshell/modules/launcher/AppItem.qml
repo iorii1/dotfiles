@@ -13,11 +13,11 @@ Item {
     property bool active: false
     signal activated()
 
-    scale: 0.9
+    scale: Appearance.popFromScale
     opacity: 0.0
 
     Component.onCompleted: entranceAnim.start()
-    PopIn { id: entranceAnim; target: root; delay: Math.min(index * 15, 150); fromScale: 0.9; scaleDuration: 220; opacityDuration: 180; overshoot: 1.3 }
+    PopIn { id: entranceAnim; target: root; delay: Appearance.staggerDelay(index) }
 
     Rectangle {
         id: row
@@ -28,8 +28,8 @@ Item {
         color: root.active ? Colors.surfaceContainerHigh : (fx.containsMouse ? Colors.surfaceContainer : "transparent")
         Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
-        scale: fx.popScale * (fx.pressed ? 0.97 : 1.0)
-        Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutQuint } }
+        scale: fx.gestureScale
+        Behavior on scale { Anim { duration: Appearance.animFast } }
 
         Rectangle {
             anchors.fill: parent
@@ -48,7 +48,7 @@ Item {
             anchors.margins: 6
             scale: root.active ? 1 : 0
             transformOrigin: Item.Center
-            Behavior on scale { NumberAnimation { duration: Appearance.animFast; easing.type: Easing.OutBack; easing.overshoot: 2.2 } }
+            Behavior on scale { PopAnim { duration: Appearance.animFast; easing.overshoot: Appearance.overshootPop } }
         }
 
         RowLayout {
@@ -61,7 +61,7 @@ Item {
                 Layout.preferredWidth: 28
                 Layout.preferredHeight: 28
                 scale: root.active ? 1.12 : 1.0
-                Behavior on scale { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutBack; easing.overshoot: 2.0 } }
+                Behavior on scale { PopAnim { easing.overshoot: Appearance.overshootPop } }
                 source: root.appIcon ? "image://icon/" + root.appIcon : ""
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
@@ -95,6 +95,8 @@ Item {
 
         PressFx {
             id: fx
+            hoverScale: 1.0
+            pressScale: Appearance.pressScaleSubtle
             anchors.fill: parent
             onActivated: root.activated()
         }

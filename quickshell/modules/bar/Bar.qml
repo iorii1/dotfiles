@@ -4,6 +4,7 @@ import Quickshell
 import "../../config"
 import "../../services"
 import "../media"
+import "../common"
 
 Scope {
     Variants {
@@ -33,14 +34,14 @@ Scope {
                 radius: BarConfig.barRadius
                 color: Colors.background
                 border.width: 1
-                border.color: Qt.rgba(Colors.outline.r, Colors.outline.g, Colors.outline.b, 0.22)
+                border.color: Colors.alpha(Colors.outline, 0.22)
                 opacity: entered ? BarConfig.barOpacity : 0
                 y: entered ? 0 : -6
 
                 Behavior on color { ColorAnimation { duration: Appearance.animSlow } }
-                Behavior on opacity { NumberAnimation { duration: Appearance.animSlow; easing.type: Easing.OutCubic } }
-                Behavior on y { NumberAnimation { duration: Appearance.animSlow; easing.type: Easing.OutCubic } }
-                Behavior on radius { NumberAnimation { duration: Appearance.animNormal; easing.type: Easing.OutCubic } }
+                Behavior on opacity { Anim { duration: Appearance.animSlow } }
+                Behavior on y { Anim { duration: Appearance.animSlow } }
+                Behavior on radius { Anim {} }
                 Component.onCompleted: entered = true
 
                 RowLayout {
