@@ -1,12 +1,23 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Wayland
 import "../../config"
 import "../../services"
 import "../common"
 
 Scope {
+    // The same open/close/toggle contract every other panel has, so the dock
+    // can also be brought up without the pointer -- from a keybind or a
+    // script -- and not only by reaching for the bottom of the screen.
+    IpcHandler {
+        target: "dock"
+        function toggle(): void { UiState.dockOpen = !UiState.dockOpen }
+        function open(): void { UiState.dockOpen = true }
+        function close(): void { UiState.dockOpen = false }
+    }
+
     Variants {
         model: Quickshell.screens
 
@@ -18,13 +29,22 @@ Scope {
             readonly property int bottomMargin: Appearance.spacingSmall
             readonly property int zoneWidth: 400
             readonly property bool hasWindows: Hyprland.toplevels.values.length > 0
+            readonly property bool enabled: BarConfig.showTaskbar
 
-            property bool revealed: false
+            // Hover is one input, the IPC pin is the other; nothing shows with
+            // no windows to show, however it was asked for.
+            property bool hovered: false
+            readonly property bool revealed: hasWindows && (hovered || UiState.dockOpen)
 
-            function show() {
-                if (!hasWindows) return
-                hideTimer.stop()
-                revealed = true
+            function reveal() {
+                hovered = true
+                // A safety net rather than the main path: the dock's own
+                // MouseArea stops this the moment the pointer lands on it. If
+                // that never happens -- the pointer clips the edge of the strip
+                // and is gone by the time the dock maps -- there is no leave
+                // event either, and without this the dock would stay up for
+                // good.
+                hideTimer.restart()
             }
 
             // A grace period, so clipping a corner on the way to an icon does
@@ -32,14 +52,19 @@ Scope {
             Timer {
                 id: hideTimer
                 interval: 350
-                onTriggered: perScreen.revealed = false
+                onTriggered: perScreen.hovered = false
             }
 
-            onHasWindowsChanged: if (!hasWindows) revealed = false
+            // Switching the dock off in the settings app, or closing the last
+            // window, unmaps the surface the pointer is sitting on -- and an
+            // unmapped surface delivers no leave. Drop the hover here, or it
+            // survives to re-reveal the dock the moment the dock comes back.
+            onEnabledChanged: if (!enabled) perScreen.hovered = false
+            onHasWindowsChanged: if (!hasWindows) perScreen.hovered = false
 
             // Two windows rather than one whose mask changes. Swapping a
             // surface's input region while the pointer is inside it makes the
-            // compositor re-deliver enter/leave, which flipped `revealed` back
+            // compositor re-deliver enter/leave, which flipped the reveal back
             // and forth and left the dock oscillating. Each window here keeps
             // one fixed input region for its whole life.
 
@@ -47,7 +72,7 @@ Scope {
             // listening while the dock is hidden.
             PanelWindow {
                 screen: perScreen.modelData
-                visible: BarConfig.showTaskbar
+                visible: perScreen.enabled
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell-dock"
                 exclusionMode: ExclusionMode.Ignore
@@ -61,7 +86,7 @@ Scope {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: perScreen.show()
+                    onEntered: perScreen.reveal()
                 }
             }
 
@@ -72,7 +97,7 @@ Scope {
             // onto the trigger.
             PanelWindow {
                 screen: perScreen.modelData
-                visible: BarConfig.showTaskbar && perScreen.revealed
+                visible: perScreen.enabled && perScreen.revealed
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.namespace: "quickshell-dock"
                 exclusionMode: ExclusionMode.Ignore
@@ -86,7 +111,7 @@ Scope {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: perScreen.show()
+                    onEntered: hideTimer.stop()
                     onExited: hideTimer.restart()
                 }
 

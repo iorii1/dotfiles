@@ -12,5 +12,6 @@ Singleton {
     property bool mediaPopupOpen: false
     property bool notificationCenterOpen: false
     property bool overviewOpen: false
+    property bool dockOpen: false
     property bool settingsOpen: false
 }

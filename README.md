@@ -19,10 +19,14 @@
 Everything below is QML in `quickshell/`, written for this setup rather than
 assembled from widgets:
 
-- **Bar** -- workspaces, window taskbar, cava audio visualiser, MPRIS media
-  widget with cover art, clock, notification bell, system tray, battery,
-  Wi-Fi, Bluetooth and a power button. Height, margin, corner radius, opacity
-  and per-widget visibility are all live-editable (`SUPER + ,`).
+- **Bar** -- workspaces, cava audio visualiser, MPRIS media widget with cover
+  art, clock, notification bell, system tray, battery, Wi-Fi, Bluetooth and a
+  power button. Height, margin, corner radius, opacity and per-widget
+  visibility are all live-editable (`SUPER + ,`).
+- **Dock** -- the window list, kept out of the bar. It stays hidden until the
+  pointer reaches the bottom centre of the screen, then slides up; clicking a
+  pill focuses that window, and the focused one carries a dot underneath.
+  `qs ipc call dock toggle` pins it open without the pointer.
 - **Launcher** (`SUPER + SPACE`) -- fuzzy app search.
 - **Overview** (`SUPER + TAB`) -- workspace grid with window icons.
 - **Clipboard history** (`SUPER + V`) -- cliphist-backed, with real image
@@ -91,7 +95,7 @@ qs ipc call <target> toggle     # also: open, close
 ```
 
 Targets: `launcher`, `clipboard`, `notifications`, `overview`, `settings`,
-`network`, `bluetooth`, `battery`, `calendar`, `media`, `power`.
+`network`, `bluetooth`, `battery`, `calendar`, `media`, `power`, `dock`.
 Plus `qs ipc call osd volume|brightness` and `qs ipc call theme reloadColors`.
 
 `qs-log` (a fish function) tails the shell's log -- start there when something
