@@ -1,0 +1,28 @@
+name: qmllint
+
+on:
+  push:
+    paths:
+      - "quickshell/**"
+      - "scripts/.local/bin/qs-lint"
+      - ".github/workflows/qmllint.yml"
+  pull_request:
+    paths:
+      - "quickshell/**"
+      - "scripts/.local/bin/qs-lint"
+      - ".github/workflows/qmllint.yml"
+
+jobs:
+  qmllint:
+    runs-on: ubuntu-latest
+    # Arch, because that is what this config targets and because quickshell's
+    # QML modules have to be present for qmllint to resolve the imports at all.
+    container: archlinux:latest
+    steps:
+      - name: Install toolchain
+        run: |
+          pacman -Syu --noconfirm --needed \
+            qt6-declarative qt6-base quickshell git
+      - uses: actions/checkout@v4
+      - name: Run qmllint
+        run: ./scripts/.local/bin/qs-lint "$PWD/quickshell"

@@ -4,12 +4,12 @@ on:
   push:
     paths:
       - "**.sh"
-      - "scripts/.local/bin/take-screenshot"
+      - "scripts/.local/bin/**"
       - ".github/workflows/shellcheck.yml"
   pull_request:
     paths:
       - "**.sh"
-      - "scripts/.local/bin/take-screenshot"
+      - "scripts/.local/bin/**"
       - ".github/workflows/shellcheck.yml"
 
 jobs:
@@ -18,4 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run shellcheck
-        run: shellcheck install.sh wallpaper-picker/dotfiless_matugen.sh scripts/.local/bin/take-screenshot
+        run: |
+          shellcheck install.sh \
+            wallpaper-picker/dotfiless_matugen.sh \
+            scripts/.local/bin/take-screenshot \
+            scripts/.local/bin/qs-lint
