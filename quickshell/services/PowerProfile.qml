@@ -1,42 +1,29 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import Quickshell.Services.UPower as UPower
 
+// power-profiles-daemon over DBus. Reads are a property, writes are an
+// assignment; the old version ran `powerprofilesctl get` on a 15 second timer
+// and `powerprofilesctl set` as a subprocess.
 Singleton {
     id: root
 
-    property string current: "balanced"
     readonly property var available: ["power-saver", "balanced", "performance"]
 
-    function refresh() {
-        if (!getProc.running) getProc.running = true
-    }
-
-    function set(profile) {
-        root.current = profile
-        setProc.command = ["powerprofilesctl", "set", profile]
-        setProc.running = true
-    }
-
-    Process {
-        id: getProc
-        command: ["powerprofilesctl", "get"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const p = text.trim()
-                if (p) root.current = p
-            }
+    readonly property string current: {
+        switch (UPower.PowerProfiles.profile) {
+        case UPower.PowerProfile.PowerSaver: return "power-saver"
+        case UPower.PowerProfile.Performance: return "performance"
+        default: return "balanced"
         }
     }
 
-    Process { id: setProc }
-
-    Timer {
-        interval: 15000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refresh()
+    function set(profile) {
+        switch (profile) {
+        case "power-saver": UPower.PowerProfiles.profile = UPower.PowerProfile.PowerSaver; break
+        case "performance": UPower.PowerProfiles.profile = UPower.PowerProfile.Performance; break
+        default: UPower.PowerProfiles.profile = UPower.PowerProfile.Balanced
+        }
     }
 }

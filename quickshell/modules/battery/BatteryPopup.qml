@@ -26,7 +26,6 @@ PanelWindow {
         function close(): void { UiState.batteryOpen = false }
     }
 
-    onVisibleChanged: if (visible) Battery.refresh()
 
     MouseArea {
         anchors.fill: parent
