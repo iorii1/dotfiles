@@ -35,9 +35,9 @@ PanelWindow {
 
     IpcHandler {
         target: "media"
-        function toggle(): void { UiState.mediaPopupOpen = !UiState.mediaPopupOpen }
-        function open(): void { UiState.mediaPopupOpen = true }
-        function close(): void { UiState.mediaPopupOpen = false }
+        function toggle(): void { UiState.toggle("mediaPopup") }
+        function open(): void { UiState.show("mediaPopup") }
+        function close(): void { UiState.hide("mediaPopup") }
     }
 
     onVisibleChanged: if (visible && player) displayPosition = player.position
@@ -63,7 +63,7 @@ PanelWindow {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: UiState.mediaPopupOpen = false
+        onClicked: UiState.hide("mediaPopup")
     }
 
     PopupCard {

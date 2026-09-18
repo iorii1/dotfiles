@@ -41,7 +41,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         onActivated: {
-            UiState.networkOpen = !UiState.networkOpen
+            UiState.toggle("network")
             if (UiState.networkOpen) Network.scan()
         }
     }

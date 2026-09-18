@@ -7,27 +7,29 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: launcherWindow
 
-    property bool open: false
+    name: "launcher"
+
     property string query: ""
     property var results: Apps.filtered(query)
 
-    visible: open
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
-    color: "transparent"
-
-    anchors { top: true; bottom: true; left: true; right: true }
+    // The selection is *not* a binding on currentIndex.
+    //
+    // It used to be `currentIndex: 0` on the ListView, which the first
+    // incrementCurrentIndex() from an arrow key destroyed for good -- and
+    // nothing reset it as the query changed. So after one arrow press the
+    // highlight stopped tracking what you were typing, the list re-filtered
+    // underneath a stale index, and Return launched whatever had drifted into
+    // that row. Resetting it explicitly on every query change is the fix.
+    onQueryChanged: resultsList.currentIndex = 0
 
     IpcHandler {
         target: "launcher"
-        function toggle(): void { launcherWindow.open = !launcherWindow.open }
-        function open(): void { launcherWindow.open = true }
-        function close(): void { launcherWindow.open = false }
+        function toggle(): void { UiState.toggle("launcher") }
+        function open(): void { UiState.show("launcher") }
+        function close(): void { UiState.hide("launcher") }
     }
 
     onOpenChanged: {
@@ -40,16 +42,19 @@ PanelWindow {
 
     function _launch(item) {
         Apps.launch(item)
-        open = false
+        UiState.hide("launcher")
     }
 
     function _launchCurrent() {
-        if (results.length > 0) _launch(results[resultsList.currentIndex])
+        const i = resultsList.currentIndex
+        if (i >= 0 && i < results.length) _launch(results[i])
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: launcherWindow.open = false
+    // Wraps, so Up from the top lands on the last result rather than sticking.
+    function _step(delta) {
+        const n = launcherWindow.results.length
+        if (n === 0) return
+        resultsList.currentIndex = ((resultsList.currentIndex + delta) % n + n) % n
     }
 
     PopupCard {
@@ -93,10 +98,25 @@ PanelWindow {
                     text: launcherWindow.query
                     onTextChanged: launcherWindow.query = text
 
-                    Keys.onDownPressed: resultsList.incrementCurrentIndex()
-                    Keys.onUpPressed: resultsList.decrementCurrentIndex()
+                    Keys.onDownPressed: launcherWindow._step(1)
+                    Keys.onUpPressed: launcherWindow._step(-1)
                     Keys.onReturnPressed: launcherWindow._launchCurrent()
-                    Keys.onEscapePressed: launcherWindow.open = false
+                    Keys.onEnterPressed: launcherWindow._launchCurrent()
+                    Keys.onEscapePressed: UiState.hide("launcher")
+                    Keys.onTabPressed: launcherWindow._step(1)
+                    Keys.onBacktabPressed: launcherWindow._step(-1)
+                    Keys.onPressed: (event) => {
+                        const n = launcherWindow.results.length
+                        if (n === 0) return
+                        switch (event.key) {
+                        case Qt.Key_Home:     resultsList.currentIndex = 0; break
+                        case Qt.Key_End:      resultsList.currentIndex = n - 1; break
+                        case Qt.Key_PageDown: launcherWindow._step(5); break
+                        case Qt.Key_PageUp:   launcherWindow._step(-5); break
+                        default: return
+                        }
+                        event.accepted = true
+                    }
                 }
             }
 
@@ -135,7 +155,6 @@ PanelWindow {
                 visible: launcherWindow.results.length > 0
                 model: launcherWindow.results
                 spacing: 2
-                currentIndex: 0
                 highlightMoveDuration: Appearance.animFast
 
                 delegate: AppItem {

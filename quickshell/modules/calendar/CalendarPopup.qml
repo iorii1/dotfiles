@@ -29,9 +29,9 @@ PanelWindow {
 
     IpcHandler {
         target: "calendar"
-        function toggle(): void { UiState.calendarOpen = !UiState.calendarOpen }
-        function open(): void { UiState.calendarOpen = true }
-        function close(): void { UiState.calendarOpen = false }
+        function toggle(): void { UiState.toggle("calendar") }
+        function open(): void { UiState.show("calendar") }
+        function close(): void { UiState.hide("calendar") }
     }
 
     onViewDateChanged: gridCells = buildGrid()
@@ -67,7 +67,7 @@ PanelWindow {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: UiState.calendarOpen = false
+        onClicked: UiState.hide("calendar")
     }
 
     PopupCard {
@@ -386,19 +386,6 @@ PanelWindow {
                         }
                     }
                 }
-            }
-
-            Rectangle { Layout.fillWidth: true; height: 1; color: Colors.outline; opacity: 0.4 }
-
-            ToggleRow {
-                Layout.fillWidth: true
-                icon: ""
-                label: "Keep Awake"
-                checked: IdleInhibit.keepAwake
-                active: UiState.calendarOpen
-                entranceDelay: 0
-                expandable: false
-                onToggleRequested: IdleInhibit.toggle()
             }
         }
     }

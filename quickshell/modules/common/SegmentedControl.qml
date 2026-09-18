@@ -18,10 +18,44 @@ Item {
         return 0
     }
 
+    // One tab stop for the whole control, with Left/Right moving between the
+    // segments inside it -- tabbing through every segment individually would
+    // make a three-option control cost three tab presses to get past.
+    activeFocusOnTab: root.segCount > 0
+
+    function _step(delta) {
+        if (root.segCount === 0) return
+        const next = Math.max(0, Math.min(root.segCount - 1, root.currentIndex + delta))
+        if (next !== root.currentIndex) root.selected(root.options[next].value)
+    }
+
+    Keys.onPressed: (event) => {
+        switch (event.key) {
+        case Qt.Key_Left:  root._step(-1); break
+        case Qt.Key_Right: root._step(1); break
+        case Qt.Key_Home:  if (root.segCount > 0) root.selected(root.options[0].value); break
+        case Qt.Key_End:   if (root.segCount > 0) root.selected(root.options[root.segCount - 1].value); break
+        default: return
+        }
+        event.accepted = true
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: Appearance.radiusNormal
         color: Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: Appearance.radiusNormal
+        color: "transparent"
+        border.width: 2
+        border.color: Colors.primary
+        opacity: root.activeFocus ? 1 : 0
+        visible: opacity > 0
+        z: 1
+        Behavior on opacity { Anim { duration: Appearance.animFast } }
     }
 
     Rectangle {

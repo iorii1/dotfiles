@@ -12,8 +12,26 @@ RowLayout {
     // Driven by the dock's reveal state so items can fade in staggered.
     property bool shown: true
 
+    // The output this dock belongs to. The list used to be every toplevel on
+    // the machine, so on a dual-head setup the dock on one monitor listed -- and
+    // revealed itself for -- windows living on the other.
+    property string screenName: ""
+
+    readonly property var windows: {
+        const all = Hyprland.toplevels.values
+        if (!root.screenName) return all
+        const out = []
+        for (let i = 0; i < all.length; i++) {
+            const mon = all[i].monitor
+            // A toplevel Hyprland has not placed yet reports no monitor; show
+            // it rather than dropping it off every dock.
+            if (!mon || mon.name === root.screenName) out.push(all[i])
+        }
+        return out
+    }
+
     Repeater {
-        model: Hyprland.toplevels
+        model: root.windows
 
         Rectangle {
             id: pill

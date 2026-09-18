@@ -9,9 +9,17 @@ PanelWindow {
 
     visible: Notifications.active.count > 0
     WlrLayershell.layer: WlrLayer.Overlay
+    // This was the only overlay without a namespace, so it fell under the
+    // ^quickshell$ layer rule meant for the bar and got the bar's slide
+    // animation instead of the popup fade.
+    WlrLayershell.namespace: "quickshell-popup"
     exclusionMode: ExclusionMode.Ignore
     focusable: false
     color: "transparent"
+
+    // Toasts had no screen at all, so on a dual-head setup they appeared on
+    // whichever output the compositor picked.
+    screen: FocusedScreen.screen
 
     anchors { top: true; right: true; bottom: true }
     margins { top: BarConfig.barHeight + BarConfig.barMargin + Appearance.spacingNormal; right: Appearance.spacingNormal }
@@ -61,7 +69,9 @@ PanelWindow {
             Timer {
                 interval: delegateRoot.effectiveTimeout
                 running: delegateRoot.effectiveTimeout > 0 && !card.hovered
-                onTriggered: Notifications.dismiss(model.uid)
+                // Timed out rather than closed: keep the notification alive so
+                // its actions still work from the notification centre.
+                onTriggered: Notifications.expire(model.uid)
             }
 
             NotificationCard {

@@ -7,29 +7,21 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: btWindow
 
-    visible: UiState.bluetoothOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    exclusionMode: ExclusionMode.Ignore
-    focusable: false
-    color: "transparent"
+    name: "bluetooth"
 
-    anchors { top: true; bottom: true; left: true; right: true }
+    // Discovery is bracketed by the popup being open, like the wifi scan: BlueZ
+    // only populates unpaired devices while it is running, and leaving the radio
+    // scanning in the background costs power for nothing.
+    onOpenChanged: open ? Bluetooth.startScan() : Bluetooth.stopScan()
 
     IpcHandler {
         target: "bluetooth"
-        function toggle(): void { UiState.bluetoothOpen = !UiState.bluetoothOpen }
-        function open(): void { UiState.bluetoothOpen = true }
-        function close(): void { UiState.bluetoothOpen = false }
-    }
-
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.bluetoothOpen = false
+        function toggle(): void { UiState.toggle("bluetooth") }
+        function open(): void { UiState.show("bluetooth") }
+        function close(): void { UiState.hide("bluetooth") }
     }
 
     PopupCard {
@@ -81,55 +73,57 @@ PanelWindow {
                 Repeater {
                     model: Bluetooth.devices
 
-                    Rectangle {
-                        id: btRow
+                    BtDeviceRow {
+                        id: pairedRow
                         required property var modelData
                         required property int index
                         width: parent ? parent.width : 0
-                        height: 34
-                        radius: Appearance.radiusSmall
-                        color: btFx.containsMouse ? Colors.surfaceContainerHigh : "transparent"
-                        Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+                        device: modelData
 
                         scale: Appearance.popFromScale
                         opacity: 0.0
                         transformOrigin: Item.Left
-
-                        Component.onCompleted: btEntranceAnim.start()
-                        PopIn { id: btEntranceAnim; target: btRow; delay: Appearance.staggerDelay(btRow.index) }
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: Appearance.spacingSmall
-                            anchors.rightMargin: Appearance.spacingSmall
-                            spacing: Appearance.spacingSmall
-
-                            Text {
-                                text: modelData && modelData.connected ? "" : ""
-                                color: Colors.primary
-                                font.family: Appearance.fontFamilyIcons
-                                font.pixelSize: Appearance.fontSizeSmall
-                                Layout.preferredWidth: 14
-                            }
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: modelData && modelData.name ? modelData.name : ""
-                                color: Colors.textPrimary
-                                font.family: Appearance.fontFamily
-                                font.pixelSize: Appearance.fontSizeSmall
-                                elide: Text.ElideRight
-                            }
-                        }
-
-                        MouseArea {
-                            id: btFx
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: modelData && modelData.connected ? Bluetooth.disconnectDevice(modelData) : Bluetooth.connectDevice(modelData)
-                        }
+                        Component.onCompleted: pairedEntrance.start()
+                        PopIn { id: pairedEntrance; target: pairedRow; delay: Appearance.staggerDelay(pairedRow.index) }
                     }
+                }
+
+                Item { width: 1; height: Appearance.spacingSmall; visible: Bluetooth.discovered.length > 0 }
+
+                RowLayout {
+                    width: parent.width
+                    visible: Bluetooth.powered
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: Bluetooth.discovering ? "Scanning…" : "Nearby"
+                        color: Colors.textSecondary
+                        font.family: Appearance.fontFamily
+                        font.pixelSize: Appearance.fontSizeSmall
+                    }
+                }
+
+                Repeater {
+                    model: Bluetooth.discovered
+
+                    BtDeviceRow {
+                        required property var modelData
+                        required property int index
+                        width: parent ? parent.width : 0
+                        device: modelData
+                        discovered: true
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    visible: Bluetooth.discovering && Bluetooth.discovered.length === 0
+                    text: "No new devices yet — put the device in pairing mode."
+                    color: Colors.textSecondary
+                    opacity: 0.7
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    wrapMode: Text.WordWrap
                 }
             }
         }

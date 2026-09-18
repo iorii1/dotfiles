@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Hold an idle inhibit for as long as this process runs.
+
+The shell's "Keep awake" toggle used to work by `pkill -x hypridle` and
+respawning it later, polled every 20 seconds to find out which state it was
+actually in. That kills the user's idle daemon outright -- losing any state it
+held -- and races anything else that starts or stops it.
+
+This instead takes the inhibit hypridle already advertises. hypridle owns
+org.freedesktop.ScreenSaver, the same interface video players use to stop the
+screen blanking, and that interface is reference counted: taking one inhibit
+does not disturb anyone else's, and dropping ours does not wake the machine if
+something else still holds one.
+
+The inhibit lives as long as the D-Bus connection, which is why this has to be
+a process that stays running rather than a one-shot `gdbus call` -- that would
+release the moment it exited.
+
+A logind inhibit is taken alongside it, because hypridle's ScreenSaver inhibit
+covers its own idle timers but not `systemctl suspend` from elsewhere.
+
+Run it, and kill it to release.
+"""
+
+import signal
+import subprocess
+import sys
+
+import dbus
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
+
+APP = "quickshell"
+REASON = "Keep awake enabled in the shell"
+
+
+def main() -> int:
+    DBusGMainLoop(set_as_default=True)
+
+    try:
+        bus = dbus.SessionBus()
+        saver = bus.get_object("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver")
+        cookie = saver.Inhibit(APP, REASON, dbus_interface="org.freedesktop.ScreenSaver")
+    except dbus.DBusException as exc:
+        # No screensaver service is not fatal: the logind inhibit below still
+        # stops the machine suspending, which is most of the point.
+        print(f"qs-keep-awake: no screensaver inhibit ({exc})", file=sys.stderr)
+        saver, cookie = None, None
+
+    # systemd-inhibit holds its inhibit for the lifetime of the child it runs,
+    # so it is given one that simply waits.
+    logind = subprocess.Popen(
+        [
+            "systemd-inhibit",
+            "--what=idle:sleep",
+            f"--who={APP}",
+            f"--why={REASON}",
+            "--mode=block",
+            "sleep",
+            "infinity",
+        ]
+    )
+
+    loop = GLib.MainLoop()
+
+    def release(*_):
+        if saver is not None and cookie is not None:
+            try:
+                saver.UnInhibit(cookie, dbus_interface="org.freedesktop.ScreenSaver")
+            except dbus.DBusException:
+                pass
+        logind.terminate()
+        loop.quit()
+
+    # GLib.unix_signal_add moved to GLibUnix in newer pygobject and warns on
+    # the old spelling; both are accepted here so this works either side of it.
+    try:
+        from gi.repository import GLibUnix
+
+        add_signal = GLibUnix.signal_add
+    except ImportError:
+        add_signal = GLib.unix_signal_add
+
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        add_signal(GLib.PRIORITY_HIGH, sig, release)
+
+    loop.run()
+    logind.wait(timeout=5)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

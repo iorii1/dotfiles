@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# qmllint over the shell, with this repo's structural noise filtered out.
+#
+# Most of this repo is QML and none of it was linted: the only workflow was
+# shellcheck, and its path filter meant it never even ran on a QML change.
+#
+# The suppressions below are all cases where qmllint is reporting how Quickshell
+# works rather than a defect:
+#
+#   unqualified            IDs from an outer component inside a Repeater
+#                          delegate -- used throughout, and deliberate
+#   missing-property       singletons are registered by Quickshell from a plain
+#   import (qmldir)        directory import, so there is no qmldir for qmllint
+#                          to read their members from
+#   uncreatable-type       PanelWindow and friends are constructed by Quickshell
+#   signal-handler-params  QProcess::ExitStatus is not exposed to qmllint
+#   unresolved-type        Quickshell's C++ types referenced from QML
+#   incompatible-type      `Connections { target: <a singleton> }` -- same root
+#                          cause as missing-property above
+#   layout-positioning     the `height: 1` divider Rectangles, which are fine
+#
+# A qmldir in config/ and services/ would fix the singleton ones properly, and
+# was tried: it works, but a qmldir *replaces* directory scanning, so the first
+# .qml added without a matching line takes the whole shell down with a cascade
+# of "Type X unavailable". Not worth it for two warnings.
+#
+# Everything else is a real finding and fails the run.
+set -uo pipefail
+
+QMLLINT="${QMLLINT:-/usr/lib/qt6/bin/qmllint}"
+command -v "$QMLLINT" >/dev/null 2>&1 || QMLLINT="qmllint"
+
+ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/quickshell}"
+
+if [ ! -d "$ROOT" ]; then
+    echo "qs-lint: no such directory: $ROOT" >&2
+    exit 2
+fi
+
+cd "$ROOT" || exit 2
+
+mapfile -t targets < <(find . -name '*.qml' | sort)
+if [ ${#targets[@]} -eq 0 ]; then
+    echo "qs-lint: no .qml files under $ROOT" >&2
+    exit 2
+fi
+
+out="$(
+    "$QMLLINT" -I /usr/lib/qt6/qml -I . \
+        --unqualified disable \
+        --missing-property disable \
+        --uncreatable-type disable \
+        --signal-handler-parameters disable \
+        --unresolved-type disable \
+        --incompatible-type disable \
+        "${targets[@]}" 2>&1 \
+    | grep -E '^(Warning|Error):' \
+    | grep -vE 'not declared as singleton in qmldir' \
+    | grep -vE 'Type warnings occurred while evaluating file' \
+    | grep -vE 'Quick\.layout-positioning'
+)"
+
+if [ -n "$out" ]; then
+    echo "$out"
+    echo
+    echo "qs-lint: $(printf '%s\n' "$out" | wc -l) finding(s) in ${#targets[@]} file(s)"
+    exit 1
+fi
+
+echo "qs-lint: clean (${#targets[@]} files)"

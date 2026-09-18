@@ -17,6 +17,15 @@ Singleton {
     property int barRadius: Appearance.radiusLarge
     property real barOpacity: 0.88
 
+    // Whole-shell knobs that live on Appearance. They are mirrored here so
+    // they persist and so the settings app can drive them the same way it
+    // drives everything else; the bindings below push them back.
+    property real animScale: 1.0
+    property real roundingScale: 1.0
+
+    onAnimScaleChanged: Appearance.animScale = root.animScale
+    onRoundingScaleChanged: Appearance.roundingScale = root.roundingScale
+
     property bool showWorkspaces: true
     property bool showTaskbar: true
     property bool showCava: true
@@ -24,6 +33,8 @@ Singleton {
     property bool showNotifications: true
     property bool showClock: true
     property bool showTray: true
+    property bool showVolume: true
+    property bool showQuickSettings: true
     property bool showBattery: true
     property bool showWifi: true
     property bool showBluetooth: true
@@ -34,6 +45,8 @@ Singleton {
         barMargin: Appearance.barMargin,
         barRadius: Appearance.radiusLarge,
         barOpacity: 0.88,
+        animScale: 1.0,
+        roundingScale: 1.0,
         showWorkspaces: true,
         showTaskbar: true,
         showCava: true,
@@ -41,6 +54,8 @@ Singleton {
         showNotifications: true,
         showClock: true,
         showTray: true,
+        showVolume: true,
+        showQuickSettings: true,
         showBattery: true,
         showWifi: true,
         showBluetooth: true,
@@ -61,6 +76,8 @@ Singleton {
         if (typeof c.barMargin === "number") root.barMargin = c.barMargin
         if (typeof c.barRadius === "number") root.barRadius = c.barRadius
         if (typeof c.barOpacity === "number") root.barOpacity = c.barOpacity
+        if (typeof c.animScale === "number") root.animScale = c.animScale
+        if (typeof c.roundingScale === "number") root.roundingScale = c.roundingScale
         if (typeof c.showWorkspaces === "boolean") root.showWorkspaces = c.showWorkspaces
         if (typeof c.showTaskbar === "boolean") root.showTaskbar = c.showTaskbar
         if (typeof c.showCava === "boolean") root.showCava = c.showCava
@@ -68,6 +85,8 @@ Singleton {
         if (typeof c.showNotifications === "boolean") root.showNotifications = c.showNotifications
         if (typeof c.showClock === "boolean") root.showClock = c.showClock
         if (typeof c.showTray === "boolean") root.showTray = c.showTray
+        if (typeof c.showVolume === "boolean") root.showVolume = c.showVolume
+        if (typeof c.showQuickSettings === "boolean") root.showQuickSettings = c.showQuickSettings
         if (typeof c.showBattery === "boolean") root.showBattery = c.showBattery
         if (typeof c.showWifi === "boolean") root.showWifi = c.showWifi
         if (typeof c.showBluetooth === "boolean") root.showBluetooth = c.showBluetooth
@@ -80,6 +99,8 @@ Singleton {
             barMargin: root.barMargin,
             barRadius: root.barRadius,
             barOpacity: root.barOpacity,
+            animScale: root.animScale,
+            roundingScale: root.roundingScale,
             showWorkspaces: root.showWorkspaces,
             showTaskbar: root.showTaskbar,
             showCava: root.showCava,
@@ -87,6 +108,8 @@ Singleton {
             showNotifications: root.showNotifications,
             showClock: root.showClock,
             showTray: root.showTray,
+            showVolume: root.showVolume,
+            showQuickSettings: root.showQuickSettings,
             showBattery: root.showBattery,
             showWifi: root.showWifi,
             showBluetooth: root.showBluetooth,

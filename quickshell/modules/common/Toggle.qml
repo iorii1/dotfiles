@@ -43,6 +43,7 @@ Item {
             hoverScale: Appearance.hoverScaleSubtle
             pressScale: Appearance.pressScaleSubtle
             anchors.fill: parent
+            focusRadius: track.radius
             onActivated: {
                 root.checked = !root.checked
                 root.toggled(root.checked)

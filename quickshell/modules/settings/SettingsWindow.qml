@@ -23,7 +23,9 @@ PanelWindow {
         { key: "barHeight", label: "Height", min: 24, max: 56, step: 1, suffix: "px" },
         { key: "barMargin", label: "Side margin", min: 0, max: 24, step: 1, suffix: "px" },
         { key: "barRadius", label: "Corner radius", min: 0, max: 28, step: 1, suffix: "px" },
-        { key: "barOpacity", label: "Opacity", min: 0.3, max: 1.0, step: 0.01, suffix: "%" }
+        { key: "barOpacity", label: "Opacity", min: 0.3, max: 1.0, step: 0.01, suffix: "%" },
+        { key: "animScale", label: "Animation speed", min: 0.0, max: 2.0, step: 0.05, suffix: "x" },
+        { key: "roundingScale", label: "Roundness", min: 0.0, max: 2.0, step: 0.05, suffix: "x" }
     ]
 
     readonly property var widgets: [
@@ -34,6 +36,8 @@ PanelWindow {
         { key: "showNotifications", label: "Notification bell", icon: "" },
         { key: "showClock", label: "Clock", icon: "" },
         { key: "showTray", label: "System tray", icon: "" },
+        { key: "showVolume", label: "Volume", icon: "" },
+        { key: "showQuickSettings", label: "Quick settings", icon: "" },
         { key: "showBattery", label: "Battery", icon: "" },
         { key: "showWifi", label: "Wi-Fi", icon: "" },
         { key: "showBluetooth", label: "Bluetooth", icon: "" },
@@ -42,9 +46,9 @@ PanelWindow {
 
     IpcHandler {
         target: "settings"
-        function toggle(): void { UiState.settingsOpen = !UiState.settingsOpen }
-        function open(): void { UiState.settingsOpen = true }
-        function close(): void { UiState.settingsOpen = false }
+        function toggle(): void { UiState.toggle("settings") }
+        function open(): void { UiState.show("settings") }
+        function close(): void { UiState.hide("settings") }
     }
 
     // Slider and Toggle both write their own value imperatively on interaction,
@@ -65,7 +69,7 @@ PanelWindow {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: UiState.settingsOpen = false
+        onClicked: UiState.hide("settings")
     }
 
     PopupCard {
@@ -83,7 +87,7 @@ PanelWindow {
 
         MouseArea { anchors.fill: parent }
 
-        Keys.onEscapePressed: UiState.settingsOpen = false
+        Keys.onEscapePressed: UiState.hide("settings")
         focus: UiState.settingsOpen
 
         ColumnLayout {
@@ -191,9 +195,12 @@ PanelWindow {
                     Text {
                         Layout.preferredWidth: 46
                         horizontalAlignment: Text.AlignRight
-                        text: sliderRow.modelData.suffix === "%"
-                            ? Math.round(sliderRow.current * 100) + "%"
-                            : sliderRow.current + "px"
+                        text: {
+                            const v = sliderRow.current
+                            if (sliderRow.modelData.suffix === "%") return Math.round(v * 100) + "%"
+                            if (sliderRow.modelData.suffix === "x") return v.toFixed(2) + "x"
+                            return v + "px"
+                        }
                         color: Colors.textSecondary
                         font.family: Appearance.fontFamilyMono
                         font.pixelSize: Appearance.fontSizeSmall

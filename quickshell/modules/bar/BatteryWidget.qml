@@ -93,6 +93,6 @@ Item {
         id: fx
         anchors.fill: parent
         anchors.margins: -4
-        onActivated: UiState.batteryOpen = !UiState.batteryOpen
+        onActivated: UiState.toggle("battery")
     }
 }

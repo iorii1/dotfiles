@@ -11,6 +11,13 @@ Singleton {
     property string cityName: ""
     property bool ready: false
 
+    // The geolocation is already fetched to get the forecast; exposing it means
+    // night light can place the sunset without geolocating a second time or
+    // making anyone type coordinates.
+    property real latitude: 0
+    property real longitude: 0
+    property bool hasLocation: false
+
     // Broad category for driving a themed animated icon.
     // https://open-meteo.com/en/docs#weathervariables
     function category(code) {
@@ -38,6 +45,9 @@ Singleton {
                     const d = JSON.parse(text)
                     if (d.status === "success") {
                         root.cityName = d.city || ""
+                        root.latitude = d.lat
+                        root.longitude = d.lon
+                        root.hasLocation = true
                         weatherProc.command = ["curl", "-s", "--max-time", "5",
                             "https://api.open-meteo.com/v1/forecast?latitude=" + d.lat +
                             "&longitude=" + d.lon + "&current=temperature_2m,weather_code"]

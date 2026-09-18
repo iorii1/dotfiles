@@ -117,11 +117,33 @@ Item {
                     elide: Text.ElideRight
                 }
 
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    radius: Appearance.radiusSmall
+                    color: "transparent"
+                    border.width: 2
+                    border.color: Colors.primary
+                    opacity: expandArea.activeFocus ? 1 : 0
+                    visible: opacity > 0
+                    Behavior on opacity { Anim { duration: Appearance.animFast } }
+                }
+
                 MouseArea {
+                    id: expandArea
                     anchors.fill: parent
                     enabled: root.expandable
                     cursorShape: root.expandable ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    activeFocusOnTab: root.expandable
                     onClicked: root.expandRequested()
+
+                    Keys.onPressed: (event) => {
+                        if (event.isAutoRepeat || !root.expandable) return
+                        if (event.key === Qt.Key_Space || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                            root.expandRequested()
+                            event.accepted = true
+                        }
+                    }
                 }
             }
 

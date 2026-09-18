@@ -8,38 +8,81 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: overviewWindow
 
-    visible: UiState.overviewOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    WlrLayershell.keyboardFocus: UiState.overviewOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
-    color: "transparent"
+    name: "overview"
 
-    anchors { top: true; bottom: true; left: true; right: true }
+    // Which tile the keyboard is on. Starts on whichever workspace is already
+    // focused, so SUPER+TAB then Return is a no-op rather than a surprise jump.
+    property int selectedIndex: 0
+
+    readonly property int workspaceCount: Hyprland.workspaces.values.length
+
+    onOpenChanged: {
+        if (!open) return
+        const list = Hyprland.workspaces.values
+        overviewWindow.selectedIndex = 0
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].focused) { overviewWindow.selectedIndex = i; break }
+        }
+        keyCatcher.forceActiveFocus()
+    }
+
+    function _move(delta) {
+        if (overviewWindow.workspaceCount === 0) return
+        const n = overviewWindow.workspaceCount
+        overviewWindow.selectedIndex = ((overviewWindow.selectedIndex + delta) % n + n) % n
+    }
+
+    function _activateSelected() {
+        const list = Hyprland.workspaces.values
+        if (overviewWindow.selectedIndex < list.length) {
+            overviewWindow.goTo(list[overviewWindow.selectedIndex].id)
+        }
+    }
 
     IpcHandler {
         target: "overview"
-        function toggle(): void { UiState.overviewOpen = !UiState.overviewOpen }
-        function open(): void { UiState.overviewOpen = true }
-        function close(): void { UiState.overviewOpen = false }
+        function toggle(): void { UiState.toggle("overview") }
+        function open(): void { UiState.show("overview") }
+        function close(): void { UiState.hide("overview") }
     }
 
     function goTo(workspaceId) {
-        UiState.overviewOpen = false
+        UiState.hide("overview")
         Compositor.focusWorkspace(workspaceId)
     }
 
     function focusWindow(address) {
-        UiState.overviewOpen = false
+        UiState.hide("overview")
         Compositor.focusWindow(address)
     }
 
-    MouseArea {
+    // The grid is a Repeater inside a plain Grid, so there is no ListView to
+    // hand key events to -- this Item holds focus and drives selectedIndex.
+    Item {
+        id: keyCatcher
         anchors.fill: parent
-        onClicked: UiState.overviewOpen = false
+        focus: true
+
+        Keys.onPressed: (event) => {
+            switch (event.key) {
+            case Qt.Key_Left:  overviewWindow._move(-1); break
+            case Qt.Key_Right: overviewWindow._move(1); break
+            case Qt.Key_Up:    overviewWindow._move(-grid.columns); break
+            case Qt.Key_Down:  overviewWindow._move(grid.columns); break
+            case Qt.Key_Home:  overviewWindow.selectedIndex = 0; break
+            case Qt.Key_End:   overviewWindow.selectedIndex = Math.max(0, overviewWindow.workspaceCount - 1); break
+            case Qt.Key_Return:
+            case Qt.Key_Enter:
+            case Qt.Key_Space:
+                overviewWindow._activateSelected(); break
+            default:
+                return
+            }
+            event.accepted = true
+        }
     }
 
     Item {
@@ -79,7 +122,10 @@ PanelWindow {
                         anchors.fill: parent
                         hoverEnabled: true
                         z: -1
-                        onClicked: overviewWindow.goTo(tile.modelData.id)
+                        onClicked: {
+                            overviewWindow.selectedIndex = tile.index
+                            overviewWindow.goTo(tile.modelData.id)
+                        }
                     }
 
                     // "Screen" inset, like a monitor bezel around the windows.
@@ -90,6 +136,22 @@ PanelWindow {
                         color: Colors.background
                         opacity: tile.hovered ? 1.0 : 0.92
                         Behavior on opacity { NumberAnimation { duration: Appearance.animFast } }
+                    }
+
+                    // Keyboard selection. Deliberately a separate ring from
+                    // focusBorder below: one says "the keyboard is here", the
+                    // other "this is the workspace you are on", and during
+                    // SUPER+TAB navigation those are usually different tiles.
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: -3
+                        radius: Appearance.radiusLarge + 3
+                        color: "transparent"
+                        border.width: 2
+                        border.color: Colors.primary
+                        opacity: tile.index === overviewWindow.selectedIndex ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on opacity { Anim { duration: Appearance.animFast } }
                     }
 
                     Rectangle {

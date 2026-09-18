@@ -44,6 +44,6 @@ Item {
         pressScale: Appearance.pressScaleSubtle
         anchors.fill: parent
         anchors.margins: -6
-        onActivated: UiState.calendarOpen = !UiState.calendarOpen
+        onActivated: UiState.toggle("calendar")
     }
 }

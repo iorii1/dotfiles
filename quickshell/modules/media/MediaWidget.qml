@@ -168,7 +168,7 @@ Item {
         PressFx {
             id: fx
             anchors.fill: parent
-            onActivated: UiState.mediaPopupOpen = !UiState.mediaPopupOpen
+            onActivated: UiState.toggle("mediaPopup")
         }
     }
 }

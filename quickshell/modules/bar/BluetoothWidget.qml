@@ -33,7 +33,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         onActivated: {
-            UiState.bluetoothOpen = !UiState.bluetoothOpen
+            UiState.toggle("bluetooth")
         }
     }
 }

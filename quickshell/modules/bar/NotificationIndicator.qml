@@ -58,6 +58,6 @@ Item {
         id: fx
         anchors.fill: parent
         anchors.margins: -4
-        onActivated: UiState.notificationCenterOpen = !UiState.notificationCenterOpen
+        onActivated: UiState.toggle("notificationCenter")
     }
 }

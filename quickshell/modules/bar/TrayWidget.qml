@@ -28,8 +28,22 @@ Item {
                 width: 18
                 height: 18
 
+                // A `NumberAnimation on opacity` value source here fought the
+                // `opacity: 0` next to it. Started explicitly instead, which is
+                // what PopIn does everywhere else -- and only opacity moves,
+                // because `scale` below carries a binding that animating would
+                // tear down for good.
                 opacity: 0
-                NumberAnimation on opacity { to: 1.0; duration: Appearance.animNormal; easing.type: Easing.Bezier; easing.bezierCurve: Appearance.easeDecelerate }
+                Component.onCompleted: fadeIn.start()
+                NumberAnimation {
+                    id: fadeIn
+                    target: trayItem
+                    property: "opacity"
+                    to: 1.0
+                    duration: Appearance.animNormal
+                    easing.type: Easing.Bezier
+                    easing.bezierCurve: Appearance.easeDecelerate
+                }
 
                 scale: fx.gestureScale
                 Behavior on scale { Anim { duration: Appearance.animFast } }

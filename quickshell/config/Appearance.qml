@@ -34,7 +34,10 @@ QtObject {
 
     // Multiplier over every corner in the shell. 0 gives square corners,
     // 1.5 gives a much softer, more rounded look, with no other edits.
-    readonly property real roundingScale: 1.0
+    //
+    // Writable, and driven from the settings app via BarConfig -- it was always
+    // documented as a knob, it just had no way to turn it.
+    property real roundingScale: 1.0
 
     readonly property int radiusSmall: Math.round(8 * roundingScale)
     readonly property int radiusNormal: Math.round(12 * roundingScale)
@@ -54,7 +57,8 @@ QtObject {
 
     // Every duration below derives from this. Raise it to slow the whole
     // shell down, lower it to make it snap; nothing animates off-token.
-    readonly property real animScale: 1.0
+    // Writable for the same reason as roundingScale above.
+    property real animScale: 1.0
 
     // Sub-perceptual feedback: press-down, ripple, cursor-follow.
     readonly property int animInstant: Math.round(90 * animScale)

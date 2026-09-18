@@ -22,6 +22,16 @@ fi
 
 [[ -f "$wallpaper" ]] || exit 0
 
+# Light or dark, as chosen in the shell's quick settings. The shell owns this
+# file; anything it does not understand falls back to dark, which is what this
+# script always did before the toggle existed.
+MODE=dark
+MODE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/theme.json"
+if [[ -f "$MODE_FILE" ]]; then
+    stored_mode="$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$MODE_FILE" | head -1)"
+    [[ "$stored_mode" == "light" ]] && MODE=light
+fi
+
 work_png="$(mktemp -t dotfiless-matugen-XXXXXX.png)"
 trap 'rm -f "$work_png"' EXIT
 
@@ -66,7 +76,7 @@ trap 'rm -f "$work_png"' EXIT
         scheme_args=(-t scheme-monochrome)
     fi
 
-    matugen image "$work_png" -c "$HOME/.config/matugen/config.toml" -m dark \
+    matugen image "$work_png" -c "$HOME/.config/matugen/config.toml" -m "$MODE" \
         --prefer saturation "${scheme_args[@]}"
     qs ipc call theme reloadColors
     hyprctl reload

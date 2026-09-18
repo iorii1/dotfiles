@@ -28,7 +28,17 @@ Scope {
             readonly property int dockHeight: 60
             readonly property int bottomMargin: Appearance.spacingSmall
             readonly property int zoneWidth: 400
-            readonly property bool hasWindows: Hyprland.toplevels.values.length > 0
+            // Per-screen, so an empty monitor's dock stays down while another
+            // monitor has windows.
+            readonly property bool hasWindows: {
+                const all = Hyprland.toplevels.values
+                const name = perScreen.modelData ? perScreen.modelData.name : ""
+                for (let i = 0; i < all.length; i++) {
+                    const mon = all[i].monitor
+                    if (!mon || !name || mon.name === name) return true
+                }
+                return false
+            }
             readonly property bool enabled: BarConfig.showTaskbar
 
             // Hover is one input, the IPC pin is the other; nothing shows with
@@ -128,6 +138,7 @@ Scope {
                         id: items
                         anchors.centerIn: parent
                         shown: perScreen.revealed
+                        screenName: perScreen.modelData ? perScreen.modelData.name : ""
                     }
                 }
             }

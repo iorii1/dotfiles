@@ -11,6 +11,14 @@ hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("SUPER + N", hl.dsp.exec_cmd("qs ipc call notifications toggle"))
 hl.bind("SUPER + TAB", hl.dsp.exec_cmd("qs ipc call overview toggle"))
 hl.bind("SUPER + comma", hl.dsp.exec_cmd("qs ipc call settings toggle"))
+hl.bind("SUPER + SHIFT + comma", hl.dsp.exec_cmd("qs ipc call quicksettings toggle"))
+
+-- These panels have always had working IPC handlers and no keys; the bar
+-- icon was the only way in, which is awkward once a widget is hidden.
+hl.bind("SUPER + A", hl.dsp.exec_cmd("qs ipc call audio toggle"))
+hl.bind("SUPER + C", hl.dsp.exec_cmd("qs ipc call calendar toggle"))
+hl.bind("SUPER + P", hl.dsp.exec_cmd("qs ipc call power toggle"))
+hl.bind("SUPER + B", hl.dsp.exec_cmd("qs ipc call bluetooth toggle"))
 hl.bind(
 	"SUPER + W",
 	hl.dsp.exec_cmd(
@@ -107,21 +115,27 @@ for i = 1, 9 do
 	hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
 end
 
+-- The shell watches PipeWire directly now, so its OSD appears on any volume
+-- change and these no longer have to poke it. That also drops a `qs ipc` spawn
+-- from every volume keypress.
+--
+-- They still go through wpctl rather than the shell so they keep working with
+-- `locked = true`, i.e. while hyprlock is up and quickshell's own surfaces are
+-- not accepting input.
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_SINK@ 5%+ && qs ipc call osd volume"),
+	hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_SINK@ 5%+"),
 	{ locked = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_SINK@ 5%- && qs ipc call osd volume"),
+	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_SINK@ 5%-"),
 	{ locked = true }
 )
-hl.bind(
-	"XF86AudioMute",
-	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle && qs ipc call osd volume"),
-	{ locked = true }
-)
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"), { locked = true })
+
+-- Mic mute on both the dedicated key and the SHIFT+mute chord that predates it.
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"), { locked = true })
 hl.bind("SHIFT + XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"), { locked = true })
 
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
@@ -145,6 +159,14 @@ hl.bind(
 	{ locked = true }
 )
 
-hl.bind("Print", hl.dsp.exec_cmd("~/.local/bin/take-screenshot full"))
-hl.bind("SHIFT + Print", hl.dsp.exec_cmd("~/.local/bin/take-screenshot region-clip"))
-hl.bind("SUPER + SHIFT + s", hl.dsp.exec_cmd("~/.local/bin/take-screenshot region-save"))
+-- Capture goes through the shell now, which shows the shot in a preview with
+-- Copy / Save / Annotate / Discard rather than deciding for you. The old
+-- take-screenshot script is still installed and still works on its own.
+hl.bind("Print", hl.dsp.exec_cmd("qs ipc call capture screen"))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd("qs ipc call capture region"))
+hl.bind("SUPER + SHIFT + s", hl.dsp.exec_cmd("qs ipc call capture region"))
+hl.bind("SUPER + SHIFT + w", hl.dsp.exec_cmd("qs ipc call capture window"))
+hl.bind("CTRL + Print", hl.dsp.exec_cmd("qs ipc call capture output"))
+
+-- Screen recording: pick a region, then stop from the bar indicator or here.
+hl.bind("SUPER + SHIFT + r", hl.dsp.exec_cmd("qs ipc call capture record"))

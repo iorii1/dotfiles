@@ -41,13 +41,55 @@ Singleton {
     }
 
     function isSecure(network) {
-        return !!network && network.security !== Net.WifiSecurityType.Open
+        if (!network) return false
+        return network.security !== Net.WifiSecurityType.Open
+            && network.security !== Net.WifiSecurityType.Owe
     }
+
+    // Enterprise networks need a certificate or an identity, not just a
+    // passphrase, so the password field cannot serve them and says so instead
+    // of failing silently after the user has typed something.
+    function isEnterprise(network) {
+        if (!network) return false
+        const s = network.security
+        return s === Net.WifiSecurityType.Wpa2Eap
+            || s === Net.WifiSecurityType.WpaEap
+            || s === Net.WifiSecurityType.Wpa3SuiteB192
+            || s === Net.WifiSecurityType.DynamicWep
+            || s === Net.WifiSecurityType.Leap
+    }
+
+    function securityLabel(network) {
+        if (!network) return ""
+        if (!root.isSecure(network)) return "Open"
+        return Net.WifiSecurityType.toString(network.security)
+    }
+
+    // ---- Wired ------------------------------------------------------------
+    //
+    // The wifi device was the only one this service ever looked at, so on a
+    // desktop the bar showed "disconnected" forever even on a live cable.
+
+    readonly property var wiredDevice: {
+        const devices = Net.Networking.devices.values
+        for (let i = 0; i < devices.length; i++)
+            if (devices[i].type === Net.DeviceType.Wired) return devices[i]
+        return null
+    }
+
+    readonly property bool wiredConnected: !!root.wiredDevice && root.wiredDevice.connected
+    readonly property bool wiredHasLink: !!root.wiredDevice && root.wiredDevice.hasLink
 
     property bool scanning: false
     property string connectingTo: ""
     property string lastError: ""
     property var pending: null
+
+    // Set when NM rejects a connection for want of a passphrase. The popup
+    // watches this to reveal its password field for that one network, which is
+    // the whole reason it exists -- this service used to answer NoSecrets by
+    // telling the user to go and run nmtui.
+    property var passwordFor: null
 
     function scan() {
         if (!device || device.scannerEnabled) return
@@ -69,9 +111,35 @@ Singleton {
     function connectTo(network) {
         if (!network) return
         root.lastError = ""
+        root.passwordFor = null
         root.connectingTo = network.name
         root.pending = network
         network.connect()
+    }
+
+    function connectWithPassword(network, psk) {
+        if (!network) return
+        root.lastError = ""
+        root.passwordFor = null
+        root.connectingTo = network.name
+        root.pending = network
+        network.connectWithPsk(psk)
+    }
+
+    function cancelPassword() {
+        root.passwordFor = null
+        root.connectingTo = ""
+    }
+
+    function disconnectFrom(network) {
+        if (network) network.disconnect()
+    }
+
+    // Drops the saved connection profile, so the next attempt asks again.
+    function forget(network) {
+        if (!network) return
+        if (root.passwordFor === network) root.passwordFor = null
+        network.forget()
     }
 
     // The scan is a request, not a transaction: NM answers by filling the
@@ -84,17 +152,28 @@ Singleton {
     }
 
     // NM says *why* a connection failed, which nmcli could only report as a
-    // line of stderr. NoSecrets is the common one here: a secured network the
-    // machine has no saved passphrase for, and this shell has nowhere to type
-    // one yet.
+    // line of stderr. NoSecrets is the common one: a secured network the machine
+    // has no saved passphrase for, which is now a prompt rather than a dead end.
     Connections {
         target: root.pending
 
         function onConnectionFailed(reason) {
-            root.lastError = reason === Net.ConnectionFailReason.NoSecrets
-                ? "\"" + root.connectingTo + "\" needs a password -- connect once with nmcli or nmtui"
-                : "Could not connect to \"" + root.connectingTo + "\" ("
+            const net = root.pending
+
+            if (reason === Net.ConnectionFailReason.NoSecrets) {
+                // Ask for the passphrase rather than reporting a dead end.
+                if (root.isEnterprise(net)) {
+                    root.lastError = "\"" + root.connectingTo
+                        + "\" is an enterprise network -- set it up once with nmtui"
+                } else {
+                    root.passwordFor = net
+                    root.lastError = ""
+                }
+            } else {
+                root.lastError = "Could not connect to \"" + root.connectingTo + "\" ("
                     + Net.ConnectionFailReason.toString(reason) + ")"
+            }
+
             root.connectingTo = ""
             root.pending = null
         }

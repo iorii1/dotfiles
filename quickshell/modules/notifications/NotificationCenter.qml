@@ -7,28 +7,18 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: centerWindow
 
-    visible: UiState.notificationCenterOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    WlrLayershell.keyboardFocus: UiState.notificationCenterOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
-    color: "transparent"
+    name: "notificationCenter"
 
-    anchors { top: true; bottom: true; left: true; right: true }
+    onOpenChanged: if (open) list.currentIndex = 0
 
     IpcHandler {
         target: "notifications"
-        function toggle(): void { UiState.notificationCenterOpen = !UiState.notificationCenterOpen }
-        function open(): void { UiState.notificationCenterOpen = true }
-        function close(): void { UiState.notificationCenterOpen = false }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.notificationCenterOpen = false
+        function toggle(): void { UiState.toggle("notificationCenter") }
+        function open(): void { UiState.show("notificationCenter") }
+        function close(): void { UiState.hide("notificationCenter") }
     }
 
     PopupCard {
@@ -167,6 +157,22 @@ PanelWindow {
                 model: Notifications.history
                 spacing: 4
 
+                // Up/Down walk the history; Delete and Backspace dismiss the
+                // row under the cursor, which is the whole interaction this
+                // list offers by pointer too.
+                focus: true
+                currentIndex: 0
+                highlightMoveDuration: Appearance.animFast
+                keyNavigationWraps: true
+
+                Keys.onPressed: (event) => {
+                    if (event.key !== Qt.Key_Delete && event.key !== Qt.Key_Backspace) return
+                    if (list.currentItem) {
+                        Notifications.dismissHistory(list.currentItem.modelData.uid)
+                        event.accepted = true
+                    }
+                }
+
                 delegate: Rectangle {
                     id: row
                     required property var modelData
@@ -174,7 +180,8 @@ PanelWindow {
                     width: list.width
                     height: rowContent.implicitHeight + Appearance.spacingSmall * 2
                     radius: Appearance.radiusSmall
-                    color: itemFx.containsMouse ? Colors.surfaceContainer : "transparent"
+                    color: (itemFx.containsMouse || row.ListView.isCurrentItem)
+                        ? Colors.surfaceContainer : "transparent"
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
                     scale: Appearance.popFromScale
@@ -183,6 +190,28 @@ PanelWindow {
                     PopIn { id: entranceAnim; target: row; delay: Appearance.staggerDelay(row.index) }
 
                     readonly property color accent: row.modelData.urgency === 2 ? Colors.error : Colors.primary
+
+                    // Parsed once per row rather than per action pill.
+                    readonly property var actions: {
+                        try {
+                            return JSON.parse(row.modelData.actionsJson || "[]")
+                        } catch (e) {
+                            return []
+                        }
+                    }
+
+                    // freedesktop convention: the action identified as
+                    // "default" is what activating the notification itself
+                    // means. It is not shown as a pill -- clicking the row is
+                    // how you invoke it.
+                    readonly property var defaultAction: {
+                        for (let i = 0; i < row.actions.length; i++) {
+                            if (row.actions[i].id === "default") return row.actions[i]
+                        }
+                        return null
+                    }
+
+                    readonly property var pillActions: row.actions.filter(a => a.id !== "default")
 
                     Rectangle {
                         width: 3
@@ -259,6 +288,87 @@ PanelWindow {
                                 maximumLineCount: 2
                                 elide: Text.ElideRight
                             }
+
+                            // Actions used to exist only on the live toast, so
+                            // once one timed out its buttons were gone for good
+                            // even though the notification was still alive.
+                            Flow {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 2
+                                spacing: Appearance.spacingSmall
+                                visible: row.pillActions.length > 0
+
+                                Repeater {
+                                    model: row.pillActions
+
+                                    Rectangle {
+                                        id: actionPill
+                                        required property var modelData
+                                        height: 22
+                                        width: actionLabel.implicitWidth + Appearance.spacingNormal
+                                        radius: height / 2
+                                        color: actionFx.containsMouse
+                                            ? Colors.alpha(row.accent, 0.28)
+                                            : Colors.alpha(Colors.surfaceContainerHigh, Appearance.layerOpacity)
+                                        Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+
+                                        scale: actionFx.gestureScale
+                                        Behavior on scale { Anim { duration: Appearance.animFast } }
+
+                                        Text {
+                                            id: actionLabel
+                                            anchors.centerIn: parent
+                                            text: actionPill.modelData.text
+                                            color: Colors.textPrimary
+                                            font.family: Appearance.fontFamily
+                                            font.pixelSize: Appearance.fontSizeSmall
+                                        }
+
+                                        PressFx {
+                                            id: actionFx
+                                            anchors.fill: parent
+                                            hoverScale: 1.0
+                                            pressScale: Appearance.pressScaleSubtle
+                                            focusRadius: parent.radius
+                                            onActivated: Notifications.invokeAction(row.modelData.uid, actionPill.modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+
+                            TextField {
+                                id: replyField
+                                Layout.fillWidth: true
+                                Layout.topMargin: 2
+                                visible: row.modelData.hasReply === true
+                                placeholder: Notifications.replyPlaceholder(row.modelData.uid)
+                                icon: "\uf112"
+                                accentColor: row.accent
+                                onAccepted: (text) => {
+                                    if (text.length > 0) Notifications.sendReply(row.modelData.uid, text)
+                                }
+                            }
+                        }
+
+                        // Silence this app specifically. DND was the only
+                        // control before, and it is all-or-nothing.
+                        Text {
+                            Layout.alignment: Qt.AlignTop
+                            visible: itemFx.containsMouse || Notifications.isMuted(row.modelData.appName)
+                            text: Notifications.isMuted(row.modelData.appName) ? "" : ""
+                            color: Notifications.isMuted(row.modelData.appName) ? Colors.error : Colors.textSecondary
+                            font.family: Appearance.fontFamilyIcons
+                            font.pixelSize: Appearance.fontSizeSmall
+
+                            scale: muteFx.gestureScale
+                            Behavior on scale { Anim { duration: Appearance.animFast } }
+
+                            PressFx {
+                                id: muteFx
+                                anchors.fill: parent
+                                anchors.margins: -6
+                                onActivated: Notifications.toggleAppMute(row.modelData.appName)
+                            }
                         }
 
                         Text {
@@ -281,11 +391,19 @@ PanelWindow {
                         }
                     }
 
+                    // Behind rowContent (z: -1), so the action pills, the reply
+                    // field, the mute bell and the dismiss X all get their
+                    // clicks first and this only sees the empty space around
+                    // them. It was hover-only before, which meant clicking a
+                    // notification to open the app that sent it did nothing.
                     MouseArea {
                         id: itemFx
                         anchors.fill: parent
                         hoverEnabled: true
-                        acceptedButtons: Qt.NoButton
+                        z: -1
+                        acceptedButtons: row.defaultAction ? Qt.LeftButton : Qt.NoButton
+                        cursorShape: row.defaultAction ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: if (row.defaultAction) Notifications.invokeAction(row.modelData.uid, row.defaultAction.id)
                     }
                 }
             }

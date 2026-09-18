@@ -7,30 +7,44 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: clipWindow
 
-    visible: UiState.clipboardOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    WlrLayershell.keyboardFocus: UiState.clipboardOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
-    color: "transparent"
+    name: "clipboard"
 
-    anchors { top: true; bottom: true; left: true; right: true }
+    property string query: ""
+
+    // The selection is managed, never bound -- the same trap the launcher fell
+    // into, where the first arrow key destroyed a `currentIndex: 0` binding and
+    // the highlight then stopped tracking the filtered list.
+    onQueryChanged: list.currentIndex = 0
 
     IpcHandler {
         target: "clipboard"
-        function toggle(): void { UiState.clipboardOpen = !UiState.clipboardOpen }
-        function open(): void { UiState.clipboardOpen = true }
-        function close(): void { UiState.clipboardOpen = false }
+        function toggle(): void { UiState.toggle("clipboard") }
+        function open(): void { UiState.show("clipboard") }
+        function close(): void { UiState.hide("clipboard") }
     }
 
     onVisibleChanged: if (visible) Clipboard.refresh()
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.clipboardOpen = false
+    function _step(delta) {
+        const n = list.count
+        if (n === 0) return
+        list.currentIndex = ((list.currentIndex + delta) % n + n) % n
+    }
+
+    function _activateCurrent() {
+        if (list.currentItem) list.currentItem.activate()
+    }
+
+    // Back to the top each time it opens, so the keyboard always starts on the
+    // most recent entry rather than wherever it was left last time.
+    onOpenChanged: {
+        if (!open) return
+        clipWindow.query = ""
+        list.currentIndex = 0
+        search.forceActiveFocus()
     }
 
     PopupCard {
@@ -52,12 +66,64 @@ PanelWindow {
             anchors.margins: Appearance.spacingNormal
             spacing: Appearance.spacingSmall
 
-            Text {
-                text: "Clipboard History"
-                color: Colors.textPrimary
-                font.family: Appearance.fontFamily
-                font.bold: true
-                font.pixelSize: Appearance.fontSizeNormal
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacingSmall
+
+                Text {
+                    Layout.fillWidth: true
+                    text: "Clipboard History"
+                    color: Colors.textPrimary
+                    font.family: Appearance.fontFamily
+                    font.bold: true
+                    font.pixelSize: Appearance.fontSizeNormal
+                }
+
+                // Clipboard.clearAll() already existed but nothing ever called
+                // it -- there was no Clear anywhere in the UI.
+                Text {
+                    text: "Clear"
+                    visible: Clipboard.entries.length > 0
+                    color: clearFx.containsMouse ? Colors.error : Colors.textSecondary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+
+                    scale: clearFx.gestureScale
+                    Behavior on scale { Anim { duration: Appearance.animFast } }
+
+                    PressFx {
+                        id: clearFx
+                        anchors.fill: parent
+                        anchors.margins: -6
+                        hoverScale: 1.0
+                        pressScale: Appearance.pressScaleSubtle
+                        onActivated: Clipboard.clearAll()
+                    }
+                }
+            }
+
+            TextField {
+                id: search
+                Layout.fillWidth: true
+                placeholder: "Search clipboard…"
+                icon: "\uf002"
+                onTextChanged: clipWindow.query = text
+
+                // The field keeps focus so you can keep typing; it drives the
+                // list rather than letting the list take the keyboard.
+                Keys.onDownPressed: clipWindow._step(1)
+                Keys.onUpPressed: clipWindow._step(-1)
+                Keys.onReturnPressed: clipWindow._activateCurrent()
+                Keys.onEnterPressed: clipWindow._activateCurrent()
+                Keys.onEscapePressed: UiState.hide("clipboard")
+                Keys.onPressed: (event) => {
+                    if (event.key !== Qt.Key_Delete) return
+                    if (list.currentItem) {
+                        Clipboard.remove(list.currentItem.modelData.id)
+                        event.accepted = true
+                    }
+                }
             }
 
             Rectangle { Layout.fillWidth: true; height: 1; color: Colors.outline; opacity: 0.4 }
@@ -67,8 +133,9 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                model: Clipboard.entries
+                model: Clipboard.filtered(clipWindow.query)
                 spacing: 2
+                highlightMoveDuration: Appearance.animFast
 
                 delegate: Rectangle {
                     id: row
@@ -77,7 +144,8 @@ PanelWindow {
                     width: list.width
                     height: row.modelData.isImage ? 52 : 40
                     radius: Appearance.radiusSmall
-                    color: itemFx.containsMouse ? Colors.surfaceContainer : "transparent"
+                    color: (itemFx.containsMouse || row.ListView.isCurrentItem)
+                        ? Colors.surfaceContainer : "transparent"
                     clip: true
                     Behavior on color { ColorAnimation { duration: Appearance.animFast } }
 
@@ -127,6 +195,29 @@ PanelWindow {
                             font.pixelSize: Appearance.fontSizeSmall
                             elide: Text.ElideRight
                         }
+
+                        // Remove one entry. cliphist has always supported this;
+                        // the shell only offered wipe-everything, and not even
+                        // that from the UI.
+                        Text {
+                            visible: itemFx.containsMouse || row.ListView.isCurrentItem
+                            text: ""
+                            color: delFx.containsMouse ? Colors.error : Colors.textSecondary
+                            font.family: Appearance.fontFamilyIcons
+                            font.pixelSize: Appearance.fontSizeSmall
+                            Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+
+                            scale: delFx.gestureScale
+                            Behavior on scale { Anim { duration: Appearance.animFast } }
+
+                            PressFx {
+                                id: delFx
+                                anchors.fill: parent
+                                anchors.margins: -6
+                                popOvershoot: 2.4
+                                onActivated: Clipboard.remove(row.modelData.id)
+                            }
+                        }
                     }
 
                     Rectangle {
@@ -140,7 +231,7 @@ PanelWindow {
                     Timer {
                         id: closeTimer
                         interval: 180
-                        onTriggered: UiState.clipboardOpen = false
+                        onTriggered: UiState.hide("clipboard")
                     }
 
                     NumberAnimation {
@@ -153,16 +244,23 @@ PanelWindow {
                         easing.bezierCurve: Appearance.easeAccelerate
                     }
 
+                    // One path for both pointer and keyboard, so Return gets the
+                    // same flash and the same close delay a click does.
+                    function activate() {
+                        Clipboard.select(row.modelData.id)
+                        copyFlash.opacity = 0.5
+                        flashFade.restart()
+                        closeTimer.restart()
+                    }
+
                     MouseArea {
                         id: itemFx
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            Clipboard.select(row.modelData.id)
-                            copyFlash.opacity = 0.5
-                            flashFade.restart()
-                            closeTimer.restart()
+                            list.currentIndex = row.index
+                            row.activate()
                         }
                     }
                 }

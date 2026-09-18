@@ -32,6 +32,6 @@ Item {
         id: fx
         anchors.fill: parent
         anchors.margins: -4
-        onActivated: UiState.powerMenuOpen = !UiState.powerMenuOpen
+        onActivated: UiState.toggle("powerMenu")
     }
 }

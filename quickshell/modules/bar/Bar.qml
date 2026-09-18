@@ -70,7 +70,10 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Appearance.spacingNormal
 
+                    RecordingIndicator {}
                     TrayWidget { visible: BarConfig.showTray }
+                    VolumeWidget { visible: BarConfig.showVolume }
+                    QuickSettingsButton { visible: BarConfig.showQuickSettings }
                     BatteryWidget { visible: BarConfig.showBattery }
                     WifiWidget { visible: BarConfig.showWifi }
                     BluetoothWidget { visible: BarConfig.showBluetooth }

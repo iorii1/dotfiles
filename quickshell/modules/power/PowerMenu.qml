@@ -7,35 +7,28 @@ import "../../config"
 import "../common"
 import "../../services"
 
-PanelWindow {
+ShellPanel {
     id: powerWindow
 
-    visible: UiState.powerMenuOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    WlrLayershell.keyboardFocus: UiState.powerMenuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
-    color: "transparent"
+    name: "powerMenu"
 
-    anchors { top: true; bottom: true; left: true; right: true }
+    // Land on Lock. It is the safe one, and the two destructive buttons are at
+    // the far end of the row behind a confirm, so nothing dangerous is one
+    // keypress away from a menu that just opened.
+    onOpenChanged: if (open) lockBtn.takeFocus()
 
     IpcHandler {
         target: "power"
-        function toggle(): void { UiState.powerMenuOpen = !UiState.powerMenuOpen }
-        function open(): void { UiState.powerMenuOpen = true }
-        function close(): void { UiState.powerMenuOpen = false }
+        function toggle(): void { UiState.toggle("powerMenu") }
+        function open(): void { UiState.show("powerMenu") }
+        function close(): void { UiState.hide("powerMenu") }
     }
 
     Process { id: runner }
     function run(cmd) {
-        UiState.powerMenuOpen = false
+        UiState.hide("powerMenu")
         runner.command = ["bash", "-c", cmd]
         runner.running = true
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.powerMenuOpen = false
     }
 
     PopupCard {
@@ -57,6 +50,9 @@ PanelWindow {
             spacing: Appearance.spacingNormal
 
             FillButton {
+                id: lockBtn
+                prevFocus: null
+                nextFocus: suspendBtn.focusItem
                 label: "Lock"
                 icon: "\uf023"
                 accentColor: Colors.primary
@@ -66,6 +62,9 @@ PanelWindow {
             }
 
             FillButton {
+                id: suspendBtn
+                prevFocus: lockBtn.focusItem
+                nextFocus: logoutBtn.focusItem
                 label: "Suspend"
                 icon: "\uf186"
                 accentColor: Colors.primary
@@ -75,6 +74,9 @@ PanelWindow {
             }
 
             FillButton {
+                id: logoutBtn
+                prevFocus: suspendBtn.focusItem
+                nextFocus: rebootBtn.focusItem
                 label: "Logout"
                 icon: "\uf08b"
                 accentColor: Colors.primary
@@ -84,6 +86,9 @@ PanelWindow {
             }
 
             FillButton {
+                id: rebootBtn
+                prevFocus: logoutBtn.focusItem
+                nextFocus: shutdownBtn.focusItem
                 label: "Reboot"
                 icon: "\uf021"
                 accentColor: Colors.error
@@ -95,6 +100,9 @@ PanelWindow {
             }
 
             FillButton {
+                id: shutdownBtn
+                prevFocus: rebootBtn.focusItem
+                nextFocus: null
                 label: "Shutdown"
                 icon: "\uf011"
                 accentColor: Colors.error

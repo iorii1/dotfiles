@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "../../config"
+import "../../services"
 import "../common"
 
 PanelWindow {
@@ -11,11 +12,13 @@ PanelWindow {
 
     property bool shown: false
     property string kind: "volume"
-    property real level: 0.0
-    property bool muted: false
     property real popScale: 0.85
 
     visible: shown
+
+    // Same treatment as the toasts: pinned to the focused output.
+    screen: FocusedScreen.screen
+
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell-popup"
     exclusionMode: ExclusionMode.Ignore
@@ -30,13 +33,38 @@ PanelWindow {
 
     IpcHandler {
         target: "osd"
-        function volume(): void { osdWindow.queryVolume() }
+        function volume(): void { osdWindow.showVolume() }
         function brightness(): void { osdWindow.queryBrightness() }
+        function mic(): void { osdWindow.showMic() }
     }
 
-    function queryVolume() {
+    // Volume and mute now come straight off the Audio service, so the OSD
+    // appears whatever moved them -- a media key, pavucontrol, a game, the
+    // shell's own mixer. It used to run `wpctl get-volume` once per keybind
+    // and scrape stdout, which meant anything else changing the volume showed
+    // nothing at all.
+    readonly property real level: {
+        if (osdWindow.kind === "brightness") return osdWindow.brightnessLevel
+        if (osdWindow.kind === "mic") return Audio.micVolume
+        return Audio.volume
+    }
+
+    readonly property bool muted: {
+        if (osdWindow.kind === "brightness") return false
+        if (osdWindow.kind === "mic") return Audio.micMuted
+        return Audio.muted
+    }
+
+    property real brightnessLevel: 0
+
+    function showVolume() {
         osdWindow.kind = "volume"
-        volumeProc.running = true
+        osdWindow._show()
+    }
+
+    function showMic() {
+        osdWindow.kind = "mic"
+        osdWindow._show()
     }
 
     function queryBrightness() {
@@ -44,17 +72,26 @@ PanelWindow {
         brightnessProc.running = true
     }
 
-    Process {
-        id: volumeProc
-        command: ["bash", "-c", "wpctl get-volume @DEFAULT_SINK@"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const m = text.match(/Volume:\s*([\d.]+)/)
-                osdWindow.level = m ? Math.min(1, parseFloat(m[1])) : 0
-                osdWindow.muted = text.indexOf("MUTED") !== -1
-                osdWindow._show()
-            }
-        }
+    // Nothing should pop up just because the shell started and the bindings
+    // settled for the first time, so changes only count once this is armed.
+    property bool armed: false
+    Timer { interval: 1500; running: true; onTriggered: osdWindow.armed = true }
+
+    Connections {
+        target: Audio
+        enabled: osdWindow.armed
+
+        function onVolumeChanged() { osdWindow._auto("volume") }
+        function onMutedChanged() { osdWindow._auto("volume") }
+        function onMicMutedChanged() { osdWindow._auto("mic") }
+    }
+
+    // Dragging the shell's own volume slider already shows the value under the
+    // cursor; echoing it in an OSD as well is just noise.
+    function _auto(which) {
+        if (UiState.audioOpen) return
+        osdWindow.kind = which
+        osdWindow._show()
     }
 
     Process {
@@ -64,8 +101,7 @@ PanelWindow {
             onStreamFinished: {
                 const parts = text.trim().split(",")
                 const pct = parts.length >= 4 ? parseInt(parts[3]) : 0
-                osdWindow.level = (isNaN(pct) ? 0 : pct) / 100
-                osdWindow.muted = false
+                osdWindow.brightnessLevel = (isNaN(pct) ? 0 : pct) / 100
                 osdWindow._show()
             }
         }
@@ -107,10 +143,8 @@ PanelWindow {
             Text {
                 text: {
                     if (osdWindow.kind === "brightness") return "\uf185"
-                    if (osdWindow.muted) return "\uf026"
-                    if (osdWindow.level > 0.5) return "\uf028"
-                    if (osdWindow.level > 0) return "\uf027"
-                    return "\uf026"
+                    if (osdWindow.kind === "mic") return Audio.micIconFor(osdWindow.muted)
+                    return Audio.iconFor(osdWindow.level, osdWindow.muted)
                 }
                 color: Colors.primary
                 font.family: Appearance.fontFamilyIcons

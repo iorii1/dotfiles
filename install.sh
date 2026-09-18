@@ -24,12 +24,14 @@ OFFICIAL_PKGS=(
     hyprland quickshell matugen hyprlock hypridle
     kitty fish fastfetch starship
     cava playerctl imagemagick libheif ffmpeg qt6-base qt6-multimedia qt6-multimedia-ffmpeg awww
-    wl-clipboard cliphist brightnessctl grim slurp libnotify curl
-    networkmanager bluez bluez-utils upower power-profiles-daemon wireplumber
+    wl-clipboard cliphist brightnessctl grim slurp satty wf-recorder libnotify curl
+    networkmanager bluez bluez-utils upower power-profiles-daemon wireplumber polkit
     xdg-desktop-portal-hyprland xdg-desktop-portal-gtk ttf-jetbrains-mono-nerd inter-font
-    papirus-icon-theme git
+    papirus-icon-theme git python-dbus python-gobject
 )
-AUR_PKGS=(mpvpaper xfce-polkit)
+# The polkit agent used to be xfce-polkit; the shell provides its own now
+# (quickshell/modules/polkit), so only the wallpaper backend is left here.
+AUR_PKGS=(mpvpaper)
 
 info "Installing official packages (pacman)..."
 sudo pacman -S --needed --noconfirm "${OFFICIAL_PKGS[@]}"
@@ -46,7 +48,7 @@ if [ -n "$AUR_HELPER" ]; then
     "$AUR_HELPER" -S --needed --noconfirm "${AUR_PKGS[@]}"
 else
     warn "No AUR helper (yay/paru) found -- skipping: ${AUR_PKGS[*]}"
-    warn "mpvpaper = video wallpaper support, xfce-polkit = the polkit auth agent."
+    warn "mpvpaper = video wallpaper support (needed for video wallpapers only)."
     warn "Install an AUR helper and re-run, or install these manually."
 fi
 
@@ -100,6 +102,8 @@ done
 link_path "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" "$REPO_DIR/hypr/.config/xdg-desktop-portal/hyprland-portals.conf"
 
 link_path "$HOME/.local/bin/take-screenshot" "$REPO_DIR/scripts/.local/bin/take-screenshot"
+link_path "$HOME/.local/bin/qs-keep-awake" "$REPO_DIR/scripts/.local/bin/qs-keep-awake"
+link_path "$HOME/.local/bin/qs-lint" "$REPO_DIR/scripts/.local/bin/qs-lint"
 
 # --- 3b. matugen config ----------------------------------------------------
 

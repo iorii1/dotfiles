@@ -2,15 +2,19 @@ import Quickshell
 import "./modules/bar"
 import "./modules/launcher"
 import "./modules/notifications"
+import "./modules/polkit"
 import "./modules/power"
 import "./modules/osd"
 import "./modules/network"
 import "./modules/bluetooth"
+import "./modules/audio"
 import "./modules/battery"
+import "./modules/capture"
 import "./modules/calendar"
 import "./modules/clipboard"
 import "./modules/media"
 import "./modules/overview"
+import "./modules/quicksettings"
 import "./modules/settings"
 import "./modules/dock"
 
@@ -20,14 +24,18 @@ Scope {
     NotificationPopups {}
     NotificationCenter {}
     PowerMenu {}
+    PolkitDialog {}
+    CapturePopup {}
     Osd {}
     NetworkPopup {}
     BluetoothPopup {}
     BatteryPopup {}
+    AudioPopup {}
     CalendarPopup {}
     ClipboardPopup {}
     MediaPopup {}
     Overview {}
+    QuickSettings {}
     SettingsWindow {}
     Dock {}
 }

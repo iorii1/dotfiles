@@ -21,15 +21,15 @@ PanelWindow {
 
     IpcHandler {
         target: "battery"
-        function toggle(): void { UiState.batteryOpen = !UiState.batteryOpen }
-        function open(): void { UiState.batteryOpen = true }
-        function close(): void { UiState.batteryOpen = false }
+        function toggle(): void { UiState.toggle("battery") }
+        function open(): void { UiState.show("battery") }
+        function close(): void { UiState.hide("battery") }
     }
 
 
     MouseArea {
         anchors.fill: parent
-        onClicked: UiState.batteryOpen = false
+        onClicked: UiState.hide("battery")
     }
 
     PopupCard {

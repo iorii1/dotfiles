@@ -23,6 +23,18 @@ Item {
 
     signal triggered()
 
+    // The item that actually holds focus, so a row of these can be chained:
+    //   FillButton { id: a; nextFocus: b.focusItem }
+    // Focus lives on the inner MouseArea rather than on root, so neighbours
+    // have to be wired to that and not to the FillButton itself.
+    property alias focusItem: ma
+    property var prevFocus: null
+    property var nextFocus: null
+
+    function takeFocus() {
+        ma.forceActiveFocus()
+    }
+
     property real fillLevel: 0.0
     property bool isTriggered: false
     readonly property bool hovered: ma.containsMouse
@@ -157,10 +169,49 @@ Item {
             hoverEnabled: true
             enabled: !root.isTriggered
             cursorShape: root.isTriggered ? Qt.ArrowCursor : Qt.PointingHandCursor
+            activeFocusOnTab: !root.isTriggered
+            KeyNavigation.left: root.prevFocus
+            KeyNavigation.right: root.nextFocus
 
             onPressed: { drainAnim.stop(); fillAnim.restart() }
             onReleased: { if (!root.isTriggered) { fillAnim.stop(); drainAnim.restart() } }
             onCanceled: { if (!root.isTriggered) { fillAnim.stop(); drainAnim.restart() } }
+
+            // Holding Space or Return drives the same fill the pointer does, so
+            // the power menu is operable without a mouse.
+            //
+            // Auto-repeat has to be filtered on *both* edges: a held key arrives
+            // as a stream of press/release pairs, and acting on them would
+            // restart the fill several times a second and it would never finish.
+            readonly property var _holdKeys: [Qt.Key_Space, Qt.Key_Return, Qt.Key_Enter]
+
+            Keys.onPressed: (event) => {
+                if (event.isAutoRepeat || root.isTriggered) return
+                if (ma._holdKeys.indexOf(event.key) === -1) return
+                drainAnim.stop()
+                fillAnim.restart()
+                event.accepted = true
+            }
+
+            Keys.onReleased: (event) => {
+                if (event.isAutoRepeat) return
+                if (ma._holdKeys.indexOf(event.key) === -1) return
+                if (!root.isTriggered) { fillAnim.stop(); drainAnim.restart() }
+                event.accepted = true
+            }
+        }
+
+        // Above the wave canvas, so a focused button still reads as focused
+        // once the fill has covered it.
+        Rectangle {
+            anchors.fill: parent
+            radius: shape.radius
+            color: "transparent"
+            border.width: 2
+            border.color: Colors.primary
+            opacity: ma.activeFocus ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { Anim { duration: Appearance.animFast } }
         }
 
         NumberAnimation {
