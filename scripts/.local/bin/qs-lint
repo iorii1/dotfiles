@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # qmllint over the shell, with this repo's structural noise filtered out.
 #
-# Most of this repo is QML and none of it was linted: the only workflow was
-# shellcheck, and its path filter meant it never even ran on a QML change.
+# Most of this repo is QML and none of it was linted: the one workflow that
+# existed checked shell scripts, and its path filter meant it never even ran on
+# a QML change.
+#
+# (That sentence is worded around a line starting with the word shellcheck,
+# which shellcheck reads as a directive to itself and then fails to parse.)
 #
 # The suppressions below are all cases where qmllint is reporting how Quickshell
 # works rather than a defect:
