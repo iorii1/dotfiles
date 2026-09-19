@@ -5,10 +5,15 @@ QtObject {
     id: root
 
     // Resolved against what is actually installed, best match first, so
-    // dropping SF Pro into ~/.local/share/fonts is picked up on next reload
-    // with no edit here -- and nothing breaks before that happens.
-    readonly property var fontPrefsUi: ["SF Pro Text", "SF Pro Display", "SF Pro", "Inter", "JetBrainsMono Nerd Font"]
-    readonly property var fontPrefsMono: ["SF Mono", "JetBrainsMono Nerd Font Mono", "JetBrainsMono Nerd Font"]
+    // dropping a preferred font into ~/.local/share/fonts is picked up on next
+    // reload with no edit here -- and nothing breaks before that happens.
+    //
+    // One family for everything: UI text, monospace and the icon glyphs all
+    // come from JetBrainsMono Nerd Font, so the bar reads as one typeface
+    // rather than Inter sitting next to Nerd Font glyphs. Inter is kept as the
+    // fallback for a machine that has not got the Nerd Font installed.
+    readonly property var fontPrefsUi: ["JetBrainsMono Nerd Font", "Inter", "Adwaita Sans"]
+    readonly property var fontPrefsMono: ["JetBrainsMono Nerd Font Mono", "JetBrainsMono Nerd Font", "Adwaita Mono"]
 
     readonly property string fontFamily: _resolveFont(fontPrefsUi)
     readonly property string fontFamilyMono: _resolveFont(fontPrefsMono)
