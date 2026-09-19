@@ -41,12 +41,25 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 40
+                width: parent.width - 58
                 text: Audio.deviceName(root.node)
                 color: root.current ? Colors.textPrimary : Colors.textSecondary
                 font.family: Appearance.fontFamily
                 font.pixelSize: Appearance.fontSizeSmall
+                font.bold: root.current
                 elide: Text.ElideRight
+            }
+
+            // The tinted background alone does not say *which* of these is
+            // live, especially with a single device where there is nothing to
+            // compare it against.
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.current
+                text: "\uf00c"
+                color: Colors.primary
+                font.family: Appearance.fontFamilyIcons
+                font.pixelSize: Appearance.fontSizeSmall
             }
         }
 

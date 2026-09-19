@@ -124,45 +124,84 @@ ShellPanel {
 
             // ---- Devices ---------------------------------------------------
             //
-            // Hidden when there is nothing to choose between, which on a laptop
-            // with no dock or headset is most of the time.
+            // Always shown, even with a single device of each kind. Hiding the
+            // section when there was nothing to choose between meant you could
+            // not see *which* device was active, could not discover that
+            // switching existed at all, and got a section appearing out of
+            // nowhere the moment a headset was plugged in.
 
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
                 color: Colors.outline
                 opacity: 0.4
-                visible: deviceColumn.visible
             }
 
             Column {
                 id: deviceColumn
                 Layout.fillWidth: true
                 spacing: 2
-                visible: Audio.sinks.length > 1 || Audio.sources.length > 1
+
+                Text {
+                    text: "Output"
+                    color: Colors.textSecondary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    font.bold: true
+                    bottomPadding: 2
+                }
 
                 Repeater {
-                    model: Audio.sinks.length > 1 ? Audio.sinks : []
+                    model: Audio.sinks
                     delegate: DeviceRow {
                         required property var modelData
                         width: deviceColumn.width
                         node: modelData
                         current: Audio.sink === modelData
-                        icon: ""
+                        icon: "\uf028"
                         onPicked: Audio.setDefaultSink(modelData)
                     }
                 }
 
+                Text {
+                    visible: Audio.sinks.length === 0
+                    text: "No output devices"
+                    color: Colors.textSecondary
+                    opacity: 0.7
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                }
+
+                Item { width: 1; height: Appearance.spacingSmall }
+
+                Text {
+                    text: "Input"
+                    color: Colors.textSecondary
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
+                    font.bold: true
+                    bottomPadding: 2
+                }
+
                 Repeater {
-                    model: Audio.sources.length > 1 ? Audio.sources : []
+                    model: Audio.sources
                     delegate: DeviceRow {
                         required property var modelData
                         width: deviceColumn.width
                         node: modelData
                         current: Audio.source === modelData
-                        icon: ""
+                        icon: "\uf130"
                         onPicked: Audio.setDefaultSource(modelData)
                     }
+                }
+
+                Text {
+                    visible: Audio.sources.length === 0
+                    text: "No input devices"
+                    color: Colors.textSecondary
+                    opacity: 0.7
+                    font.family: Appearance.fontFamily
+                    font.pixelSize: Appearance.fontSizeSmall
                 }
             }
 
