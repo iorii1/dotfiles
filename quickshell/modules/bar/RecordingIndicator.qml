@@ -9,57 +9,56 @@ Item {
     id: root
 
     visible: Capture.recording
-    implicitWidth: visible ? row.implicitWidth + Appearance.spacingSmall * 2 : 0
-    implicitHeight: 24
+    implicitWidth: visible ? rowLayout.implicitWidth : 0
+    implicitHeight: 20
 
-    Behavior on implicitWidth { Anim {} }
+    scale: fx.gestureScale
+    Behavior on scale { Anim { duration: Appearance.animFast } }
 
     Rectangle {
         anchors.fill: parent
-        radius: Appearance.radiusNormal
-        color: fx.containsMouse ? Colors.alpha(Colors.error, 0.28) : Colors.alpha(Colors.error, 0.16)
-        Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+        anchors.margins: -6
+        radius: 8
+        color: "#ffffff"
+        opacity: fx.flashOpacity
+    }
 
-        scale: fx.gestureScale
-        Behavior on scale { Anim { duration: Appearance.animFast } }
+    Row {
+        id: rowLayout
+        anchors.centerIn: parent
+        spacing: 5
 
-        Row {
-            id: row
-            anchors.centerIn: parent
-            spacing: Appearance.spacingSmall
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 8
+            height: 8
+            radius: 4
+            color: Colors.error
 
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 8
-                height: 8
-                radius: 4
-                color: Colors.error
-
-                // Breathes on the shared pulse token, like every other ambient
-                // loop in the shell.
-                SequentialAnimation on opacity {
-                    running: root.visible
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.35; duration: Appearance.animPulse; easing.type: Easing.InOutSine }
-                    NumberAnimation { to: 1.0; duration: Appearance.animPulse; easing.type: Easing.InOutSine }
-                }
+            // Breathes on the shared pulse token, like every other ambient loop
+            // in the shell.
+            SequentialAnimation on opacity {
+                running: root.visible
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.35; duration: Appearance.animPulse; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 1.0; duration: Appearance.animPulse; easing.type: Easing.InOutSine }
             }
+        }
 
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "REC"
-                color: Colors.error
-                font.family: Appearance.fontFamily
-                font.pixelSize: Appearance.fontSizeSmall
-                font.bold: true
-            }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "REC"
+            color: Colors.error
+            font.family: Appearance.fontFamily
+            font.pixelSize: Appearance.fontSizeSmall
+            font.bold: true
         }
     }
 
     PressFx {
         id: fx
         anchors.fill: parent
-        focusRadius: Appearance.radiusNormal
+        anchors.margins: -4
         onActivated: Capture.stopRecording()
     }
 }
