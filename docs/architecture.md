@@ -112,6 +112,8 @@ launcher.json       app usage counts, for ranking
 notifications.json  history, do-not-disturb, muted apps
 theme.json          light or dark   (the matugen hook reads this one too)
 nightlight.json     on/off and colour temperatures
+clipboard.json      pinned entries
+dock.json           pinned apps, in order
 ```
 
 Each is created the first time something needs to write it, so a fresh install
@@ -192,8 +194,8 @@ Two consequences worth internalising:
 
 ```
 config/     Appearance, Colors            design tokens. No behaviour.
-services/   22 singletons + 2 components  state and the outside world.
-modules/    21 directories                windows and widgets. UI only.
+services/   24 singletons + 2 components  state and the outside world.
+modules/    22 directories                windows and widgets. UI only.
 ```
 
 The dependency direction is strictly downward: modules read services read
@@ -281,6 +283,13 @@ before writing a new one:
 | `TextField` | themed input, with a password mode |
 | `FillButton` | hold-to-activate, with optional two-stage confirm |
 
+Context menus are separate, in `modules/menu/`: `Menu.show(handle, x, y)` puts
+one on screen, built from a `QsMenuHandle` via `QsMenuOpener`. The tray is the
+first user. Submenus expand inline rather than flying out, and the nested rows
+load through a `Loader` with a string source, because QML rejects a component
+that instantiates itself -- that is a load-time error which takes the whole
+config down, not a runtime one.
+
 `PressFx` is the one to understand: binding a sibling `Rectangle`'s `scale` to
 `fx.gestureScale` and its overlay's `opacity` to `fx.flashOpacity` gets you the
 shell's entire interaction feel, and because it sets `activeFocusOnTab` every
@@ -310,6 +319,7 @@ Where each service's truth actually comes from:
 | `Compositor`, `FocusedScreen` | Hyprland IPC | dispatch, focused monitor |
 | `Cava`, `Clipboard`, `Capture`, `NightLight`, `IdleInhibit`, `Theme`, `Weather` | spawned processes | cava, cliphist, grim, wlsunset, the keep-awake helper, matugen, curl |
 | `BarConfig`, `Persist` | `FileView` on disk | settings and state |
+| `DockPins`, `Menu` | in-memory + `Persist` | what is pinned to the dock, and which menu is showing |
 | `UiState` | nothing | pure in-memory state bus |
 | `StateToasts` | observes the above | announces changes nobody was told about |
 

@@ -21,7 +21,7 @@
 Everything below is QML in `quickshell/`, written for this setup rather than
 assembled from widgets:
 
-- **Bar** -- workspaces, cava audio visualiser, MPRIS media widget with cover
+- **Bar** -- workspaces (scroll them to switch), cava audio visualiser, MPRIS media widget with cover
   art, the focused window's title, clock, notification bell, system tray,
   volume, battery, Wi-Fi, Bluetooth, system monitor, quick settings and a power
   button. Height, margin, corner radius, opacity,
@@ -31,16 +31,19 @@ assembled from widgets:
   pointer reaches the bottom centre of the screen, then slides up; clicking a
   pill focuses that window, and the focused one carries a dot underneath. Each
   monitor's dock lists only that monitor's windows.
-  `qs ipc call dock toggle` pins it open without the pointer.
+  Apps can be pinned to it: a pin with no window is a launcher, a pin with
+  windows is a switcher for them, and each pill carries a dot per window.
+  Right-click a pill to pin or unpin it, middle-click to close that window.
+  `qs ipc call dock toggle` pins the dock open without the pointer.
 - **Launcher** (`SUPER + SPACE`) -- fuzzy app search, ranked by match quality
   and by what you actually launch. Matches names, generic names, keywords and
   comments, and offers `.desktop` actions ("New Private Window") as results.
   Also does arithmetic, runs a command after `>`, and reaches the shell's own
   verbs -- type "cpu" for the system monitor, "shut" for shutdown.
 - **Overview** (`SUPER + TAB`) -- workspace grid with window icons, navigable
-  with the arrow keys.
+  with the arrow keys. Drag a window onto another workspace to move it.
 - **Clipboard history** (`SUPER + V`) -- cliphist-backed, searchable, with real
-  image thumbnails and per-entry delete.
+  image thumbnails, per-entry delete and pinning.
 - **Notification centre** (`SUPER + N`) -- history that survives a reload,
   per-app mute, inline replies, actions on history entries, plus toast popups.
   The shell *is* the notification daemon; there is no mako.
