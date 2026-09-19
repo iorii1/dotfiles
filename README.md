@@ -22,8 +22,9 @@ Everything below is QML in `quickshell/`, written for this setup rather than
 assembled from widgets:
 
 - **Bar** -- workspaces, cava audio visualiser, MPRIS media widget with cover
-  art, clock, notification bell, system tray, volume, quick settings, battery,
-  Wi-Fi, Bluetooth and a power button. Height, margin, corner radius, opacity,
+  art, the focused window's title, clock, notification bell, system tray,
+  volume, battery, Wi-Fi, Bluetooth, system monitor, quick settings and a power
+  button. Height, margin, corner radius, opacity,
   animation speed, roundness and per-widget visibility are all live-editable
   (`SUPER + ,`).
 - **Dock** -- the window list, kept out of the bar. It stays hidden until the
@@ -34,6 +35,8 @@ assembled from widgets:
 - **Launcher** (`SUPER + SPACE`) -- fuzzy app search, ranked by match quality
   and by what you actually launch. Matches names, generic names, keywords and
   comments, and offers `.desktop` actions ("New Private Window") as results.
+  Also does arithmetic, runs a command after `>`, and reaches the shell's own
+  verbs -- type "cpu" for the system monitor, "shut" for shutdown.
 - **Overview** (`SUPER + TAB`) -- workspace grid with window icons, navigable
   with the arrow keys.
 - **Clipboard history** (`SUPER + V`) -- cliphist-backed, searchable, with real
@@ -43,6 +46,9 @@ assembled from widgets:
   The shell *is* the notification daemon; there is no mako.
 - **Media** (`SUPER + SHIFT + M`) -- MPRIS controls with a player switcher, so
   a browser and a music player no longer fight over which one the bar shows.
+- **System monitor** (`SUPER + SHIFT + D`) -- CPU, memory, temperature, disk
+  and network, read from `/proc` and `/sys`. The bar button turns red past 90%
+  or 85°C.
 - **Quick settings** (`SUPER + SHIFT + ,`) -- light/dark mode, night light,
   keep-awake, do-not-disturb and volume in one panel. Wi-Fi, Bluetooth,
   battery/power-profile, calendar with weather, audio and media each also have
@@ -100,6 +106,7 @@ indicators rather than panels.
 | `SUPER` + `B` | Bluetooth |
 | `SUPER` + `C` | Calendar |
 | `SUPER` + `SHIFT` + `M` | Media |
+| `SUPER` + `SHIFT` + `D` | System monitor |
 | `SUPER` + `P` | Power menu |
 | `SUPER` + `W` | Wallpaper picker |
 | `SUPER` + `Escape` | Lock screen |
@@ -113,6 +120,7 @@ indicators rather than panels.
 | `SUPER` + `SHIFT` + `h/j/k/l` | Swap window |
 | `SUPER` + `CTRL` + `h/j/k/l` | Resize window |
 | `SUPER` + `LMB` / `RMB` | Move / resize window (drag) |
+| `SUPER` + `CTRL` + `RMB` | Close window |
 | `SUPER` + `R` | Reload Hyprland config |
 | `SUPER` + `M` / `SUPER` + `SHIFT` + `E` | Quit Hyprland |
 | `Print` | Screenshot: full screen |
@@ -141,8 +149,8 @@ qs ipc call <target> toggle     # also: open, close
 ```
 
 Targets: `launcher`, `clipboard`, `notifications`, `overview`, `settings`,
-`quicksettings`, `network`, `bluetooth`, `battery`, `audio`, `calendar`,
-`media`, `power`, `dock`.
+`quicksettings`, `dashboard`, `network`, `bluetooth`, `battery`, `audio`,
+`calendar`, `media`, `power`, `dock`.
 
 Capture has its own verbs rather than toggle/open/close:
 
@@ -151,6 +159,12 @@ qs ipc call capture region|window|output|screen   # take a shot
 qs ipc call capture copy|save|annotate|close      # act on the preview
 qs ipc call capture record                        # start / stop recording
 ```
+
+The shell also ships its own lock screen, which is deliberately **not** bound
+to a key yet -- `SUPER + Escape` still goes to hyprlock. Read
+[docs/architecture.md](docs/architecture.md) §9 before trying
+`qs ipc call lock lock`: while a session lock is held, a crash leaves the
+session locked and the way back is a TTY.
 
 Plus `qs ipc call osd volume|brightness|mic` and
 `qs ipc call theme reloadColors`.

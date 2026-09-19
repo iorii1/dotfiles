@@ -5,8 +5,8 @@ This is a record of a single large pass over the Quickshell config in
 learned by running them. It is written to be read by someone who wants to
 understand *why* the code looks the way it does, not as a changelog.
 
-The shell went from **5,943 lines of QML across 54 files** to **9,710 across
-74**, and from **14 IPC targets to 17**.
+The shell went from **5,943 lines of QML across 54 files** to **11,107 across
+84**, and from **14 IPC targets to 19**.
 
 ---
 
@@ -112,6 +112,25 @@ Briefly, since the README covers the user-facing side:
 - **Capture and recording** with a preview offering Copy / Save / Annotate /
   Discard.
 - **A quick settings panel**, finally using `ToggleRow`'s expandable mechanism.
+
+Then a second pass, measured against what caelestia ships:
+
+- **System monitoring**, which did not exist in any form: `Resources` reading
+  `/proc` and `/sys`, and a dashboard on `SUPER+SHIFT+D`.
+- **Launcher modes** — arithmetic, `>` to run a command, and the shell's own
+  verbs, so "cpu" reaches the system monitor and "shut" reaches shutdown.
+- **A window title** in the bar, which had twelve modules and no way to say
+  what had focus.
+- **Notification grouping**, collapsing a run from one app into the newest with
+  a count.
+- **Toasts for state the shell knew and never mentioned** — charger, battery
+  thresholds, do-not-disturb, audio device changes, night light, keep-awake.
+- **A media player switcher**, replacing the same "first playing player" loop
+  duplicated in two files.
+- **A lock screen** on ext-session-lock and PAM, deliberately not bound to
+  anything yet.
+- **The first window rules** in the repo, and XWayland scaling, which was
+  leaving XWayland clients soft at scale 1.25.
 
 ---
 
@@ -219,6 +238,82 @@ The general lesson is the debugging shape, not the two quirks: when a layout is
 wrong, walk the tree and print `height`, `implicitHeight`, `visible` and
 `children.length` at each level. The answer was two levels down both times, and
 no amount of re-reading the QML would have produced it.
+
+### A singleton nothing references is never created
+
+`StateToasts` observes half the services and announces what changed. It has no
+public API, because nothing needs to ask it anything — and that is exactly why
+it did not work as a singleton. QML creates a singleton the first time
+something reads a property off it, and nothing ever read one.
+
+The instinct is to force it: `Component.onCompleted: StateToasts.armed` in
+`shell.qml`. That took the entire shell down —
+
+```
+ERROR: Failed to load configuration
+  caused by @shell.qml[27:5]: Non-existent attached object
+```
+
+— because Quickshell's `Scope` does not support the `Component` attached
+property. The right answer was not a workaround but a correction: something
+with no public API that exists only to observe is a **component**, not a
+singleton, and `shell.qml` instantiates it like any other object.
+
+The same reasoning applies to `Persist`, for a different reason: each store is
+a separate file, so there is nothing singular to be.
+
+### An observer that arms late misses the value it is comparing against
+
+The state toasts must not fire on login — otherwise every one of them
+announces, once, that the state has "changed" to what it already was. So they
+arm on a delay, and the `Connections` carry `enabled: root.armed`.
+
+That is correct and it introduced a second bug. A disabled `Connections`
+receives nothing, so the signal that fires as the services first settle never
+arrives, and `_lastSink` stayed empty. The first *real* device change then
+looked like the initial one and was swallowed:
+
+```qml
+const had = root._lastSink !== ""   // false, because we were asleep for it
+root._lastSink = name
+if (had) notify(...)                // so the first change says nothing
+```
+
+Measured exactly that way: switching output device produced nothing at all,
+and exactly one toast once the previous values were seeded at the moment of
+arming rather than inferred from a signal that had already passed.
+
+### eval is not a calculator
+
+The launcher needed arithmetic. `eval(query)` is one line and wrong twice over:
+it will execute anything typed into a launcher, and it *accepts* input that is
+not arithmetic at all — `[]+{}` is `"[object Object]"`, an assignment returns
+its value, a property access returns whatever is there — so it answers
+confidently instead of declining.
+
+A tokeniser and a recursive-descent parser is perhaps eighty lines and rejects
+all of it. Checked against 23 cases including `[]+{}`, `alert(1)` and `1;2`,
+all of which correctly produce nothing.
+
+Worth noting where the line is: `evaluate("5")` returns `5`, because 5 *is* an
+expression. Whether to offer that as a calculator result is a separate
+question, and `looksLikeMath()` answers it — a bare number is not a sum
+somebody wants the answer to.
+
+### Hardware can make a feature impossible, not just unconfigured
+
+Hibernate looked like a one-line addition to the power menu. This machine's
+only swap is zram: four gigabytes of *compressed RAM*. Hibernation writes RAM
+to swap and then cuts power — hibernating into RAM cannot survive that, and
+`systemctl hibernate` fails every time.
+
+A button that always fails is worse than no button, so it is shown only when
+`swapon` reports backing store that is not zram, and the keyboard focus chain
+skips it when hidden.
+
+The general shape: before adding a control for something the system
+*advertises* — `/sys/power/state` does list `disk` here — check whether it can
+actually work on this machine.
 
 ### A `qmldir` replaces directory scanning entirely
 
@@ -348,6 +443,12 @@ immediately) before touching the UI.
 Stated plainly, because a document like this is worth nothing if it only lists
 wins.
 
+- **The lock screen has never been locked.** Its authentication path is
+  verified — PAM starts, asks for a password with echo off, and returns
+  `Failed` for a wrong one — but the surface itself has not been shown, because
+  testing it needs a real password typed at it. It is on no keybind for that
+  reason, and hyprlock is still installed and still on `SUPER+Escape`. See
+  `architecture.md` §9 for the failure mode before trying it.
 - **Screen recording has never been run end to end** — start, stop, and a
   playable file. The region picker needs a human, so it was never driven to
   completion. If a recording will not play, the SIGINT handling in
@@ -359,6 +460,8 @@ wins.
   real causes were found and fixed (the binding loop, the focus grab). It has
   been reliable since, but that is not proof the flake is gone — only that two
   mechanisms that could produce it are gone.
+- **Hibernate cannot work on this machine** and is hidden accordingly; the
+  button has therefore never been exercised anywhere.
 - **Enterprise (802.1X) Wi-Fi** still needs `nmtui` once. A PSK field cannot
   serve a network that wants a certificate.
 - **`Hyprland.focusedMonitor` takes about a second to populate** after startup,
@@ -366,3 +469,6 @@ wins.
   build. `FocusedScreen` falls back to the focused workspace's monitor, and
   returning null is safe — it means "let the compositor place it", which is
   what every window did before.
+- **No GPU metrics.** The dashboard covers CPU, memory, temperature, disk and
+  network; caelestia also shows GPU, which needs vendor-specific tooling this
+  machine does not have installed.
