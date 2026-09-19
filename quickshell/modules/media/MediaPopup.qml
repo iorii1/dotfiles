@@ -9,25 +9,16 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: popupWindow
 
-    visible: UiState.mediaPopupOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    exclusionMode: ExclusionMode.Ignore
-    focusable: false
-    color: "transparent"
+    name: "mediaPopup"
 
-    anchors { top: true; bottom: true; left: true; right: true }
+    // Only one player list at a time, and it shuts with the popup.
+    property bool playerListOpen: false
+    onOpenChanged: if (!open) popupWindow.playerListOpen = false
 
-    readonly property var player: {
-        const list = Mpris.players.values
-        for (let i = 0; i < list.length; i++) {
-            if (list[i].playbackState === MprisPlaybackState.Playing) return list[i]
-        }
-        return list.length > 0 ? list[0] : null
-    }
+    readonly property var player: Media.active
     readonly property bool active: player !== null && player.trackTitle !== ""
     readonly property bool playing: active && player.playbackState === MprisPlaybackState.Playing
 
@@ -61,11 +52,6 @@ PanelWindow {
         return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.hide("mediaPopup")
-    }
-
     PopupCard {
         id: card
         anchors.left: parent.left
@@ -91,6 +77,26 @@ PanelWindow {
             anchors.top: parent.top
             anchors.margins: Appearance.spacingNormal
             spacing: Appearance.spacingNormal
+
+            // --- Which player ------------------------------------------------
+            //
+            // Only worth a row when more than one thing is registered on the
+            // bus; with a single player it would just restate the obvious.
+            Select {
+                Layout.fillWidth: true
+                visible: Media.hasChoice
+                label: "Playing on"
+                icon: "\uf001"
+                model: Media.players
+                textFor: (p) => Media.displayName(p)
+                isCurrent: (p) => Media.isActive(p)
+                expanded: popupWindow.playerListOpen
+                onExpandRequested: popupWindow.playerListOpen = !popupWindow.playerListOpen
+                onPicked: (p) => {
+                    Media.select(p)
+                    popupWindow.playerListOpen = false
+                }
+            }
 
             // --- Vinyl disc -------------------------------------------------
             Item {
@@ -145,7 +151,7 @@ PanelWindow {
                                 id: artImg
                                 anchors.fill: parent
                                 source: {
-                                    if (!popupWindow.active) return ""
+                                    if (!popupWindow.player) return ""
                                     const u = popupWindow.player.trackArtUrl || ""
                                     if (!u) return ""
                                     return (u.startsWith("file://") || u.startsWith("http")) ? u : "file://" + u
@@ -168,7 +174,7 @@ PanelWindow {
                                 source: artImg
                                 maskEnabled: true
                                 maskSource: artMask
-                                opacity: (popupWindow.active && artImg.status === Image.Ready && artImg.source !== "") ? 1.0 : 0.0
+                                opacity: (popupWindow.player && artImg.status === Image.Ready && artImg.source !== "") ? 1.0 : 0.0
                                 Behavior on opacity { NumberAnimation { duration: Appearance.animSlow } }
                             }
 
@@ -176,7 +182,7 @@ PanelWindow {
                                 anchors.fill: parent
                                 radius: width / 2
                                 color: Colors.alpha(Colors.surfaceContainer, Appearance.layerOpacity)
-                                opacity: (popupWindow.active && artImg.status === Image.Ready && artImg.source !== "") ? 0.0 : 1.0
+                                opacity: (popupWindow.player && artImg.status === Image.Ready && artImg.source !== "") ? 0.0 : 1.0
                                 Behavior on opacity { NumberAnimation { duration: Appearance.animNormal } }
 
                                 Text {
@@ -231,7 +237,7 @@ PanelWindow {
 
                         Text {
                             id: titleMain
-                            text: popupWindow.active ? (popupWindow.player.trackTitle || "Unknown Track") : "Nothing playing"
+                            text: popupWindow.player ? (popupWindow.player.trackTitle || "Unknown Track") : "Nothing playing"
                             font.family: Appearance.fontFamily
                             font.bold: true
                             font.pixelSize: Appearance.fontSizeNormal
@@ -268,26 +274,26 @@ PanelWindow {
 
             Text {
                 Layout.fillWidth: true
-                text: popupWindow.active ? (popupWindow.player.trackArtist || "Unknown Artist") : ""
+                text: popupWindow.player ? (popupWindow.player.trackArtist || "Unknown Artist") : ""
                 font.family: Appearance.fontFamily
                 font.pixelSize: Appearance.fontSizeSmall
                 color: Colors.textSecondary
                 elide: Text.ElideRight
-                visible: popupWindow.active
+                visible: !!popupWindow.player
             }
 
             // --- Progress ----------------------------------------------------
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2
-                visible: popupWindow.active && popupWindow.player.length > 0
+                visible: popupWindow.player && popupWindow.player.length > 0
 
                 Slider {
                     id: seekSlider
                     Layout.fillWidth: true
-                    value: (popupWindow.active && popupWindow.player.length > 0) ? (popupWindow.displayPosition / popupWindow.player.length) : 0
+                    value: (popupWindow.player && popupWindow.player.length > 0) ? (popupWindow.displayPosition / popupWindow.player.length) : 0
                     onMoved: (v) => {
-                        if (popupWindow.active && popupWindow.player.length > 0) {
+                        if (popupWindow.player && popupWindow.player.length > 0) {
                             popupWindow.displayPosition = v * popupWindow.player.length
                             popupWindow.player.position = popupWindow.displayPosition
                         }
@@ -304,7 +310,7 @@ PanelWindow {
                     }
                     Item { Layout.fillWidth: true }
                     Text {
-                        text: popupWindow.active ? popupWindow.formatTime(popupWindow.player.length) : "--:--"
+                        text: popupWindow.player ? popupWindow.formatTime(popupWindow.player.length) : "--:--"
                         color: Colors.textSecondary
                         font.family: Appearance.fontFamily
                         font.pixelSize: Appearance.fontSizeSmall
@@ -329,7 +335,7 @@ PanelWindow {
                     PressFx {
                         id: prevFx
                         anchors.fill: parent
-                        onActivated: if (popupWindow.active && popupWindow.player.canGoPrevious) popupWindow.player.previous()
+                        onActivated: if (popupWindow.player && popupWindow.player.canGoPrevious) popupWindow.player.previous()
                     }
                 }
 
@@ -361,7 +367,7 @@ PanelWindow {
                         id: playFx
                         hoverScale: 1.0
                         anchors.fill: parent
-                        onActivated: if (popupWindow.active && popupWindow.player.canTogglePlaying) popupWindow.player.togglePlaying()
+                        onActivated: if (popupWindow.player && popupWindow.player.canTogglePlaying) popupWindow.player.togglePlaying()
                     }
                 }
 
@@ -377,7 +383,7 @@ PanelWindow {
                     PressFx {
                         id: nextFx
                         anchors.fill: parent
-                        onActivated: if (popupWindow.active && popupWindow.player.canGoNext) popupWindow.player.next()
+                        onActivated: if (popupWindow.player && popupWindow.player.canGoNext) popupWindow.player.next()
                     }
                 }
             }

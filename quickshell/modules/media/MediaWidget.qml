@@ -9,15 +9,11 @@ import "../common"
 Item {
     id: root
 
-    readonly property var player: {
-        const list = Mpris.players.values
-        for (let i = 0; i < list.length; i++) {
-            if (list[i].playbackState === MprisPlaybackState.Playing) return list[i]
-        }
-        return list.length > 0 ? list[0] : null
-    }
-    readonly property bool playing: root.player && root.player.playbackState === MprisPlaybackState.Playing
-    readonly property bool active: root.player !== null && root.player.trackTitle !== ""
+    // Which player this is about is Media's decision, so the widget and the
+    // popup can never disagree about it.
+    readonly property var player: Media.active
+    readonly property bool playing: Media.playing
+    readonly property bool active: Media.hasActive
 
     implicitWidth: root.active ? rowLayout.implicitWidth + Appearance.spacingNormal * 2 : 0
     implicitHeight: 24
@@ -78,7 +74,11 @@ Item {
                             asynchronous: true
                             fillMode: Image.PreserveAspectCrop
                             source: {
-                                if (!root.active) return ""
+                                // Guarded on the player itself, not on a sibling
+                                // boolean: both derive from Media.active and can be
+                                // re-evaluated in different passes, so checking one
+                                // while dereferencing the other reads null.
+                                if (!root.player) return ""
                                 const u = root.player.trackArtUrl || ""
                                 if (!u) return ""
                                 return (u.startsWith("file://") || u.startsWith("http")) ? u : "file://" + u
@@ -130,7 +130,7 @@ Item {
 
                     Text {
                         id: titleText
-                        text: root.active
+                        text: root.player
                             ? (root.player.trackTitle || "Unknown") + (root.player.trackArtist ? " — " + root.player.trackArtist : "")
                             : ""
                         color: Colors.textPrimary
