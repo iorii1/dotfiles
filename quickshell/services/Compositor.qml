@@ -21,6 +21,11 @@ Singleton {
         Hyprland.dispatch("hl.dsp.focus({ window = 'address:0x" + address + "' })")
     }
 
+    function moveWindowToWorkspace(address, workspaceId) {
+        Hyprland.dispatch("hl.dsp.window.move({ window = 'address:0x" + address
+            + "', workspace = " + workspaceId + " })")
+    }
+
     function closeWindow(address) {
         Hyprland.dispatch("hl.dsp.window.close({ window = 'address:0x" + address + "' })")
     }

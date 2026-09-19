@@ -35,6 +35,11 @@ ShellPanel {
         overviewWindow.selectedIndex = ((overviewWindow.selectedIndex + delta) % n + n) % n
     }
 
+    // Dragged window icons are reparented here while they move. The workspace
+    // tiles are PopupCards, which clip, so an icon dragged inside one would be
+    // sliced off at its edge and could never reach another tile.
+    property Item dragLayer: null
+
     function _activateSelected() {
         const list = Hyprland.workspaces.values
         if (overviewWindow.selectedIndex < list.length) {
@@ -90,6 +95,14 @@ ShellPanel {
         width: grid.implicitWidth
         height: grid.implicitHeight
 
+        Component.onCompleted: overviewWindow.dragLayer = dragLayer
+
+        Item {
+            id: dragLayer
+            anchors.fill: parent
+            z: 100
+        }
+
         opacity: UiState.overviewOpen ? 1 : 0
         scale: UiState.overviewOpen ? 1 : Appearance.popupFromScale
         Behavior on opacity { Anim {} }
@@ -116,6 +129,35 @@ ShellPanel {
                     opacity: 0
                     Component.onCompleted: entranceAnim.start()
                     PopIn { id: entranceAnim; target: tile; delay: Appearance.staggerDelay(index) }
+
+                    DropArea {
+                        id: tileDrop
+                        anchors.fill: parent
+
+                        onDropped: (drop) => {
+                            const src = drop.source
+                            if (!src || !src.modelData) return
+                            // Dropping a window back where it started is a
+                            // no-op, not a move.
+                            if (src.workspaceId === tile.modelData.id) return
+                            Compositor.moveWindowToWorkspace(src.modelData.address,
+                                                             tile.modelData.id)
+                            drop.accept()
+                        }
+                    }
+
+                    // Lights up the tile the pointer is over while dragging.
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Appearance.radiusLarge
+                        color: "transparent"
+                        border.width: 2
+                        border.color: Colors.primary
+                        opacity: tileDrop.containsDrag ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on opacity { Anim { duration: Appearance.animFast } }
+                        z: 50
+                    }
 
                     MouseArea {
                         id: tileHoverFx
@@ -215,6 +257,11 @@ ShellPanel {
                                 id: winTile
                                 required property var modelData
                                 required property int index
+
+                                // Read by the DropArea to ignore a drop back
+                                // onto the workspace the window already lives
+                                // on.
+                                readonly property int workspaceId: tile.modelData.id
                                 width: 60
                                 spacing: 4
 
@@ -223,9 +270,18 @@ ShellPanel {
                                 Component.onCompleted: winEntranceAnim.start()
                                 PopIn { id: winEntranceAnim; target: winTile; delay: Appearance.staggerDelay(winTile.index); fromScale: 0.7 }
 
+                                // A fixed slot the layout keeps, so the icon
+                                // can be lifted out of it mid-drag without the
+                                // row collapsing and reflowing under the
+                                // pointer.
+                                Item {
+                                    id: slot
+                                    Layout.alignment: Qt.AlignHCenter
+                                    width: 48
+                                    height: 48
+
                                 Rectangle {
                                     id: iconBg
-                                    Layout.alignment: Qt.AlignHCenter
                                     width: 48
                                     height: 48
                                     radius: Appearance.radiusNormal
@@ -234,6 +290,26 @@ ShellPanel {
 
                                     scale: winFx.gestureScale
                                     Behavior on scale { Anim { duration: Appearance.animFast } }
+
+                                    Drag.active: winFx.drag.active
+                                    Drag.source: winTile
+                                    Drag.hotSpot.x: 24
+                                    Drag.hotSpot.y: 24
+
+                                    opacity: winFx.drag.active ? 0.75 : 1
+
+                                    // Reparented to the drag layer for the
+                                    // duration, because the workspace tile
+                                    // clips and would otherwise cut the icon
+                                    // off at its own edge.
+                                    states: State {
+                                        name: "dragging"
+                                        when: winFx.drag.active
+                                        ParentChange {
+                                            target: iconBg
+                                            parent: overviewWindow.dragLayer
+                                        }
+                                    }
 
                                     Rectangle {
                                         anchors.fill: parent
@@ -257,8 +333,43 @@ ShellPanel {
                                         hoverScale: 1.0
                                         pressScale: Appearance.pressScaleSubtle
                                         anchors.fill: parent
-                                        onActivated: overviewWindow.focusWindow(winTile.modelData.address)
+                                        drag.target: iconBg
+                                        drag.threshold: 8
+
+                                        // Qt does not emit clicked after a
+                                        // drag, but drag.active is already
+                                        // false by release, so relying on it
+                                        // alone would be a guard that never
+                                        // fires. This latches instead.
+                                        property bool didDrag: false
+                                        onPressed: winFx.didDrag = false
+                                        Connections {
+                                            target: winFx.drag
+                                            function onActiveChanged() {
+                                                if (winFx.drag.active) winFx.didDrag = true
+                                            }
+                                        }
+
+                                        // Only a click focuses -- a drag that
+                                        // happens to end over the tile it
+                                        // started on must not also focus the
+                                        // window and close the overview.
+                                        onActivated: {
+                                            if (winFx.didDrag) return
+                                            overviewWindow.focusWindow(winTile.modelData.address)
+                                        }
+
+                                        // Whether or not a DropArea took it,
+                                        // the icon has to go home: ParentChange
+                                        // restores the parent but leaves x and
+                                        // y wherever the drag ended.
+                                        onReleased: {
+                                            iconBg.Drag.drop()
+                                            iconBg.x = 0
+                                            iconBg.y = 0
+                                        }
                                     }
+                                }
                                 }
 
                                 Text {
