@@ -10,7 +10,13 @@ Item {
     property string appName: ""
     property string appComment: ""
     property string appIcon: ""
+
+    // Results that are not apps -- a sum, a command, one of the shell's own
+    // verbs -- have no desktop icon, so they carry a glyph instead.
+    property string glyph: ""
+
     property bool active: false
+    property bool mono: false
     signal activated()
 
     scale: Appearance.popFromScale
@@ -57,14 +63,28 @@ Item {
             anchors.rightMargin: Appearance.spacingNormal
             spacing: Appearance.spacingNormal
 
-            Image {
+            Item {
                 Layout.preferredWidth: 28
                 Layout.preferredHeight: 28
                 scale: root.active ? 1.12 : 1.0
                 Behavior on scale { PopAnim { easing.overshoot: Appearance.overshootPop } }
-                source: root.appIcon ? "image://icon/" + root.appIcon : ""
-                fillMode: Image.PreserveAspectFit
-                asynchronous: true
+
+                Image {
+                    anchors.fill: parent
+                    visible: root.glyph === ""
+                    source: root.appIcon ? "image://icon/" + root.appIcon : ""
+                    fillMode: Image.PreserveAspectFit
+                    asynchronous: true
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: root.glyph !== ""
+                    text: root.glyph
+                    color: Colors.primary
+                    font.family: Appearance.fontFamilyIcons
+                    font.pixelSize: 20
+                }
             }
 
             ColumnLayout {
@@ -75,7 +95,7 @@ Item {
                     Layout.fillWidth: true
                     text: root.appName
                     color: Colors.textPrimary
-                    font.family: Appearance.fontFamily
+                    font.family: root.mono ? Appearance.fontFamilyMono : Appearance.fontFamily
                     font.pixelSize: Appearance.fontSizeNormal
                     font.bold: true
                     elide: Text.ElideRight

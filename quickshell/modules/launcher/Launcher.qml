@@ -13,7 +13,7 @@ ShellPanel {
     name: "launcher"
 
     property string query: ""
-    property var results: Apps.filtered(query)
+    property var results: Search.results(query)
 
     // The selection is *not* a binding on currentIndex.
     //
@@ -41,7 +41,7 @@ ShellPanel {
     }
 
     function _launch(item) {
-        Apps.launch(item)
+        Search.activate(item)
         UiState.hide("launcher")
     }
 
@@ -82,7 +82,7 @@ ShellPanel {
 
                 Text {
                     visible: searchInput.text === ""
-                    text: "Search apps…"
+                    text: "Search apps, or type a sum, or > to run a command"
                     color: Colors.textSecondary
                     font.family: Appearance.fontFamily
                     font.pixelSize: Appearance.fontSizeLarge
@@ -139,7 +139,7 @@ ShellPanel {
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "No apps found"
+                    text: "Nothing found"
                     color: Colors.textSecondary
                     opacity: 0.6
                     font.family: Appearance.fontFamily
@@ -161,7 +161,9 @@ ShellPanel {
                     width: resultsList.width
                     appName: modelData.name
                     appComment: modelData.comment
-                    appIcon: modelData.icon
+                    appIcon: modelData.kind === "app" ? modelData.icon : ""
+                    glyph: modelData.kind === "app" ? "" : modelData.icon
+                    mono: modelData.kind === "calc"
                     active: ListView.isCurrentItem
                     onActivated: launcherWindow._launch(modelData)
                 }
