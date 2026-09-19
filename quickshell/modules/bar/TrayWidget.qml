@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import "../../config"
+import "../../services"
 import "../common"
 
 Item {
@@ -54,17 +55,51 @@ Item {
                     asynchronous: true
                 }
 
+                // The menu opens below the item, in the coordinate space of a
+                // full-screen layer surface -- which is the screen, because the
+                // bar spans it and every overlay is anchored to all four edges.
+                function openMenu() {
+                    if (!trayItem.modelData.hasMenu) return
+                    const p = trayItem.mapToItem(null, 0, trayItem.height)
+                    Menu.show(trayItem.modelData.menu, p.x - 8, p.y + BarConfig.barMargin + 4)
+                }
+
                 PressFx {
                     id: fx
                     anchors.fill: parent
                     anchors.margins: -4
-                    onActivated: trayItem.modelData.activate()
+
+                    // An item that says onlyMenu has no activate action at all,
+                    // so left-clicking it used to do precisely nothing.
+                    onActivated: {
+                        if (trayItem.modelData.onlyMenu) trayItem.openMenu()
+                        else trayItem.modelData.activate()
+                    }
+
+                    // SNI items can take scroll -- volume applets and the like
+                    // use it. This was never forwarded.
+                    onWheel: (wheel) => {
+                        const dx = wheel.angleDelta.x
+                        const dy = wheel.angleDelta.y
+                        if (dy !== 0) trayItem.modelData.scroll(dy, false)
+                        if (dx !== 0) trayItem.modelData.scroll(dx, true)
+                        wheel.accepted = true
+                    }
                 }
 
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-                    onClicked: trayItem.modelData.secondaryActivate()
+                    acceptedButtons: Qt.RightButton | Qt.MiddleButton
+                    onClicked: (mouse) => {
+                        if (mouse.button === Qt.MiddleButton) {
+                            trayItem.modelData.secondaryActivate()
+                            return
+                        }
+                        // The real menu, where there is one. secondaryActivate
+                        // is a fallback an item may implement, not its menu.
+                        if (trayItem.modelData.hasMenu) trayItem.openMenu()
+                        else trayItem.modelData.secondaryActivate()
+                    }
                 }
             }
         }

@@ -7,6 +7,7 @@ import "./modules/notifications"
 import "./modules/polkit"
 import "./modules/power"
 import "./modules/osd"
+import "./modules/menu"
 import "./modules/network"
 import "./modules/bluetooth"
 import "./modules/audio"
@@ -50,4 +51,7 @@ Scope {
     // `qs ipc call lock lock`, until it has been tried. hyprlock stays on
     // SUPER+Escape as the known-good path.
     Lock {}
+
+    // One context menu, shown wherever it was asked for.
+    ContextMenu {}
 }
