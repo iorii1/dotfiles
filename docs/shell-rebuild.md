@@ -315,6 +315,46 @@ The general shape: before adding a control for something the system
 *advertises* — `/sys/power/state` does list `disk` here — check whether it can
 actually work on this machine.
 
+### Two layer surfaces must not share a pixel
+
+The dock is two surfaces on purpose: a four-pixel trigger strip that is always
+mapped, and the dock proper that appears when it is touched. The comment in the
+file explains why it is not one surface whose input region changes — that had
+already been tried, and swapping a region under the pointer makes the
+compositor re-deliver enter and leave.
+
+What it did not account for is that the two surfaces **overlapped**. The dock
+reached all the way to the screen edge while the strip owned the bottom four
+pixels, so that band belonged to both at once. With the pointer resting in it
+the compositor handed focus back and forth between them as the dock committed
+each frame of its entrance animation, and because every leave restarted the
+hide timer, the dock faded out from under the pointer before an icon could be
+clicked.
+
+Making them adjacent — the strip owns the bottom four pixels, the dock owns
+everything above, the dock shortened by exactly the strip's height so the card
+lands in the same place — removes the contention entirely. There is no band
+that two surfaces can argue over.
+
+The general rule: two layer surfaces that both want the pointer must not share
+any pixel. Overlap is not a small inefficiency, it is an ambiguity the
+compositor resolves differently from frame to frame.
+
+### Enter and leave are not enough to know where the pointer is
+
+Even adjacent, the same dock produced leaves with the pointer standing
+perfectly still. Hyprland re-evaluates pointer focus when surfaces map, unmap
+and commit, and a dock that appears is doing all three — so a leave arrives,
+and then no motion follows to prompt the matching enter, because the user has
+simply stopped moving.
+
+Anything that hides itself on leave therefore needs a second opinion. A leave
+now only starts a countdown; when it expires the compositor is asked where the
+pointer actually is, through `hyprctl cursorpos`, and the surface hides only if
+it has really gone. That is one process per dismissal, not per frame, which is
+cheap enough — and unlike an event stream, a coordinate cannot be stale in a
+way that silently loses the pointer.
+
 ### A `qmldir` replaces directory scanning entirely
 
 Adding `qmldir` files to `config/` and `services/` made qmllint resolve the
@@ -430,11 +470,30 @@ tools could not see most of it.
   one muted app and one control app. Keep-awake was confirmed with
   `systemd-inhibit --list`.
 
-One caution learned the hard way: **do not debug a visible feature by invoking
-it in a loop.** Driving the capture preview a dozen times to chase a race
-flashes a full-screen preview over whatever the user is doing. Measure the
-underlying command standalone (`grim` took 350 ms, which ruled out timing
-immediately) before touching the UI.
+### Three ways this testing went wrong
+
+Worth recording, because each one produced confident, wrong conclusions.
+
+**Do not debug a visible feature by invoking it in a loop.** Driving the
+capture preview a dozen times to chase a race flashes a full-screen preview
+over whatever the user is doing. Measure the underlying command standalone
+(`grim` took 350 ms, which ruled out timing immediately) before touching the
+UI.
+
+**Do not drive the pointer on a machine somebody is using.** The dock bug was
+chased with `hl.dsp.cursor.move`, warping the cursor to the bottom edge and
+sampling what happened. The results contradicted each other run to run — the
+fix appeared to work, then not, then work again. The reason was in the log all
+along: a check reported the cursor at `(2806, 661)` immediately after it had
+been moved to `(2688, 862)`. The user's hand was on the mouse, and every warp
+was racing a real pointer. An automated cursor is not an observer; it is a
+second user.
+
+**Assert that a patch applied.** Two rounds of that same investigation tested
+code that had never changed, because a `str.replace()` silently does nothing
+when its pattern does not match, and the file had been restored from a backup
+in between. Every edit in a script deserves `assert old in s` — the failure is
+loud and immediate, instead of a measurement of the wrong thing.
 
 ---
 

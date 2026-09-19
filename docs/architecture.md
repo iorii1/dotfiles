@@ -537,7 +537,50 @@ pinned, not opened.
 
 ---
 
-## 13. Multi-monitor
+## 13. The dock, which is two windows
+
+Worth its own note, because the shape is unobvious and there are three
+separate reasons for it.
+
+```
+          ┌───────────────────────────────┐
+          │  dock      798 → 860          │   mapped only while revealed
+          ├───────────────────────────────┤
+          │  strip     860 → 864          │   always mapped
+          └───────────────────────────────┘  screen edge, y = 864
+```
+
+**Why two windows and not one that changes size.** Swapping a surface's input
+region while the pointer is inside it makes the compositor re-deliver enter and
+leave, which flipped the reveal back and forth and left the dock oscillating.
+Each window here keeps one fixed input region for its whole life.
+
+**Why they do not overlap.** They used to: the dock reached the screen edge, so
+the bottom four pixels belonged to both surfaces. With the pointer in that band
+the compositor handed it back and forth between them as the dock committed its
+entrance animation, and since every leave restarted the hide timer, the dock
+faded out from under the pointer. Adjacent surfaces have no band to argue over.
+The dock is shortened by exactly the strip's height, so the card still lands
+where it did.
+
+**Why leaving does not immediately hide it.** Hyprland re-evaluates pointer
+focus when surfaces map, unmap and commit — all of which a dock does as it
+appears — so leaves arrive with the pointer standing still, and no motion
+follows to prompt the matching enter. A leave starts a 400 ms countdown; when
+it expires, `hyprctl cursorpos` is consulted and the dock hides only if the
+pointer has really gone. One process per dismissal.
+
+The contents are in `DockItems.qml`: pinned apps first, each gathering its own
+windows, then anything running that no pin claimed. Matching a window to a
+desktop entry goes through `startupClass` first — Spotify's window calls itself
+`Spotify` while its entry is `spotify-launcher` — with the id and name as
+fallbacks. The match keys are computed once per pin rather than once per window
+per evaluation, because walking `DesktopEntries` on every pass returned
+intermittently different answers and the row resized under the pointer.
+
+---
+
+## 14. Multi-monitor
 
 Two different strategies, for two different needs:
 
@@ -558,7 +601,7 @@ window did before this existed.
 
 ---
 
-## 14. Recipes
+## 15. Recipes
 
 ### Add a bar widget
 
@@ -595,7 +638,7 @@ to the bar.
 
 ---
 
-## 15. House style, and why qmlformat is not used
+## 16. House style, and why qmlformat is not used
 
 Two conventions run through every QML file here, and both are deliberate:
 
@@ -634,7 +677,7 @@ layout.
 
 ---
 
-## 16. When something breaks
+## 17. When something breaks
 
 ```bash
 qs-log                  # tail the running shell's log — start here, always
