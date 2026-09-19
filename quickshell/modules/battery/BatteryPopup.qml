@@ -7,17 +7,10 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: battWindow
 
-    visible: UiState.batteryOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    exclusionMode: ExclusionMode.Ignore
-    focusable: false
-    color: "transparent"
-
-    anchors { top: true; bottom: true; left: true; right: true }
+    name: "battery"
 
     IpcHandler {
         target: "battery"
@@ -26,11 +19,6 @@ PanelWindow {
         function close(): void { UiState.hide("battery") }
     }
 
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.hide("battery")
-    }
 
     PopupCard {
         id: card

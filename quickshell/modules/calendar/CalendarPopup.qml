@@ -7,17 +7,10 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: calWindow
 
-    visible: UiState.calendarOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    exclusionMode: ExclusionMode.Ignore
-    focusable: false
-    color: "transparent"
-
-    anchors { top: true; bottom: true; left: true; right: true }
+    name: "calendar"
 
     property var viewDate: new Date()
     // Recomputed on open -- the shell outlives midnight, so a once-evaluated
@@ -63,11 +56,6 @@ PanelWindow {
             nextDay++
         }
         return cells
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.hide("calendar")
     }
 
     PopupCard {

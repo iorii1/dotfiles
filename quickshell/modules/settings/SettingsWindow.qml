@@ -7,17 +7,10 @@ import "../../config"
 import "../../services"
 import "../common"
 
-PanelWindow {
+ShellPanel {
     id: settingsWindow
 
-    visible: UiState.settingsOpen
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-popup"
-    WlrLayershell.keyboardFocus: UiState.settingsOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    exclusionMode: ExclusionMode.Ignore
-    color: "transparent"
-
-    anchors { top: true; bottom: true; left: true; right: true }
+    name: "settings"
 
     readonly property var sliders: [
         { key: "barHeight", label: "Height", min: 24, max: 56, step: 1, suffix: "px" },
@@ -67,11 +60,6 @@ PanelWindow {
 
     onVisibleChanged: if (visible) syncControls()
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: UiState.hide("settings")
-    }
-
     PopupCard {
         id: card
         width: 460
@@ -87,7 +75,6 @@ PanelWindow {
 
         MouseArea { anchors.fill: parent }
 
-        Keys.onEscapePressed: UiState.hide("settings")
         focus: UiState.settingsOpen
 
         ColumnLayout {
