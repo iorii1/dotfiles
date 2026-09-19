@@ -13,6 +13,16 @@ ShellPanel {
 
     name: "audio"
 
+    // Which device list is open, if any. Only one at a time -- two long lists
+    // open at once would push the mixer off the bottom of the screen.
+    property string openSelect: ""
+
+    function _expand(which) {
+        audioWindow.openSelect = (audioWindow.openSelect === which) ? "" : which
+    }
+
+    onOpenChanged: if (!open) audioWindow.openSelect = ""
+
     IpcHandler {
         target: "audio"
         function toggle(): void { UiState.toggle("audio") }
@@ -124,11 +134,9 @@ ShellPanel {
 
             // ---- Devices ---------------------------------------------------
             //
-            // Always shown, even with a single device of each kind. Hiding the
-            // section when there was nothing to choose between meant you could
-            // not see *which* device was active, could not discover that
-            // switching existed at all, and got a section appearing out of
-            // nowhere the moment a headset was plugged in.
+            // Collapsed to one row each. Listing every device inline was fine
+            // with a laptop's single sink and single source, and a wall of rows
+            // the moment a dock or a headset adds more.
 
             Rectangle {
                 Layout.fillWidth: true
@@ -137,71 +145,33 @@ ShellPanel {
                 opacity: 0.4
             }
 
-            Column {
-                id: deviceColumn
+            Select {
                 Layout.fillWidth: true
-                spacing: 2
-
-                Text {
-                    text: "Output"
-                    color: Colors.textSecondary
-                    font.family: Appearance.fontFamily
-                    font.pixelSize: Appearance.fontSizeSmall
-                    font.bold: true
-                    bottomPadding: 2
+                label: "Output"
+                icon: "\uf028"
+                model: Audio.sinks
+                textFor: (item) => Audio.deviceName(item)
+                isCurrent: (item) => Audio.sink === item
+                expanded: audioWindow.openSelect === "sink"
+                onExpandRequested: audioWindow._expand("sink")
+                onPicked: (item) => {
+                    Audio.setDefaultSink(item)
+                    audioWindow.openSelect = ""
                 }
+            }
 
-                Repeater {
-                    model: Audio.sinks
-                    delegate: DeviceRow {
-                        required property var modelData
-                        width: deviceColumn.width
-                        node: modelData
-                        current: Audio.sink === modelData
-                        icon: "\uf028"
-                        onPicked: Audio.setDefaultSink(modelData)
-                    }
-                }
-
-                Text {
-                    visible: Audio.sinks.length === 0
-                    text: "No output devices"
-                    color: Colors.textSecondary
-                    opacity: 0.7
-                    font.family: Appearance.fontFamily
-                    font.pixelSize: Appearance.fontSizeSmall
-                }
-
-                Item { width: 1; height: Appearance.spacingSmall }
-
-                Text {
-                    text: "Input"
-                    color: Colors.textSecondary
-                    font.family: Appearance.fontFamily
-                    font.pixelSize: Appearance.fontSizeSmall
-                    font.bold: true
-                    bottomPadding: 2
-                }
-
-                Repeater {
-                    model: Audio.sources
-                    delegate: DeviceRow {
-                        required property var modelData
-                        width: deviceColumn.width
-                        node: modelData
-                        current: Audio.source === modelData
-                        icon: "\uf130"
-                        onPicked: Audio.setDefaultSource(modelData)
-                    }
-                }
-
-                Text {
-                    visible: Audio.sources.length === 0
-                    text: "No input devices"
-                    color: Colors.textSecondary
-                    opacity: 0.7
-                    font.family: Appearance.fontFamily
-                    font.pixelSize: Appearance.fontSizeSmall
+            Select {
+                Layout.fillWidth: true
+                label: "Input"
+                icon: "\uf130"
+                model: Audio.sources
+                textFor: (item) => Audio.deviceName(item)
+                isCurrent: (item) => Audio.source === item
+                expanded: audioWindow.openSelect === "source"
+                onExpandRequested: audioWindow._expand("source")
+                onPicked: (item) => {
+                    Audio.setDefaultSource(item)
+                    audioWindow.openSelect = ""
                 }
             }
 
