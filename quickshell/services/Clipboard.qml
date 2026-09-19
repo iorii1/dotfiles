@@ -8,7 +8,43 @@ Singleton {
 
     property var entries: []
     property var pendingList: []
+
+    // Entries kept at the top and never aged out of view. cliphist itself has
+    // no concept of pinning, so this is the shell's own list of ids, held
+    // alongside the preview text: an id that has since fallen off the end of
+    // cliphist's history is dropped rather than shown as a dead row.
+    property var pinned: []
     readonly property string thumbDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/quickshell-clip-thumbs"
+
+    Persist {
+        id: store
+        fileName: "clipboard.json"
+        defaults: ({ pinned: [] })
+        onLoaded: root.pinned = store.value("pinned") || []
+    }
+
+    function isPinned(id) {
+        const list = root.pinned
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === String(id)) return true
+        }
+        return false
+    }
+
+    function togglePin(entry) {
+        if (!entry) return
+        const id = String(entry.id)
+        const next = []
+        let found = false
+        for (let i = 0; i < root.pinned.length; i++) {
+            if (root.pinned[i].id === id) { found = true; continue }
+            next.push(root.pinned[i])
+        }
+        // Newest pin first, so pinning something puts it where you just looked.
+        if (!found) next.unshift({ id: id, preview: entry.preview || "" })
+        root.pinned = next
+        store.set("pinned", next)
+    }
 
     function refresh() {
         if (!listProc.running) listProc.running = true
@@ -17,12 +53,29 @@ Singleton {
     // Case-insensitive substring over the preview text. Image rows have no
     // useful preview -- cliphist reports them as "binary data ..." -- so they
     // match on the word "image" instead, which is what they are labelled.
+    // Pinned entries float to the top, in pin order. Everything else keeps
+    // cliphist's order, which is most-recent-first.
+    function _withPinnedFirst(list) {
+        if (root.pinned.length === 0) return list
+        const pins = []
+        const rest = []
+        for (let i = 0; i < list.length; i++) {
+            (root.isPinned(list[i].id) ? pins : rest).push(list[i])
+        }
+        pins.sort((a, b) => {
+            const ia = root.pinned.findIndex(p => p.id === String(a.id))
+            const ib = root.pinned.findIndex(p => p.id === String(b.id))
+            return ia - ib
+        })
+        return pins.concat(rest)
+    }
+
     function filtered(query) {
         const q = (query || "").trim().toLowerCase()
-        if (!q) return root.entries
-        return root.entries.filter(e => e.isImage
+        if (!q) return root._withPinnedFirst(root.entries)
+        return root._withPinnedFirst(root.entries.filter(e => e.isImage
             ? ("image".indexOf(q) === 0 || "binary".indexOf(q) === 0)
-            : e.preview.toLowerCase().indexOf(q) !== -1)
+            : e.preview.toLowerCase().indexOf(q) !== -1))
     }
 
     function select(id) {
@@ -90,7 +143,26 @@ Singleton {
     // Decodes any not-yet-cached image entries to thumbDir BEFORE entries
     // is published, so the ListView never binds an Image to a file that
     // doesn't exist yet.
-    Process { id: thumbProc; onExited: root.entries = root.pendingList }
+    Process {
+        id: thumbProc
+        onExited: {
+            root.entries = root.pendingList
+            root._prunePins()
+        }
+    }
+
+    // cliphist ages entries out at its own max-items, so a pin can outlive the
+    // thing it points at. Dropped rather than left as a row that copies
+    // nothing.
+    function _prunePins() {
+        if (root.pinned.length === 0) return
+        const live = {}
+        for (let i = 0; i < root.entries.length; i++) live[String(root.entries[i].id)] = true
+        const kept = root.pinned.filter(p => live[p.id])
+        if (kept.length === root.pinned.length) return
+        root.pinned = kept
+        store.set("pinned", kept)
+    }
 
     Process { id: selectProc }
     Process { id: removeProc; onExited: root.refresh() }

@@ -20,4 +20,8 @@ Singleton {
     function focusWindow(address) {
         Hyprland.dispatch("hl.dsp.focus({ window = 'address:0x" + address + "' })")
     }
+
+    function closeWindow(address) {
+        Hyprland.dispatch("hl.dsp.window.close({ window = 'address:0x" + address + "' })")
+    }
 }

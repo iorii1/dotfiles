@@ -97,6 +97,15 @@ RowLayout {
                 anchors.bottomMargin: 4
             }
 
+            // Below the PressFx, accepting only the middle button: a
+            // MouseArea passes through what it does not accept, so left
+            // clicks still reach the focus handler above.
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.MiddleButton
+                onClicked: Compositor.closeWindow(pill.modelData.address)
+            }
+
             PressFx {
                 id: fx
                 anchors.fill: parent

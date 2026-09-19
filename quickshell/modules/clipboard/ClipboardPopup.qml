@@ -196,6 +196,31 @@ ShellPanel {
                             elide: Text.ElideRight
                         }
 
+                        // Pinned entries float to the top and survive being
+                        // scrolled past; cliphist has no concept of this, so
+                        // the shell keeps the list.
+                        Text {
+                            visible: itemFx.containsMouse || row.ListView.isCurrentItem
+                                || Clipboard.isPinned(row.modelData.id)
+                            text: ""
+                            color: Clipboard.isPinned(row.modelData.id)
+                                ? Colors.primary
+                                : (pinFx.containsMouse ? Colors.textPrimary : Colors.textSecondary)
+                            font.family: Appearance.fontFamilyIcons
+                            font.pixelSize: Appearance.fontSizeSmall
+                            Behavior on color { ColorAnimation { duration: Appearance.animFast } }
+
+                            scale: pinFx.gestureScale
+                            Behavior on scale { Anim { duration: Appearance.animFast } }
+
+                            PressFx {
+                                id: pinFx
+                                anchors.fill: parent
+                                anchors.margins: -6
+                                onActivated: Clipboard.togglePin(row.modelData)
+                            }
+                        }
+
                         // Remove one entry. cliphist has always supported this;
                         // the shell only offered wipe-everything, and not even
                         // that from the UI.
