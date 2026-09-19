@@ -28,6 +28,7 @@ Scope {
             readonly property int dockHeight: 60
             readonly property int bottomMargin: Appearance.spacingSmall
             readonly property int zoneWidth: 400
+            readonly property int stripHeight: 4
             // Per-screen, so an empty monitor's dock stays down while another
             // monitor has windows.
             readonly property bool hasWindows: {
@@ -51,21 +52,67 @@ Scope {
 
             function reveal() {
                 hovered = true
+                hideTimer.stop()
                 // A safety net rather than the main path: the dock's own
                 // MouseArea stops this the moment the pointer lands on it. If
                 // that never happens -- the pointer clips the edge of the strip
                 // and is gone by the time the dock maps -- there is no leave
                 // event either, and without this the dock would stay up for
                 // good.
-                hideTimer.restart()
             }
 
             // A grace period, so clipping a corner on the way to an icon does
             // not dismiss the dock.
             Timer {
                 id: hideTimer
-                interval: 350
-                onTriggered: perScreen.hovered = false
+                // Long enough to cover the handoff from the strip to the
+                // dock, short enough not to leave the dock hanging around.
+                interval: 400
+                onTriggered: cursorCheck.running = true
+            }
+
+            // Before hiding, ask the compositor where the pointer actually is.
+            //
+            // Enter and leave cannot be trusted here. Hyprland re-evaluates
+            // pointer focus whenever surfaces map, unmap or commit, and this
+            // dock is two layer surfaces doing all three as it appears -- so
+            // both of them emit leaves while the pointer stands perfectly
+            // still, and with no motion to prompt it the compositor never
+            // sends the matching enter. Measured: one move to the bottom edge
+            // followed by four seconds of stillness produced a strip enter, a
+            // strip leave and a hide, with the pointer never having left.
+            //
+            // The pointer's position is the ground truth. A leave only starts
+            // the countdown; this has the final say. One process per
+            // dismissal, not per frame.
+            Process {
+                id: cursorCheck
+                command: ["hyprctl", "cursorpos"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        const mon = perScreen.modelData
+                        const parts = text.trim().split(",")
+                        const cx = parseInt(parts[0])
+                        const cy = parseInt(parts[1])
+
+                        if (!mon || parts.length < 2 || isNaN(cx) || isNaN(cy)) {
+                            perScreen.hovered = false
+                            return
+                        }
+
+                        // The band both surfaces occupy, in layout coordinates.
+                        const bandTop = mon.y + mon.height
+                            - perScreen.dockHeight - perScreen.bottomMargin
+                        const centre = mon.x + mon.width / 2
+                        const half = Math.max(dockWindow.width, perScreen.zoneWidth) / 2
+
+                        const inside = cy >= bandTop
+                            && cx >= centre - half && cx <= centre + half
+
+                        if (inside) hideTimer.restart()
+                        else perScreen.hovered = false
+                    }
+                }
             }
 
             // Switching the dock off in the settings app, or closing the last
@@ -94,21 +141,28 @@ Scope {
 
                 anchors { bottom: true }
                 implicitWidth: perScreen.zoneWidth
-                implicitHeight: 4
+                implicitHeight: perScreen.stripHeight
 
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: perScreen.reveal()
+                    onExited: hideTimer.restart()
                 }
             }
 
-            // The dock proper. It reaches down to the screen edge and is at
-            // least as wide as the trigger strip, so the pointer arriving from
-            // the strip lands inside it rather than in a gap -- and leaving it
-            // sideways also leaves the strip, instead of dropping straight back
-            // onto the trigger.
+            // The dock proper. It sits directly on top of the trigger strip
+            // rather than over it.
+            //
+            // These two used to overlap: the dock reached all the way to the
+            // screen edge, so the bottom four pixels belonged to both surfaces
+            // at once. With the pointer in that shared band the compositor
+            // handed it back and forth between them as the dock committed its
+            // entrance animation, and every leave restarted the hide timer.
+            // Adjacent instead: the strip owns the bottom four pixels, the dock
+            // owns everything above, and moving up crosses one boundary once.
             PanelWindow {
+                id: dockWindow
                 screen: perScreen.modelData
                 visible: perScreen.enabled && perScreen.revealed
                 WlrLayershell.layer: WlrLayer.Overlay
@@ -118,8 +172,11 @@ Scope {
                 color: "transparent"
 
                 anchors { bottom: true }
-                implicitWidth: Math.max(card.width, perScreen.zoneWidth)
+                margins.bottom: perScreen.stripHeight
+                implicitWidth: Math.max(items.implicitWidth + Appearance.spacingNormal * 2,
+                                        perScreen.zoneWidth)
                 implicitHeight: perScreen.dockHeight + perScreen.bottomMargin
+                    - perScreen.stripHeight
 
                 MouseArea {
                     anchors.fill: parent

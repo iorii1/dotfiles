@@ -36,26 +36,58 @@ RowLayout {
         return out
     }
 
+    // The match keys for each pinned app, worked out once per pin rather than
+    // once per window per recompute.
+    //
+    // This used to call Apps.entryForAppId for every window on every
+    // evaluation, which walks the whole DesktopEntries list. That list churns,
+    // so the lookup intermittently returned null and a window flapped between
+    // being claimed by its pin and getting a pill of its own -- the count
+    // oscillated between three and four. Every flap resized this row, which
+    // resized the dock's surface under the pointer, and the compositor
+    // answered by re-delivering enter and leave.
+    readonly property var pinKeys: {
+        const out = []
+        const pins = DockPins.entries
+        for (let i = 0; i < pins.length; i++) {
+            const e = pins[i]
+            const keys = []
+            if (e.startupClass) keys.push(String(e.startupClass).toLowerCase())
+            if (e.id) keys.push(String(e.id).toLowerCase())
+            if (e.name) keys.push(String(e.name).toLowerCase().replace(/ /g, ""))
+            out.push({ entry: e, keys: keys })
+        }
+        return out
+    }
+
+    function _matchesPin(appId, keys) {
+        if (!appId) return false
+        const want = String(appId).toLowerCase()
+        const squashed = want.replace(/ /g, "")
+        for (let i = 0; i < keys.length; i++) {
+            if (keys[i] === want || keys[i] === squashed) return true
+        }
+        return false
+    }
+
     // One entry per pill: a pinned app (with however many windows it has), or
     // a running window whose app is not pinned.
     readonly property var items: {
         const out = []
         const claimed = {}
 
-        const pins = DockPins.entries
-        for (let i = 0; i < pins.length; i++) {
-            const entry = pins[i]
+        for (let i = 0; i < root.pinKeys.length; i++) {
+            const pin = root.pinKeys[i]
             const mine = []
             for (let w = 0; w < root.windows.length; w++) {
                 const win = root.windows[w]
                 const appId = win.wayland ? win.wayland.appId : ""
-                const match = Apps.entryForAppId(appId)
-                if (match && match.id === entry.id) {
+                if (root._matchesPin(appId, pin.keys)) {
                     mine.push(win)
                     claimed[win.address] = true
                 }
             }
-            out.push({ pinned: true, entry: entry, entryId: entry.id, windows: mine })
+            out.push({ pinned: true, entry: pin.entry, entryId: pin.entry.id, windows: mine })
         }
 
         for (let w = 0; w < root.windows.length; w++) {
