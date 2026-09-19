@@ -487,7 +487,46 @@ to the bar.
 
 ---
 
-## 12. When something breaks
+## 12. House style, and why qmlformat is not used
+
+Two conventions run through every QML file here, and both are deliberate:
+
+```qml
+Behavior on color { ColorAnimation { duration: Appearance.animFast } }   // one line
+root.checked = !root.checked                                            // no semicolons
+```
+
+`qmlformat` is installed at `/usr/lib/qt6/bin/qmlformat` and **is not used on
+this repository.** It has no option to preserve either convention, and running
+it was measured rather than guessed:
+
+| | |
+| :--- | :--- |
+| Files it would rewrite | **70 of 74** |
+| Line growth | **+1,545 lines, 15%** |
+| What changes | 174 one-line `Behavior` blocks exploded to five lines each, and a semicolon added to every JS statement |
+| What improves | nothing — the output is semantically identical |
+
+A `Behavior on scale { Anim { duration: Appearance.animFast } }` reads as a
+single thought: *this scales quickly*. The five-line form says the same thing
+while burying it, and doing that 174 times pushes the actual logic further
+apart everywhere. It would also rewrite `git blame` for almost the whole shell
+in one commit.
+
+So the style is maintained by hand. If you ever do run qmlformat, you will get
+a 70-file diff — that is expected, and the answer is `git checkout`, not
+review.
+
+(`qmlformat --output-options` lists what it can be told to do. `SemicolonRule:
+essential` would fix the semicolons; nothing fixes the one-liners, which is the
+larger half.)
+
+`qs-lint` is the tool that *is* used, and it checks correctness rather than
+layout.
+
+---
+
+## 13. When something breaks
 
 ```bash
 qs-log                  # tail the running shell's log — start here, always
