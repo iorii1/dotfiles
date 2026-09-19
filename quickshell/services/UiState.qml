@@ -18,6 +18,7 @@ Singleton {
     property bool batteryOpen: false
     property bool audioOpen: false
     property bool quickSettingsOpen: false
+    property bool dashboardOpen: false
     property bool calendarOpen: false
     property bool clipboardOpen: false
     property bool mediaPopupOpen: false
@@ -32,7 +33,8 @@ Singleton {
 
     readonly property var exclusive: [
         "powerMenu", "network", "bluetooth", "battery", "audio", "quickSettings",
-        "calendar", "clipboard", "mediaPopup", "notificationCenter", "overview",
+        "dashboard", "calendar", "clipboard", "mediaPopup", "notificationCenter",
+        "overview",
         "launcher", "settings"
     ]
 

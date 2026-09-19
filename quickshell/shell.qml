@@ -9,6 +9,7 @@ import "./modules/network"
 import "./modules/bluetooth"
 import "./modules/audio"
 import "./modules/battery"
+import "./modules/dashboard"
 import "./modules/capture"
 import "./modules/calendar"
 import "./modules/clipboard"
@@ -35,6 +36,7 @@ Scope {
     ClipboardPopup {}
     MediaPopup {}
     Overview {}
+    Dashboard {}
     QuickSettings {}
     SettingsWindow {}
     Dock {}

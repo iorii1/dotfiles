@@ -35,6 +35,7 @@ Singleton {
     property bool showTray: true
     property bool showVolume: true
     property bool showQuickSettings: true
+    property bool showDashboard: true
     property bool showBattery: true
     property bool showWifi: true
     property bool showBluetooth: true
@@ -56,6 +57,7 @@ Singleton {
         showTray: true,
         showVolume: true,
         showQuickSettings: true,
+        showDashboard: true,
         showBattery: true,
         showWifi: true,
         showBluetooth: true,
@@ -87,6 +89,7 @@ Singleton {
         if (typeof c.showTray === "boolean") root.showTray = c.showTray
         if (typeof c.showVolume === "boolean") root.showVolume = c.showVolume
         if (typeof c.showQuickSettings === "boolean") root.showQuickSettings = c.showQuickSettings
+        if (typeof c.showDashboard === "boolean") root.showDashboard = c.showDashboard
         if (typeof c.showBattery === "boolean") root.showBattery = c.showBattery
         if (typeof c.showWifi === "boolean") root.showWifi = c.showWifi
         if (typeof c.showBluetooth === "boolean") root.showBluetooth = c.showBluetooth
@@ -110,6 +113,7 @@ Singleton {
             showTray: root.showTray,
             showVolume: root.showVolume,
             showQuickSettings: root.showQuickSettings,
+            showDashboard: root.showDashboard,
             showBattery: root.showBattery,
             showWifi: root.showWifi,
             showBluetooth: root.showBluetooth,

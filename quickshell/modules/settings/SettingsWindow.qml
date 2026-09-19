@@ -30,6 +30,7 @@ ShellPanel {
         { key: "showClock", label: "Clock", icon: "" },
         { key: "showTray", label: "System tray", icon: "" },
         { key: "showVolume", label: "Volume", icon: "" },
+        { key: "showDashboard", label: "System monitor", icon: "" },
         { key: "showQuickSettings", label: "Quick settings", icon: "" },
         { key: "showBattery", label: "Battery", icon: "" },
         { key: "showWifi", label: "Wi-Fi", icon: "" },

@@ -76,6 +76,7 @@ Scope {
                     BatteryWidget { visible: BarConfig.showBattery }
                     WifiWidget { visible: BarConfig.showWifi }
                     BluetoothWidget { visible: BarConfig.showBluetooth }
+                    DashboardButton { visible: BarConfig.showDashboard }
                     QuickSettingsButton { visible: BarConfig.showQuickSettings }
                     PowerButton { visible: BarConfig.showPower }
                 }
