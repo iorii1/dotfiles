@@ -246,6 +246,32 @@ The catch: the inhibit lives as long as the **D-Bus connection**, so a one-shot
 `gdbus call` releases the instant it exits. It has to be a process that stays
 running, which is what `scripts/.local/bin/qs-keep-awake` is.
 
+### One source of truth, or two that disagree
+
+`MediaWidget.qml` and `MediaPopup.qml` each contained the same loop — *the
+first player in Playing state, else the first player at all* — copied between
+them. That is not merely duplication: the two are separate bindings evaluated
+independently, so the bar widget and the popup could genuinely disagree about
+which player they were showing, and neither offered a way to choose.
+
+Moving the decision into a `Media` singleton fixed the choosing and the
+disagreement at once. It also surfaced a subtler hazard while rewiring them:
+
+```qml
+readonly property var player: Media.active      // an object, or null
+readonly property bool active: Media.hasActive  // derived from the same thing
+
+text: root.active ? root.player.trackTitle : ""  // reads null, sometimes
+```
+
+Both derive from `Media.active`, but they are separate bindings and QML may
+re-evaluate them in different passes. Checking one while dereferencing the
+other therefore reads `null` intermittently — which is exactly what happened,
+as two `TypeError: Cannot read property 'trackTitle' of null` in the log.
+
+Guard on the thing you are about to dereference, not on a sibling that happens
+to describe it.
+
 ### Notification history and notification actions are in tension
 
 Actions on a history entry can only work while the underlying `Notification`

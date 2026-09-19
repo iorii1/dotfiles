@@ -258,10 +258,11 @@ ShellPanel {
 Leave `name` empty and drive `open` yourself — that is what the polkit dialog
 and the capture preview do, since neither is a panel the user toggles.
 
-**Not everything is migrated yet.** These are still raw `PanelWindow`:
-`battery`, `calendar`, `media` (all `focusable: false`, so pointer-only by
-design), `settings` (has its own Escape), plus `osd` and `notifications`, which
-are deliberately standalone because they are not panels at all.
+**Every panel is a `ShellPanel`.** The only two windows that are not are
+`osd` and `notifications`, and deliberately so — they are indicators rather
+than panels: they take no keyboard, cannot be dismissed, and follow the
+focused monitor by a live binding instead of latching, because neither can
+disturb what "focused" means.
 
 ### The shared primitives
 

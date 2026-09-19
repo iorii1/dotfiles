@@ -41,6 +41,8 @@ assembled from widgets:
 - **Notification centre** (`SUPER + N`) -- history that survives a reload,
   per-app mute, inline replies, actions on history entries, plus toast popups.
   The shell *is* the notification daemon; there is no mako.
+- **Media** (`SUPER + SHIFT + M`) -- MPRIS controls with a player switcher, so
+  a browser and a music player no longer fight over which one the bar shows.
 - **Quick settings** (`SUPER + SHIFT + ,`) -- light/dark mode, night light,
   keep-awake, do-not-disturb and volume in one panel. Wi-Fi, Bluetooth,
   battery/power-profile, calendar with weather, audio and media each also have
@@ -60,7 +62,9 @@ assembled from widgets:
   persisted to `~/.local/state/quickshell/bar.json`.
 
 Every panel can be driven from the keyboard: Escape closes, arrows navigate,
-Return activates, and Tab walks the controls inside.
+Return activates, and Tab walks the controls inside. The only two surfaces
+that take no keyboard are the OSD and the notification toasts, which are
+indicators rather than panels.
 
 ## Components
 
@@ -95,6 +99,7 @@ Return activates, and Tab walks the controls inside.
 | `SUPER` + `A` | Audio mixer |
 | `SUPER` + `B` | Bluetooth |
 | `SUPER` + `C` | Calendar |
+| `SUPER` + `SHIFT` + `M` | Media |
 | `SUPER` + `P` | Power menu |
 | `SUPER` + `W` | Wallpaper picker |
 | `SUPER` + `Escape` | Lock screen |
