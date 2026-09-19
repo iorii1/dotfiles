@@ -2,6 +2,7 @@ import Quickshell
 import "./services"
 import "./modules/bar"
 import "./modules/launcher"
+import "./modules/lock"
 import "./modules/notifications"
 import "./modules/polkit"
 import "./modules/power"
@@ -44,4 +45,9 @@ Scope {
 
     // Announces state the shell knows about but never said out loud.
     StateToasts {}
+
+    // Present but not bound to anything: locking is deliberate, via
+    // `qs ipc call lock lock`, until it has been tried. hyprlock stays on
+    // SUPER+Escape as the known-good path.
+    Lock {}
 }
