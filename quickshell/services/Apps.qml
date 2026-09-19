@@ -180,6 +180,46 @@ Singleton {
         return scored.map(x => x.item)
     }
 
+    // A desktop entry by its id, or null. Pins are stored as ids, so this is
+    // how they are resolved back to something launchable.
+    function entryById(id) {
+        const apps = DesktopEntries.applications.values
+        for (let i = 0; i < apps.length; i++) {
+            if (apps[i].id === id) return apps[i]
+        }
+        return null
+    }
+
+    // The desktop entry a running window belongs to, or null.
+    //
+    // startupClass exists precisely for this and is what to trust when it is
+    // set -- Spotify's window says "Spotify" while its entry id is
+    // "spotify-launcher", and only startupClass connects the two. Everything
+    // else falls back to the id, then to the name with spaces removed.
+    function entryForAppId(appId) {
+        if (!appId) return null
+        const want = String(appId).toLowerCase()
+        const apps = DesktopEntries.applications.values
+
+        for (let i = 0; i < apps.length; i++) {
+            const sc = apps[i].startupClass
+            if (sc && String(sc).toLowerCase() === want) return apps[i]
+        }
+        for (let i = 0; i < apps.length; i++) {
+            if (String(apps[i].id).toLowerCase() === want) return apps[i]
+        }
+        for (let i = 0; i < apps.length; i++) {
+            if (String(apps[i].name).toLowerCase().replace(/ /g, "") === want.replace(/ /g, "")) return apps[i]
+        }
+        return null
+    }
+
+    function launchEntry(entry) {
+        if (!entry) return
+        root._recordUse(entry.id)
+        if (typeof entry.execute === "function") entry.execute()
+    }
+
     function launch(item) {
         if (!item) return
         root._recordUse(item.id)

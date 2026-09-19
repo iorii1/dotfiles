@@ -44,7 +44,10 @@ Scope {
             // Hover is one input, the IPC pin is the other; nothing shows with
             // no windows to show, however it was asked for.
             property bool hovered: false
-            readonly property bool revealed: hasWindows && (hovered || UiState.dockOpen)
+            // Pins make the dock worth showing even with nothing running --
+            // it is a launcher then, not just a switcher.
+            readonly property bool hasContent: perScreen.hasWindows || DockPins.pinned.length > 0
+            readonly property bool revealed: hasContent && (hovered || UiState.dockOpen)
 
             function reveal() {
                 hovered = true
