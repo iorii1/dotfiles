@@ -117,6 +117,25 @@ sed "s|@REPO_DIR@|$REPO_DIR|g" \
     "$REPO_DIR/matugen/config.toml.template" > "$HOME/.config/matugen/config.toml"
 echo "  $HOME/.config/matugen/config.toml"
 
+# --- 3c. seed the theme ----------------------------------------------------
+
+# Every colour file the desktop reads is matugen output, and matugen had never
+# been run by the time this finished -- so a fresh install came up with
+# ~/.config/cava and ~/.config/fastfetch pointing at directories that did not
+# exist yet, and kitty, GTK, hyprlock and the shell all falling back to their
+# built-in palettes.
+#
+# There is no wallpaper to derive a scheme from at this point, so the shell's
+# own fallback accent is used as the seed. Picking a wallpaper (SUPER+W)
+# regenerates all of this from the image and overwrites it.
+info "Seeding the colour scheme (until you pick a wallpaper)..."
+if matugen color hex "#8aadf4" -c "$HOME/.config/matugen/config.toml" -m dark >/dev/null 2>&1; then
+    echo "  generated colours for quickshell, hyprland, hyprlock, kitty, cava, fastfetch, gtk3, gtk4"
+else
+    warn "matugen could not seed the theme; everything will use its built-in fallback"
+    warn "until you pick a wallpaper with SUPER+W."
+fi
+
 # --- 4. GTK/Qt theme defaults ---------------------------------------------
 
 # Base theme + dark preference for apps that ask a portal instead of reading
