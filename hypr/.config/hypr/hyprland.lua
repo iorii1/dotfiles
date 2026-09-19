@@ -61,6 +61,16 @@ hl.config({
     },
 })
 
+-- eDP-1 runs at scale 1.25, and XWayland clients cannot scale themselves --
+-- without this they are rendered at 1x and upscaled, which looks soft. Telling
+-- XWayland to use scale 1 and letting the compositor handle it keeps them
+-- sharp. Costs nothing when no XWayland client is running.
+hl.config({
+    xwayland = {
+        force_zero_scaling = true,
+    },
+})
+
 hl.curve("mangoOpen",    { type = "bezier", points = { {0.16, 1}, {0.3, 1} } })
 hl.curve("mangoClose",   { type = "bezier", points = { {0.4, 0},  {1, 1} } })
 hl.curve("mangoFocus",   { type = "bezier", points = { {0.16, 1}, {0.3, 1} } })
@@ -98,3 +108,22 @@ hl.layer_rule({ name = "quickshell-dock", match = { namespace = "^quickshell-doc
 hl.layer_rule({ name = "quickshell-blur",       match = { namespace = "^quickshell$" },       blur = true, ignore_alpha = 0.1 })
 hl.layer_rule({ name = "quickshell-popup-blur", match = { namespace = "^quickshell-popup$" }, blur = true, ignore_alpha = 0.1 })
 hl.layer_rule({ name = "quickshell-dock-blur",  match = { namespace = "^quickshell-dock$" },  blur = true, ignore_alpha = 0.1 })
+
+-- Window rules. There were none, so everything tiled -- including the things
+-- that are not really windows.
+
+-- Firefox's picture-in-picture is a small always-on-top video, and tiling it
+-- gives it half the screen.
+hl.window_rule({
+    name  = "float-picture-in-picture",
+    match = { title = "^Picture-in-Picture$" },
+    float = true,
+})
+
+-- Portal file choosers (the Open/Save dialog most apps now use) are dialogs,
+-- not documents.
+hl.window_rule({
+    name  = "float-portal-dialogs",
+    match = { class = "^xdg-desktop-portal-gtk$" },
+    float = true,
+})

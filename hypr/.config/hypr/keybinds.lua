@@ -19,6 +19,7 @@ hl.bind("SUPER + A", hl.dsp.exec_cmd("qs ipc call audio toggle"))
 hl.bind("SUPER + C", hl.dsp.exec_cmd("qs ipc call calendar toggle"))
 hl.bind("SUPER + P", hl.dsp.exec_cmd("qs ipc call power toggle"))
 hl.bind("SUPER + B", hl.dsp.exec_cmd("qs ipc call bluetooth toggle"))
+hl.bind("SUPER + SHIFT + M", hl.dsp.exec_cmd("qs ipc call media toggle"))
 hl.bind(
 	"SUPER + W",
 	hl.dsp.exec_cmd(
