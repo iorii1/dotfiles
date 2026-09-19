@@ -263,6 +263,32 @@ and the capture preview do, since neither is a panel the user toggles.
 design), `settings` (has its own Escape), plus `osd` and `notifications`, which
 are deliberately standalone because they are not panels at all.
 
+### The shared primitives
+
+`modules/common/` holds everything a panel is assembled from. Reach for these
+before writing a new one:
+
+| | |
+| :--- | :--- |
+| `ShellPanel` | the window itself (above) |
+| `PopupCard` | the floating surface: rounded, translucent, shadowed |
+| `PressFx` | the whole gesture vocabulary — hover, press, click ripple, keyboard activation, focus ring |
+| `Anim`, `PopAnim`, `PopIn` | the motion presets everything animates on |
+| `Toggle`, `Slider`, `SegmentedControl`, `TextField` | controls |
+| `ToggleRow` | a labelled toggle with optional expandable content |
+| `Select` | a collapsible picker for a list that would be clunky inline |
+| `FillButton` | hold-to-activate, with optional two-stage confirm |
+
+`PressFx` is the one to understand: binding a sibling `Rectangle`'s `scale` to
+`fx.gestureScale` and its overlay's `opacity` to `fx.flashOpacity` gets you the
+shell's entire interaction feel, and because it sets `activeFocusOnTab` every
+control built on it is keyboard-reachable for free.
+
+> Animate a target's `scale` with a `Behavior`, never a `PropertyAnimation` —
+> the latter tears down `gestureScale`'s binding permanently the first time it
+> runs. The comment in `PressFx.qml` says so, and three separate places in the
+> codebase cite the same class of bug.
+
 ---
 
 ## 6. The service layer

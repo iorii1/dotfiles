@@ -5,7 +5,7 @@ This is a record of a single large pass over the Quickshell config in
 learned by running them. It is written to be read by someone who wants to
 understand *why* the code looks the way it does, not as a changelog.
 
-The shell went from **5,943 lines of QML across 54 files** to **9,528 across
+The shell went from **5,943 lines of QML across 54 files** to **9,710 across
 74**, and from **14 IPC targets to 17**.
 
 ---
@@ -181,6 +181,44 @@ with `onFlagChanged` and a derived instance that also declares
 
 Worth knowing, because the opposite is true of ordinary property *bindings*,
 which a derived declaration does replace.
+
+### Two ways a Column silently measures zero
+
+Both found building `Select`, the collapsible device picker, and both only
+visible by printing the numbers — the UI simply did not grow, with no warning
+of any kind.
+
+**Visibility propagates.** `Item.visible` is effective visibility: a child of an
+invisible parent reports `visible == false` itself. So a `Column` with
+`visible: false` has, as far as it is concerned, no visible children, and
+measures 0. That much is reasonable. What is not is that it does not reliably
+recompute when shown again — it stayed 0 high with its three rows already
+inside it, correctly parented and 28px each.
+
+The fix is to never hide the Column. Keep it visible inside a wrapper with
+`clip: true` whose *height* animates to zero instead, which also slides rather
+than pops.
+
+**A positioner does not re-measure a child that changes height.** `Column`
+counts a child's height when that child is created, and its own
+`implicitHeight` then stops tracking it. With the list open the wrapper was
+correctly 86 high and the Column still reported 30:
+
+```
+SMOKE listOpen = true | wrapper.h = 86 | list.implicitH = 86 | sel.implicitH = 30
+```
+
+Deriving the height explicitly is exact, and gives one place to animate:
+
+```qml
+implicitHeight: root.headerHeight
+    + (root.listOpen ? column.spacing + list.implicitHeight : 0)
+```
+
+The general lesson is the debugging shape, not the two quirks: when a layout is
+wrong, walk the tree and print `height`, `implicitHeight`, `visible` and
+`children.length` at each level. The answer was two levels down both times, and
+no amount of re-reading the QML would have produced it.
 
 ### A `qmldir` replaces directory scanning entirely
 
