@@ -12,7 +12,10 @@ ShellPanel {
 
     name: "notificationCenter"
 
-    onOpenChanged: if (open) list.currentIndex = 0
+    // Which app's group is expanded, if any. One at a time.
+    property string expandedApp: ""
+
+    onOpenChanged: if (open) { list.currentIndex = 0; centerWindow.expandedApp = "" }
 
     IpcHandler {
         target: "notifications"
@@ -178,7 +181,6 @@ ShellPanel {
                     required property var modelData
                     required property int index
                     width: list.width
-                    height: rowContent.implicitHeight + Appearance.spacingSmall * 2
                     radius: Appearance.radiusSmall
                     color: (itemFx.containsMouse || row.ListView.isCurrentItem)
                         ? Colors.surfaceContainer : "transparent"
@@ -190,6 +192,17 @@ ShellPanel {
                     PopIn { id: entranceAnim; target: row; delay: Appearance.staggerDelay(row.index) }
 
                     readonly property color accent: row.modelData.urgency === 2 ? Colors.error : Colors.primary
+
+                    // Consecutive rows from one app collapse into the newest,
+                    // which carries the count. Ten messages from one chat were
+                    // ten full cards.
+                    readonly property int runLength: Notifications.runLength(row.index)
+                    readonly property bool continuation: Notifications.isContinuation(row.index)
+                    readonly property bool grouped: row.runLength > 1
+                    readonly property bool groupOpen: centerWindow.expandedApp === row.modelData.appName
+
+                    visible: !row.continuation || row.groupOpen
+                    height: visible ? rowContent.implicitHeight + Appearance.spacingSmall * 2 : 0
 
                     // Parsed once per row rather than per action pill.
                     readonly property var actions: {
@@ -256,6 +269,34 @@ ShellPanel {
                                     font.pixelSize: Appearance.fontSizeSmall
                                     elide: Text.ElideRight
                                 }
+                                Rectangle {
+                                    visible: row.grouped && !row.continuation
+                                    implicitWidth: countLabel.implicitWidth + 10
+                                    implicitHeight: 16
+                                    radius: 8
+                                    color: Colors.alpha(row.accent, 0.22)
+
+                                    Text {
+                                        id: countLabel
+                                        anchors.centerIn: parent
+                                        // runLength counts the header row too, and it is
+                                        // the one already on screen.
+                                        text: row.groupOpen ? "collapse" : (row.runLength - 1) + " more"
+                                        color: Colors.textPrimary
+                                        font.family: Appearance.fontFamily
+                                        font.pixelSize: Appearance.fontSizeSmall
+                                    }
+
+                                    PressFx {
+                                        anchors.fill: parent
+                                        hoverScale: 1.0
+                                        pressScale: Appearance.pressScaleSubtle
+                                        focusRadius: 8
+                                        onActivated: centerWindow.expandedApp =
+                                            row.groupOpen ? "" : row.modelData.appName
+                                    }
+                                }
+
                                 Text {
                                     text: row.modelData.time
                                     color: Colors.textSecondary
@@ -386,7 +427,9 @@ ShellPanel {
                                 anchors.fill: parent
                                 anchors.margins: -6
                                 popOvershoot: 2.4
-                                onActivated: Notifications.dismissHistory(row.modelData.uid)
+                                onActivated: (row.grouped && !row.groupOpen)
+                                    ? Notifications.dismissRun(row.index)
+                                    : Notifications.dismissHistory(row.modelData.uid)
                             }
                         }
                     }

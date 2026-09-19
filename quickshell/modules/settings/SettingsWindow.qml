@@ -23,6 +23,7 @@ ShellPanel {
 
     readonly property var widgets: [
         { key: "showWorkspaces", label: "Workspaces", icon: "" },
+        { key: "showWindowTitle", label: "Window title", icon: "" },
         { key: "showTaskbar", label: "Dock", icon: "" },
         { key: "showCava", label: "Audio visualizer", icon: "" },
         { key: "showMedia", label: "Media", icon: "" },

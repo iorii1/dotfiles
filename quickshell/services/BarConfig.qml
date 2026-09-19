@@ -27,6 +27,7 @@ Singleton {
     onRoundingScaleChanged: Appearance.roundingScale = root.roundingScale
 
     property bool showWorkspaces: true
+    property bool showWindowTitle: true
     property bool showTaskbar: true
     property bool showCava: true
     property bool showMedia: true
@@ -49,6 +50,7 @@ Singleton {
         animScale: 1.0,
         roundingScale: 1.0,
         showWorkspaces: true,
+        showWindowTitle: true,
         showTaskbar: true,
         showCava: true,
         showMedia: true,
@@ -81,6 +83,7 @@ Singleton {
         if (typeof c.animScale === "number") root.animScale = c.animScale
         if (typeof c.roundingScale === "number") root.roundingScale = c.roundingScale
         if (typeof c.showWorkspaces === "boolean") root.showWorkspaces = c.showWorkspaces
+        if (typeof c.showWindowTitle === "boolean") root.showWindowTitle = c.showWindowTitle
         if (typeof c.showTaskbar === "boolean") root.showTaskbar = c.showTaskbar
         if (typeof c.showCava === "boolean") root.showCava = c.showCava
         if (typeof c.showMedia === "boolean") root.showMedia = c.showMedia
@@ -105,6 +108,7 @@ Singleton {
             animScale: root.animScale,
             roundingScale: root.roundingScale,
             showWorkspaces: root.showWorkspaces,
+            showWindowTitle: root.showWindowTitle,
             showTaskbar: root.showTaskbar,
             showCava: root.showCava,
             showMedia: root.showMedia,

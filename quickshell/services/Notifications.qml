@@ -100,6 +100,36 @@ Singleton {
         root._persist()
     }
 
+    // How many consecutive rows from index i share its app. Ten messages from
+    // one chat were ten separate cards; the centre now shows the newest and a
+    // count, and expands to the rest on demand.
+    function runLength(index) {
+        if (index < 0 || index >= historyModel.count) return 0
+        const app = historyModel.get(index).appName
+        let n = 1
+        for (let i = index + 1; i < historyModel.count; i++) {
+            if (historyModel.get(i).appName !== app) break
+            n++
+        }
+        return n
+    }
+
+    // True when this row is the continuation of the run above it, so the
+    // centre can hide it behind the group header.
+    function isContinuation(index) {
+        if (index <= 0) return false
+        return historyModel.get(index).appName === historyModel.get(index - 1).appName
+    }
+
+    function dismissRun(index) {
+        const n = root.runLength(index)
+        for (let k = 0; k < n; k++) {
+            root._release(historyModel.get(index).uid)
+            historyModel.remove(index, 1)
+        }
+        root._persist()
+    }
+
     // Every distinct app in the history, for a mute list that only offers apps
     // that have actually sent something.
     function knownApps() {

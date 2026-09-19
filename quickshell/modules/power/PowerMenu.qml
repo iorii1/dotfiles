@@ -24,6 +24,24 @@ ShellPanel {
         function close(): void { UiState.hide("powerMenu") }
     }
 
+    // Hibernation writes RAM to swap, so it needs swap that survives losing
+    // power. zram is compressed RAM -- hibernating to it cannot work, and
+    // `systemctl hibernate` fails every time. This machine has only zram, so
+    // the button would be permanently broken; it is hidden unless there is
+    // real backing store to hibernate into.
+    property bool canHibernate: false
+
+    Process {
+        id: hibernateCheck
+        running: true
+        command: ["bash", "-c",
+            "swapon --show=NAME --noheadings 2>/dev/null "
+            + "| grep -qv '^/dev/zram' && echo yes || echo no"]
+        stdout: StdioCollector {
+            onStreamFinished: powerWindow.canHibernate = (text.trim() === "yes")
+        }
+    }
+
     Process { id: runner }
     function run(cmd) {
         UiState.hide("powerMenu")
@@ -76,7 +94,7 @@ ShellPanel {
             FillButton {
                 id: logoutBtn
                 prevFocus: suspendBtn.focusItem
-                nextFocus: rebootBtn.focusItem
+                nextFocus: powerWindow.canHibernate ? hibernateBtn.focusItem : rebootBtn.focusItem
                 label: "Logout"
                 icon: "\uf08b"
                 accentColor: Colors.primary
@@ -86,8 +104,21 @@ ShellPanel {
             }
 
             FillButton {
-                id: rebootBtn
+                id: hibernateBtn
+                visible: powerWindow.canHibernate
                 prevFocus: logoutBtn.focusItem
+                nextFocus: rebootBtn.focusItem
+                label: "Hibernate"
+                icon: "\uf0f4"
+                accentColor: Colors.primary
+                active: UiState.powerMenuOpen
+                entranceDelay: 150
+                onTriggered: powerWindow.run("systemctl hibernate")
+            }
+
+            FillButton {
+                id: rebootBtn
+                prevFocus: hibernateBtn.focusItem
                 nextFocus: shutdownBtn.focusItem
                 label: "Reboot"
                 icon: "\uf021"

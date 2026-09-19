@@ -1,4 +1,5 @@
 import Quickshell
+import "./services"
 import "./modules/bar"
 import "./modules/launcher"
 import "./modules/notifications"
@@ -40,4 +41,7 @@ Scope {
     QuickSettings {}
     SettingsWindow {}
     Dock {}
+
+    // Announces state the shell knows about but never said out loud.
+    StateToasts {}
 }
